@@ -70,6 +70,9 @@ describe("DesktopEnvironment", () => {
 
       assert.equal(development.stateDir, "/Users/alice/.t3/dev");
       assert.equal(production.stateDir, "/Users/alice/.t3/userdata");
+      assert.equal(production.appUserModelId, "com.vorynixal.t4code");
+      assert.equal(production.linuxDesktopEntryName, "com.vorynixal.T4Code.desktop");
+      assert.equal(production.linuxWmClass, "vorynixal-t4code");
     }),
   );
 });

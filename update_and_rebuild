@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+cd "$repo_root"
+
+if [[ -z "${T4_BUILD_VERSION:-}" ]]; then
+  mapfile -t nightly_tags < <(git tag --merged HEAD --list 'v*-nightly.*' --sort=-version:refname)
+  if ((${#nightly_tags[@]} == 0)); then
+    echo "No merged Nightly tag found; set T4_BUILD_VERSION to build this checkout." >&2
+    exit 1
+  fi
+  T4_BUILD_VERSION=${nightly_tags[0]#v}
+fi
+
+source_appimage="$repo_root/release/T4 Code-Code-${T4_BUILD_VERSION}-x86_64.AppImage"
+install_root="$HOME/.local/opt/vorynixal/t4-code-nightly"
+app_path="$install_root/T4 Code Nightly.AppImage"
+profile_root="$HOME/.local/share/vorynixal/t4-code-nightly"
+command_dir="$HOME/.local/bin"
+command_path="$command_dir/t4"
+applications_dir="$HOME/.local/share/applications"
+icon_dir="$HOME/.local/share/icons/hicolor/256x256/apps"
+icon_path="$icon_dir/vorynixal-t4code.png"
+desktop_path="$applications_dir/com.vorynixal.T4Code.desktop"
+
+vp run dist:desktop:artifact --platform linux --target AppImage --arch x64 \
+  --build-version "$T4_BUILD_VERSION"
+
+if [[ ! -s "$source_appimage" ]]; then
+  echo "Build completed without the expected AppImage: $source_appimage" >&2
+  exit 1
+fi
+command -v magick >/dev/null || { echo "ImageMagick (magick) is required to install the launcher icon." >&2; exit 1; }
+
+mkdir -p "$install_root" "$command_dir" "$applications_dir" "$icon_dir" "$profile_root"
+app_tmp=$(mktemp "$install_root/.T4-Code-Nightly.XXXXXX")
+wrapper_tmp=$(mktemp "$command_dir/.t4.XXXXXX")
+icon_tmp=$(mktemp "$icon_dir/.vorynixal-t4code.XXXXXX.png")
+desktop_tmp=$(mktemp "$applications_dir/.com.vorynixal.T4Code.XXXXXX.desktop")
+trap 'rm -f -- "$app_tmp" "$wrapper_tmp" "$icon_tmp" "$desktop_tmp"' EXIT
+
+install -m 755 "$source_appimage" "$app_tmp"
+magick "$repo_root/assets/nightly/nightly-universal-1024.png" -resize 256x256 "$icon_tmp"
+
+cat >"$wrapper_tmp" <<'EOF'
+#!/usr/bin/env sh
+set -eu
+
+app="$HOME/.local/opt/vorynixal/t4-code-nightly/T4 Code Nightly.AppImage"
+profile="$HOME/.local/share/vorynixal/t4-code-nightly"
+export T3CODE_HOME="$profile/home"
+export T3CODE_DESKTOP_LAUNCHER_PATH="$HOME/.local/bin/t4"
+export XDG_CONFIG_HOME="$HOME/.config/vorynixal/t4-code-nightly"
+export XDG_DATA_HOME="$profile/xdg-data"
+export XDG_CACHE_HOME="$HOME/.cache/vorynixal/t4-code-nightly"
+exec "$app" "$@"
+EOF
+chmod 755 "$wrapper_tmp"
+
+cat >"$desktop_tmp" <<EOF
+[Desktop Entry]
+Type=Application
+Name=T4 Code Nightly
+GenericName=AI coding agent
+Comment=Desktop application for coding agents
+Exec="$command_path" %U
+TryExec=$command_path
+Icon=vorynixal-t4code
+Terminal=false
+Categories=Development;IDE;
+StartupNotify=true
+StartupWMClass=vorynixal-t4code
+EOF
+
+mv -f -- "$app_tmp" "$app_path"
+mv -f -- "$wrapper_tmp" "$command_path"
+mv -f -- "$icon_tmp" "$icon_path"
+mv -f -- "$desktop_tmp" "$desktop_path"
+if command -v update-desktop-database >/dev/null; then
+  update-desktop-database "$applications_dir"
+fi
+
+printf 'Installed T4 Code Nightly %s\nAppImage: %s\nLauncher: %s\nCommand: t4\nData: %s\n' \
+  "$T4_BUILD_VERSION" "$app_path" "$desktop_path" "$profile_root"

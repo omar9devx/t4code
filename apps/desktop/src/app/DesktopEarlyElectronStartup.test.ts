@@ -3,6 +3,7 @@ import * as NodePath from "node:path";
 import { assert, describe, it } from "@effect/vitest";
 
 import {
+  resolveEarlyLinuxElectronOptions,
   restoreEarlyLinuxDeviceScaleFactor,
   resolveEarlyLinuxPasswordStorePreference,
   resolveLinuxDisableFeaturesSwitch,
@@ -10,6 +11,17 @@ import {
 
 describe("DesktopEarlyElectronStartup", () => {
   const joinPath = NodePath.posix.join;
+
+  it("uses a Vorynixal app identity for Linux desktop integration", () => {
+    const options = resolveEarlyLinuxElectronOptions({
+      env: {},
+      homeDirectory: "/home/user",
+      joinPath,
+      readFileString: () => "{}",
+    });
+    assert.equal(options.linuxDesktopEntryName, "com.vorynixal.T4Code.desktop");
+    assert.equal(options.linuxWmClass, "vorynixal-t4code");
+  });
 
   it("reads the persisted linux password-store preference before Electron is ready", () => {
     const preference = resolveEarlyLinuxPasswordStorePreference({
