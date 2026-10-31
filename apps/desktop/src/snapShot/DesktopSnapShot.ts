@@ -156,7 +156,9 @@ export class DesktopSnapShotError extends Schema.TaggedError<DesktopSnapShotErro
       case "window-unavailable":
         return "The active window is not available for capture.";
       case "capture":
-        return "Could not capture the active window.";
+        return this.cause instanceof Error && this.cause.message.trim()
+          ? `Could not capture the active window: ${this.cause.message}`
+          : "Could not capture the active window.";
     }
   }
 }

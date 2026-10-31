@@ -126,7 +126,7 @@ class LinuxCaptureConnection {
     this.bus.disconnect();
   }
 
-  private async wait<T>(pending: Promise<T>, timeoutMs = 5_000): Promise<T> {
+  private async wait<T>(pending: Promise<T>, timeoutMs = 25_000): Promise<T> {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       return await Promise.race([

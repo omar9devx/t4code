@@ -42,8 +42,8 @@ export const isWindowsCommandNotFound = Effect.fn("isWindowsCommandNotFound")(fu
   return WINDOWS_COMMAND_NOT_FOUND_PATTERNS.some((pattern) => pattern.test(stderr));
 });
 
-export const DEFAULT_TIMEOUT_MS = 4_000;
-export const AUTH_PROBE_TIMEOUT_MS = 10_000;
+export const DEFAULT_TIMEOUT_MS = 25_000;
+export const AUTH_PROBE_TIMEOUT_MS = 25_000;
 
 export const COMPACT_SLASH_COMMAND = {
   name: "compact",

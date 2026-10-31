@@ -501,7 +501,7 @@ export const makeOpenCode2ModelLoader = <E>(
           schedule: Schedule.spaced("250 millis"),
         }),
         Effect.catch((error) => (latest.length > 0 ? Effect.succeed(latest) : Effect.fail(error))),
-        Effect.timeoutOption("5 seconds"),
+        Effect.timeoutOption("25 seconds"),
         Effect.map((loaded) => {
           // Fresh progress may still be partial, but a warm cache must not freeze slow catalogs.
           if (loaded._tag === "Some") lastLoaded = loaded.value;
@@ -535,7 +535,7 @@ export const loadOpenCode2Workspace = Effect.fn("OpencodeProviderStatus.loadOpen
   function* <E>(read: Effect.Effect<OpenCode2Workspace, E>, scanned: Effect.Effect<void>) {
     const first = yield* read;
     if (first.commands.length > 0) return first;
-    yield* scanned.pipe(Effect.timeoutOption("10 seconds"));
+    yield* scanned.pipe(Effect.timeoutOption("25 seconds"));
     return yield* read;
   },
 );

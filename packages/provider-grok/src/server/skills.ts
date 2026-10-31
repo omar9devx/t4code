@@ -11,7 +11,7 @@ import { resolveSpawnCommand } from "@t3tools/shared/shell";
 import { spawnAndCollect } from "@t3tools/provider-core/server/snapshotProbe";
 import { grokProbeEnvironment } from "./probeEnvironment.ts";
 
-const GROK_SKILLS_PROBE_TIMEOUT_MS = 4_000;
+const GROK_SKILLS_PROBE_TIMEOUT_MS = 25_000;
 // The composer's chip rule, anchored to the message start, so `$25` never names a skill.
 const LEADING_SKILL_MENTION = new RegExp(`^\\s*${SKILL_MENTION_PATTERN.source}`, "u");
 
