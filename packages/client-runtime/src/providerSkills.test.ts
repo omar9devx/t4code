@@ -13,6 +13,7 @@ import {
   getProviderSkillsForSlashMenu,
   hasCompleteProviderWorkspaceSnapshot,
   resolveProviderSkillsForCwd,
+  resolveProviderPluginsForCwd,
   resolveProviderSlashCommandsForCwd,
 } from "./providerSkills.ts";
 
@@ -95,6 +96,25 @@ describe("getProviderSkillsForSlashMenu", () => {
 });
 
 describe("workspace provider snapshots", () => {
+  it("resolves installed plugins for the selected workspace", () => {
+    const plugin = {
+      id: "publisher/reviewer",
+      name: "reviewer",
+      displayName: "Code Review",
+    };
+    const withPlugin = {
+      ...provider,
+      workspaceSnapshots: provider.workspaceSnapshots.map((snapshot) => ({
+        ...snapshot,
+        plugins: [plugin],
+      })),
+    } satisfies ServerProvider;
+
+    expect(resolveProviderPluginsForCwd(withPlugin, "/workspace/project-a")).toEqual([plugin]);
+    expect(resolveProviderPluginsForCwd(withPlugin, "/workspace/project-b")).toEqual([]);
+    expect(resolveProviderPluginsForCwd(withPlugin, null)).toEqual([]);
+  });
+
   it("uses the cwd snapshot after a provider session has populated it", () => {
     expect(resolveProviderSkillsForCwd(provider, "/workspace/project-a")).toEqual([
       { name: "project", path: "/workspace/project-a/SKILL.md", enabled: true },

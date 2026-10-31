@@ -23,7 +23,7 @@ import * as ResetCreditCoordinator from "../resetCreditCoordinator.ts";
 import {
   checkCodexProviderStatus,
   makePendingCodexProvider,
-  probeCodexSkillsForCwd,
+  probeCodexWorkspaceForCwd,
   withCodexAppServerClient,
 } from "../CodexProvider.ts";
 import { resolveCodexLaunchArgs } from "../codexLaunchArgs.ts";
@@ -276,7 +276,7 @@ export const CodexDriver: ProviderDriver<
         ? snapshot.getSnapshot
         : Effect.all([
             snapshot.getSnapshot,
-            probeCodexSkillsForCwd({
+            probeCodexWorkspaceForCwd({
               binaryPath: effectiveConfig.binaryPath,
               homePath: effectiveConfig.homePath,
               launchArgs: resolveCodexLaunchArgs(effectiveConfig.launchArgs, processEnv),
@@ -284,11 +284,11 @@ export const CodexDriver: ProviderDriver<
               environment: processEnv,
             }).pipe(
               Effect.scoped,
-              Effect.timeout("20 seconds"),
+              Effect.timeout("50 seconds"),
               Effect.provideService(ChildProcessSpawner.ChildProcessSpawner, spawner),
             ),
           ]).pipe(
-            Effect.map(([machineSnapshot, skills]) => ({ ...machineSnapshot, skills })),
+            Effect.map(([machineSnapshot, workspace]) => ({ ...machineSnapshot, ...workspace })),
             Effect.mapError(
               (cause) =>
                 new ProviderDriverError({

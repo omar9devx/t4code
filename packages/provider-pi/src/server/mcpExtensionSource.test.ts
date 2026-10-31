@@ -144,7 +144,9 @@ describe("Pi MCP tool results", () => {
       const output = await bridge.tools[0]!.execute("image", {});
       assert.deepEqual(output.content[0], image);
       assert.equal(output.content.length, isError ? 2 : 1);
-      if (isError) assert.include(output.content[1]?.text ?? "", "returned an error");
+      if (isError) {
+        assert.match(output.content[1]?.text ?? "", /^T4 Code MCP tool .+ returned an error$/u);
+      }
       assert.equal(output.isError, isError ? true : undefined);
       assert.deepEqual(output.structuredContent, result);
     },
@@ -295,7 +297,7 @@ describe("Pi MCP tool schemas", () => {
 
 describe("Pi tool discovery permissions", () => {
   it.each(["approval-required", "auto-accept-edits", "auto"])(
-    "allows annotated T3 reads in %s while gating mutations and replacements",
+    "allows annotated T4 Code reads in %s while gating mutations and replacements",
     async (runtimeMode) => {
       const bridge = await loadMcpBridge({ modern: true, runtimeMode });
       const hook = bridge.handlers.get("tool_call") as unknown as (

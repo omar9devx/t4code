@@ -73,7 +73,7 @@ const model = "claude-opus-5-5";
 const base = buildBase(capture, { model, keepUserInstructions: false });
 const json = (text: string) => JSON.parse(text);
 
-it.effect("answers device calls with T3's handlers over the case's world", () =>
+it.effect("answers device calls with T4 Code's handlers over the case's world", () =>
   Effect.gen(function* () {
     const { devices, deviceHosts } = deviceCase({}).setup.world ?? {};
     const tools = yield* makeDeviceTools({ devices: devices ?? [], deviceHosts }, base.environment);
@@ -88,7 +88,7 @@ it.effect("answers device calls with T3's handlers over the case's world", () =>
     assert.match(command, /^\/home\/user\/\.t3\/userdata\/device\/.+\/agent-device$/);
     assert.include(opened.quickStart, command);
     assert.deepEqual(tools.launchers, [command]);
-    // The image never reaches the model; T3's text result has the rest.
+    // The image never reaches the model; T4 Code's text result has the rest.
     assert.deepEqual(json((yield* tools.call("device_screenshot", {})).text).screenshot, {
       mimeType: "image/png",
       width: 1206,
@@ -103,7 +103,7 @@ it.effect("answers device calls with T3's handlers over the case's world", () =>
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
-it.effect("lists the boot state T3 left a device in", () =>
+it.effect("lists the boot state T4 Code left a device in", () =>
   Effect.gen(function* () {
     const { devices, deviceHosts } = deviceCase({}).setup.world ?? {};
     const stopped = (devices ?? []).map((device) => ({ ...device, booted: false }));
@@ -116,95 +116,107 @@ it.effect("lists the boot state T3 left a device in", () =>
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
-it("decodes only T3 device errors as injected failures", () => {
+it("decodes only T4 Code device errors as injected failures", () => {
   assert.isDefined(deviceFailure(screenshotFailure));
   assert.isUndefined(deviceFailure({ error: "Synthetic hub is unavailable", isError: true }));
   assert.isUndefined(deviceFailure("default"));
 });
 
-it.effect("rebuilds prior device results with T3, whose sessions reach the measured turn", () =>
-  Effect.gen(function* () {
-    const testCase = deviceCase({
-      priorTurns: [
-        { role: "user", text: "Show me Settings on the iPhone on build-mac." },
-        {
-          role: "assistant",
-          toolCalls: [
-            { tool: "device_list", input: {}, result: "default" },
-            { tool: "device_open", input: { hostId: MAC, deviceId: IPHONE }, result: "default" },
-          ],
-        },
-      ],
-      mocks: { device_screenshot: screenshotFailure },
-    });
-    const sample = makeSample(testCase, base);
-    assert.throws(() => buildMessages(sample), /run withDevices/);
-    yield* withDevices(sample);
-    const shown = JSON.stringify(buildMessages(sample));
-    const [launcher = ""] = sample.devices?.launchers ?? [];
-    assert.include(shown, launcher);
-    assert.notInclude(shown, `"content":"default"`);
-    const tools = sample.devices!;
-    assert.isFalse((yield* tools.call("device_screenshot", {})).isError);
-    const mock = deviceFailure(testCase.setup.mocks?.device_screenshot);
-    assert.isTrue((yield* tools.call("device_screenshot", {}, mock)).isError);
-  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+it.effect(
+  "rebuilds prior device results with T4 Code, whose sessions reach the measured turn",
+  () =>
+    Effect.gen(function* () {
+      const testCase = deviceCase({
+        priorTurns: [
+          { role: "user", text: "Show me Settings on the iPhone on build-mac." },
+          {
+            role: "assistant",
+            toolCalls: [
+              { tool: "device_list", input: {}, result: "default" },
+              { tool: "device_open", input: { hostId: MAC, deviceId: IPHONE }, result: "default" },
+            ],
+          },
+        ],
+        mocks: { device_screenshot: screenshotFailure },
+      });
+      const sample = makeSample(testCase, base);
+      assert.throws(() => buildMessages(sample), /run withDevices/);
+      yield* withDevices(sample);
+      const shown = JSON.stringify(buildMessages(sample));
+      const [launcher = ""] = sample.devices?.launchers ?? [];
+      assert.include(shown, launcher);
+      assert.notInclude(shown, `"content":"default"`);
+      const tools = sample.devices!;
+      assert.isFalse((yield* tools.call("device_screenshot", {})).isError);
+      const mock = deviceFailure(testCase.setup.mocks?.device_screenshot);
+      assert.isTrue((yield* tools.call("device_screenshot", {}, mock)).isError);
+    }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
-it.effect("gives a native subagent T3's SubagentStart context instead of T3's append", () =>
-  Effect.gen(function* () {
-    const subagentContext = yield* Effect.promise(() => t3SubagentContext(model));
-    const native = {
-      ...buildBase(capture, { model, keepUserInstructions: false, nativeSubagent: true }),
-      subagentContext,
-    };
-    const system = (blocks: typeof base.system) =>
-      blocks.map((block) => String(block.text)).join("");
-    assert.include(system(base.system), t3SystemAppend(model));
-    assert.notInclude(system(native.system), t3SystemAppend(model));
-    const testCase = deviceCase({ role: "native-subagent" });
-    const shown = (sample: typeof native) =>
-      buildMessages(makeSample(testCase, sample))[0]?.content.map((block) => String(block.text));
-    const reminders = shown(native)?.join("\n") ?? "";
-    // A ref without T3's hook gives the subagent nothing.
-    assert.equal(
-      reminders.includes("SubagentStart hook additional context"),
-      subagentContext !== "",
-    );
-    assert.include(reminders, subagentContext);
-    // Claude Code 2.1.310 records the hook's context after the task, and sends it that way.
-    const blocks = shown({ ...native, subagentContext: "## T3 Code devices" }) ?? [];
-    assert.equal(blocks.at(-2), testCase.prompt);
-    assert.equal(
-      blocks.at(-1),
-      "<system-reminder>\nSubagentStart hook additional context: ## T3 Code devices\n</system-reminder>",
-    );
-  }),
+it.effect(
+  "gives a native subagent T4 Code's SubagentStart context instead of T4 Code's append",
+  () =>
+    Effect.gen(function* () {
+      const subagentContext = yield* Effect.promise(() => t3SubagentContext(model));
+      const native = {
+        ...buildBase(capture, { model, keepUserInstructions: false, nativeSubagent: true }),
+        subagentContext,
+      };
+      const system = (blocks: typeof base.system) =>
+        blocks.map((block) => String(block.text)).join("");
+      assert.include(system(base.system), t3SystemAppend(model));
+      assert.notInclude(system(native.system), t3SystemAppend(model));
+      const testCase = deviceCase({ role: "native-subagent" });
+      const shown = (sample: typeof native) =>
+        buildMessages(makeSample(testCase, sample))[0]?.content.map((block) => String(block.text));
+      const reminders = shown(native)?.join("\n") ?? "";
+      // A ref without T4 Code's hook gives the subagent nothing.
+      assert.equal(
+        reminders.includes("SubagentStart hook additional context"),
+        subagentContext !== "",
+      );
+      assert.include(reminders, subagentContext);
+      // Claude Code 2.1.310 records the hook's context after the task, and sends it that way.
+      const blocks = shown({ ...native, subagentContext: "## T4 Code devices" }) ?? [];
+      assert.equal(blocks.at(-2), testCase.prompt);
+      assert.equal(
+        blocks.at(-1),
+        "<system-reminder>\nSubagentStart hook additional context: ## T4 Code devices\n</system-reminder>",
+      );
+    }),
 );
 
-it.effect("tells the shell simulator the launchers T3 returned and agent-device's real CLI", () =>
-  Effect.gen(function* () {
-    const sample = makeSample(deviceCase({}), base);
-    yield* withDevices(sample);
-    const call = { tool: "Bash", input: { command: "ls /tmp" } };
-    const told = (request: ReturnType<typeof shellRequest>) => JSON.stringify(request.messages);
-    assert.notInclude(told(shellRequest(sample, call, "claude-haiku-5-5")), "launchers T3's");
-    const opened = yield* sample.devices!.call("device_open", { hostId: MAC, deviceId: IPHONE });
-    const { command } = json(opened.text).agentDevice;
-    const request = shellRequest(sample, call, "claude-haiku-5-5");
-    assert.include(told(request), `agent-device launchers T3's device_open returned: ${command}`);
-    // agent-device's own syntax: a positional recording path, and `record stop` with no flag.
-    assert.include(request.system, AGENT_DEVICE_SHELL);
-    assert.include(
-      request.system,
-      "agent-device record start [path] [--scope <app|device|system>]",
-    );
-    assert.include(request.system, "| record stop |");
-    assert.include(request.system, "Unknown flag: --stop. Did you mean --scope?");
-    // A case without devices keeps the shell prompt every other case has.
-    const plain = makeSample(deviceCase({ world: {} }), base);
-    assert.notInclude(shellRequest(plain, call, "claude-haiku-5-5").system, "agent-device");
-  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+it.effect(
+  "tells the shell simulator the launchers T4 Code returned and agent-device's real CLI",
+  () =>
+    Effect.gen(function* () {
+      const sample = makeSample(deviceCase({}), base);
+      yield* withDevices(sample);
+      const call = { tool: "Bash", input: { command: "ls /tmp" } };
+      const told = (request: ReturnType<typeof shellRequest>) => JSON.stringify(request.messages);
+      assert.notInclude(
+        told(shellRequest(sample, call, "claude-haiku-5-5")),
+        "launchers T4 Code's",
+      );
+      const opened = yield* sample.devices!.call("device_open", { hostId: MAC, deviceId: IPHONE });
+      const { command } = json(opened.text).agentDevice;
+      const request = shellRequest(sample, call, "claude-haiku-5-5");
+      assert.include(
+        told(request),
+        `agent-device launchers T4 Code's device_open returned: ${command}`,
+      );
+      // agent-device's own syntax: a positional recording path, and `record stop` with no flag.
+      assert.include(request.system, AGENT_DEVICE_SHELL);
+      assert.include(
+        request.system,
+        "agent-device record start [path] [--scope <app|device|system>]",
+      );
+      assert.include(request.system, "| record stop |");
+      assert.include(request.system, "Unknown flag: --stop. Did you mean --scope?");
+      // A case without devices keeps the shell prompt every other case has.
+      const plain = makeSample(deviceCase({ world: {} }), base);
+      assert.notInclude(shellRequest(plain, call, "claude-haiku-5-5").system, "agent-device");
+    }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
 it("prints agent-device's own help for a lone help command on a returned launcher", () => {
@@ -230,7 +242,7 @@ it("prints agent-device's own help for a lone help command on a returned launche
   assert.isUndefined(asked(`/usr/local/bin/agent-device help`));
 });
 
-it("pins agent-device's help to the version T3 installs", () => {
+it("pins agent-device's help to the version T4 Code installs", () => {
   const versions = JSON.parse(
     NodeFS.readFileSync(
       new URL("../../apps/server/src/device/deviceToolVersions.json", import.meta.url),
@@ -600,41 +612,45 @@ const deviceTools = (extra: object) =>
     base.environment,
   );
 
-it.effect("lists a host whose discovery fails as T3 does: failed, with none of its devices", () =>
-  Effect.gen(function* () {
-    // F1's saved device_list: the hub answered, but its device list timed out.
-    const failure = new DeviceOperationError({
-      operation: "list",
-      reason: "request_failed",
-      cause: null,
-    });
-    const tools = yield* deviceTools({ deviceDiscoveryFailures: { [MAC]: failure } });
-    const listed = json((yield* tools.call("device_list", {})).text);
-    assert.deepEqual(listed.hostStatuses[MAC], {
-      status: "failed",
-      detail:
-        "Device list failed: Could not communicate with device support. Try refreshing devices.",
-    });
-    assert.equal(listed.hostStatuses[SPARE_MAC].status, "ready");
-    assert.deepEqual(
-      listed.devices.map((device: { id: string }) => device.id),
-      [SPARE_PHONE],
-    );
-    const opened = yield* tools.call("device_open", { hostId: MAC, deviceId: IPHONE });
-    assert.isTrue(opened.isError);
-    assert.include(opened.text, IPHONE);
-    assert.isFalse(
-      (yield* tools.call("device_open", { hostId: SPARE_MAC, deviceId: SPARE_PHONE })).isError,
-    );
-    // A failed host with no devices of its own still needs its label.
-    const unlabeled = yield* Effect.exit(
-      deviceTools({ deviceDiscoveryFailures: { "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee": failure } }),
-    );
-    assert.isTrue(unlabeled._tag === "Failure");
-  }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
+it.effect(
+  "lists a host whose discovery fails as T4 Code does: failed, with none of its devices",
+  () =>
+    Effect.gen(function* () {
+      // F1's saved device_list: the hub answered, but its device list timed out.
+      const failure = new DeviceOperationError({
+        operation: "list",
+        reason: "request_failed",
+        cause: null,
+      });
+      const tools = yield* deviceTools({ deviceDiscoveryFailures: { [MAC]: failure } });
+      const listed = json((yield* tools.call("device_list", {})).text);
+      assert.deepEqual(listed.hostStatuses[MAC], {
+        status: "failed",
+        detail:
+          "Device list failed: Could not communicate with device support. Try refreshing devices.",
+      });
+      assert.equal(listed.hostStatuses[SPARE_MAC].status, "ready");
+      assert.deepEqual(
+        listed.devices.map((device: { id: string }) => device.id),
+        [SPARE_PHONE],
+      );
+      const opened = yield* tools.call("device_open", { hostId: MAC, deviceId: IPHONE });
+      assert.isTrue(opened.isError);
+      assert.include(opened.text, IPHONE);
+      assert.isFalse(
+        (yield* tools.call("device_open", { hostId: SPARE_MAC, deviceId: SPARE_PHONE })).isError,
+      );
+      // A failed host with no devices of its own still needs its label.
+      const unlabeled = yield* Effect.exit(
+        deviceTools({
+          deviceDiscoveryFailures: { "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee": failure },
+        }),
+      );
+      assert.isTrue(unlabeled._tag === "Failure");
+    }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
-it.effect("denies every device tool with T3's own error when agent device access is off", () =>
+it.effect("denies every device tool with T4 Code's own error when agent device access is off", () =>
   Effect.gen(function* () {
     const tools = yield* deviceTools({ deviceAgentAccess: false });
     for (const [name, input] of [
@@ -655,12 +671,12 @@ it.effect("denies every device tool with T3's own error when agent device access
         `${name}: ${result.text}`,
       );
     }
-    // T3 drops its device text for a thread without the capability, on refs that have it.
-    assert.notInclude(t3SystemAppend(model, false), "## T3 Code devices");
+    // T4 Code drops its device text for a thread without the capability, on refs that have it.
+    assert.notInclude(t3SystemAppend(model, false), "## T4 Code devices");
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
-it.effect("reports an unreadable capture as T3 does: a successful 0×0 screenshot", () =>
+it.effect("reports an unreadable capture as T4 Code does: a successful 0×0 screenshot", () =>
   Effect.gen(function* () {
     const tools = yield* deviceTools({ deviceInvalidCapture: true });
     yield* tools.call("device_open", { hostId: MAC, deviceId: IPHONE });
@@ -680,12 +696,12 @@ it.effect("reports an unreadable capture as T3 does: a successful 0×0 screensho
 it.effect("refuses an open on a device another thread's agent-device session holds", () =>
   Effect.gen(function* () {
     const tools = yield* deviceTools({ deviceOwners: { [IPHONE]: "acme-design-review" } });
-    // T3 names the owner's session as it names every thread's.
+    // T4 Code names the owner's session as it names every thread's.
     const owner = "t3-a062c547ef0b6bf8ee839b67";
     assert.deepEqual(tools.owners, [
       { deviceId: IPHONE, threadId: "acme-design-review", session: owner },
     ]);
-    // T3 has no cross-thread gate: device_open succeeds, and device_list shows only this thread.
+    // T4 Code has no cross-thread gate: device_open succeeds, and device_list shows only this thread.
     const opened = json((yield* tools.call("device_open", { hostId: MAC, deviceId: IPHONE })).text);
     assert.deepEqual(json((yield* tools.call("device_list", {})).text).open, [
       { hostId: MAC, deviceId: IPHONE },
@@ -736,7 +752,7 @@ it.effect("refuses an open on a device another thread's agent-device session hol
     const told = JSON.stringify(shellRequest(sample, { tool: "Bash", input: {} }, model).messages);
     assert.include(
       told,
-      `${owner} (Acme iPhone, ${IPHONE}, on build-mac) belongs to another T3 thread (acme-design-review)`,
+      `${owner} (Acme iPhone, ${IPHONE}, on build-mac) belongs to another T4 Code thread (acme-design-review)`,
     );
     // Closing the owner's session frees the device.
     history.push({ tool: "Bash", input: { command: line("close", owner) }, output: "Closed" });
@@ -817,7 +833,7 @@ it.effect(
       const free = told(spareOpen);
       assert.include(
         free,
-        `agent-device launchers T3's device_open returned: ${
+        `agent-device launchers T4 Code's device_open returned: ${
           held.session === undefined
             ? `${held.command} (shared: each command's --udid or --serial and --session name its device and session)`
             : `${held.command} (drives Acme iPhone, ${IPHONE}, on build-mac, in session ${held.session}); ${spare.command} (drives Acme Spare iPhone, ${SPARE_PHONE}, on spare-mac, in session ${spare.session})`
@@ -825,7 +841,7 @@ it.effect(
       );
       assert.include(
         free,
-        `${session(held)} (Acme iPhone, ${IPHONE}, on build-mac) has not started; ${session(spare)} (Acme Spare iPhone, ${SPARE_PHONE}, on spare-mac) has not started; ${owner} (Acme iPhone, ${IPHONE}, on build-mac) belongs to another T3 thread (acme-design-review) and holds its device with an app open.`,
+        `${session(held)} (Acme iPhone, ${IPHONE}, on build-mac) has not started; ${session(spare)} (Acme Spare iPhone, ${SPARE_PHONE}, on spare-mac) has not started; ${owner} (Acme iPhone, ${IPHONE}, on build-mac) belongs to another T4 Code thread (acme-design-review) and holds its device with an app open.`,
       );
       assert.include(
         free,

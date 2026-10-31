@@ -47,6 +47,7 @@ import {
   getProviderSkillsForSlashMenu,
   getProviderSlashCommandsForSlashMenu,
   isProviderSkillUserInvocable,
+  resolveProviderPluginsForCwd,
   resolveProviderSkillsForCwd,
   resolveProviderSlashCommandsForCwd,
 } from "@t3tools/client-runtime/providerSkills";
@@ -140,7 +141,7 @@ export function buildComposerSlashCommandItems(input: {
     (item) => item.command.includes(query) && (item.command === "model" || allowInteractionMode),
   );
 
-  // Providers expand commands only at the start of a message. T3 commands
+  // Providers expand commands only at the start of a message. T4 Code commands
   // change local state and do not have this restriction.
   if (!input.atMessageStart) return items;
   for (const command of input.selectedProviderStatus?.slashCommands ?? []) {
@@ -194,6 +195,8 @@ export function resolveComposerCommandSelection(input: {
     replacement = `${serializeComposerFileLink(item.path)} `;
   } else if (item.type === "skill") {
     replacement = `$${item.skill.name} `;
+  } else if (item.type === "plugin") {
+    replacement = `^${item.plugin.id} `;
   } else if (item.type === "slash-command") {
     replacement = `/${item.command} `;
   } else if (item.type === "provider-slash-command") {
@@ -266,6 +269,14 @@ export function useComposerCommandMenu({
   const skills = selectedProviderStatus
     ? resolveProviderSkillsForCwd(selectedProviderStatus, projectCwd)
     : [];
+  const plugins = selectedProviderStatus
+    ? resolveProviderPluginsForCwd(selectedProviderStatus, projectCwd)
+    : [];
+  const pluginsLoading =
+    selectedProviderStatus?.driver === "codex" &&
+    !selectedProviderStatus.workspaceSnapshots?.some(
+      (snapshot) => snapshot.cwd === projectCwd && !snapshot.slashCommandsPending,
+    );
   const selectedProviderInstanceId = selectedProviderStatus?.instanceId;
   const refreshWorkspaceSnapshot = useAtomRefresh(
     environmentId && projectCwd && selectedProviderInstanceId
@@ -457,6 +468,24 @@ export function useComposerCommandMenu({
       }));
     }
 
+    if (trigger.kind === "plugin") {
+      const query = trigger.query.trim().toLowerCase();
+      return plugins
+        .filter((plugin) =>
+          `${plugin.name} ${plugin.displayName ?? ""} ${plugin.id} ${plugin.description ?? ""}`
+            .toLowerCase()
+            .includes(query),
+        )
+        .slice(0, 20)
+        .map((plugin) => ({
+          id: `plugin:${plugin.id}`,
+          type: "plugin" as const,
+          plugin,
+          label: plugin.displayName ?? plugin.name,
+          description: plugin.description ?? plugin.id,
+        }));
+    }
+
     if (trigger.kind === "path") {
       const threadItems = environmentId
         ? matchComposerThreadItems({
@@ -616,7 +645,13 @@ export function useComposerCommandMenu({
     items,
     skills,
     isLoading:
-      trigger?.kind === "pull-request" ? pullRequestSearch.isPending : pathSearch.isPending,
+      trigger?.kind === "pull-request"
+        ? pullRequestSearch.isPending
+        : trigger?.kind === "plugin"
+          ? pluginsLoading
+          : trigger?.kind === "skill"
+            ? false
+            : pathSearch.isPending,
     error:
       trigger?.kind === "pull-request"
         ? pullRequestProjectId === null || pullRequestRepository === null

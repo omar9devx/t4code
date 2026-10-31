@@ -1236,6 +1236,26 @@ export const ServerSettings = Schema.Struct({
   enableAgentDeviceAccess: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
   /** Enabling the Device panel must not grant providers device control. */
   enableDeviceSupport: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
+  /** Computer use is separately gated from browser and mobile-device access. */
+  enableComputerUseSupport: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
+  enableAgentComputerUseAccess: Schema.Boolean.pipe(
+    Schema.withDecodingDefault(Effect.succeed(false)),
+  ),
+  computerUseApprovalMode: Schema.Literals([
+    "always-allow",
+    "always-ask",
+    "allow-move-and-screenshot",
+  ]).pipe(Schema.withDecodingDefault(Effect.succeed("always-allow" as const))),
+  computerUsePermissions: Schema.Struct({
+    screen: Schema.Boolean,
+    pointer: Schema.Boolean,
+    click: Schema.Boolean,
+    keyboard: Schema.Boolean,
+  }).pipe(
+    Schema.withDecodingDefault(
+      Effect.succeed({ screen: false, pointer: false, click: false, keyboard: false }),
+    ),
+  ),
   deviceOnboardingCompleted: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
   deviceHosts: SshDeviceHostConfigs.pipe(Schema.withDecodingDefault(Effect.succeed([]))),
   easDeviceHosts: EasDeviceHostConfigs.pipe(Schema.withDecodingDefault(Effect.succeed([]))),
@@ -1602,6 +1622,19 @@ export const ServerSettingsPatch = Schema.Struct({
   ),
   enableAgentDeviceAccess: Schema.optionalKey(Schema.Boolean),
   enableDeviceSupport: Schema.optionalKey(Schema.Boolean),
+  enableComputerUseSupport: Schema.optionalKey(Schema.Boolean),
+  enableAgentComputerUseAccess: Schema.optionalKey(Schema.Boolean),
+  computerUseApprovalMode: Schema.optionalKey(
+    Schema.Literals(["always-allow", "always-ask", "allow-move-and-screenshot"]),
+  ),
+  computerUsePermissions: Schema.optionalKey(
+    Schema.Struct({
+      screen: Schema.optionalKey(Schema.Boolean),
+      pointer: Schema.optionalKey(Schema.Boolean),
+      click: Schema.optionalKey(Schema.Boolean),
+      keyboard: Schema.optionalKey(Schema.Boolean),
+    }),
+  ),
   deviceOnboardingCompleted: Schema.optionalKey(Schema.Boolean),
   deviceHosts: Schema.optionalKey(SshDeviceHostConfigs),
   easDeviceHosts: Schema.optionalKey(EasDeviceHostConfigs),

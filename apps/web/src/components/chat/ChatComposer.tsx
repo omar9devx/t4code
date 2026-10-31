@@ -255,6 +255,7 @@ import {
 } from "@t3tools/client-runtime/state/composer-dispatch";
 import type { ContextWindowSnapshot } from "../../lib/contextWindow";
 import {
+  resolveProviderPluginsForCwd,
   resolveProviderSkillsForCwd,
   resolveProviderSlashCommandsForCwd,
 } from "@t3tools/client-runtime/providerSkills";
@@ -931,6 +932,14 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
   const selectedProviderSkills = selectedProviderStatus
     ? resolveProviderSkillsForCwd(selectedProviderStatus, gitCwd)
     : NO_PROVIDER_SKILLS;
+  const selectedProviderPlugins = selectedProviderStatus
+    ? resolveProviderPluginsForCwd(selectedProviderStatus, gitCwd)
+    : [];
+  const selectedProviderPluginsLoading =
+    selectedProviderStatus?.driver === "codex" &&
+    !selectedProviderStatus.workspaceSnapshots?.some(
+      (snapshot) => snapshot.cwd === gitCwd && !snapshot.slashCommandsPending,
+    );
   const selectedProviderSlashCommands = selectedProviderStatus
     ? resolveProviderSlashCommandsForCwd(selectedProviderStatus, gitCwd)
     : NO_PROVIDER_SLASH_COMMANDS;
@@ -1137,6 +1146,8 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     compactSlashCommandAvailable,
     selectedProvider,
     selectedProviderSkills,
+    selectedProviderPlugins,
+    selectedProviderPluginsLoading,
     selectedProviderSlashCommands,
     showSkillsInSlashMenu: settings.showSkillsInSlashMenu,
     questionAttachmentTarget,
@@ -1922,6 +1933,19 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       if (applied) {
         setComposerHighlightedItemId(null);
       }
+      return;
+    }
+    if (item.type === "plugin") {
+      const replacement = `^${item.plugin.id} `;
+      const replacementRangeEnd = extendReplacementRangeForTrailingSpace(
+        snapshot.value,
+        trigger.rangeEnd,
+        replacement,
+      );
+      const applied = applyPromptReplacement(trigger.rangeStart, replacementRangeEnd, replacement, {
+        expectedText: snapshot.value.slice(trigger.rangeStart, replacementRangeEnd),
+      });
+      if (applied) setComposerHighlightedItemId(null);
       return;
     }
     if (item.type === "pull-request") {

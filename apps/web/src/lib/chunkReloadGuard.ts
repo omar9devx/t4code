@@ -1,6 +1,15 @@
 // Deploys and desktop server swaps can invalidate lazy chunks; one reload fetches the fresh index.
 const CHUNK_RELOAD_GUARD_KEY = "t3code:chunk-load-reloaded";
 
+export function isDynamicImportLoadError(error: unknown): boolean {
+  return (
+    error instanceof TypeError &&
+    /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i.test(
+      error.message,
+    )
+  );
+}
+
 export function reloadOnceForChunkLoadError(
   getStorage: () => Storage = () => window.sessionStorage,
   reload: () => void = () => window.location.reload(),

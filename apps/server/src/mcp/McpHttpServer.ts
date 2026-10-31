@@ -14,6 +14,7 @@ import type * as Types from "effect/Types";
 import { AiError, McpProtocol, McpSchema, McpServer, Tool, Toolkit } from "effect/ai";
 import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/http";
 import {
+  ComputerUseError,
   DeviceToolError,
   OrchestratorMcpFailure,
   PreviewAutomationError,
@@ -27,6 +28,7 @@ import packageJson from "../../package.json" with { type: "json" };
 import * as ServerConfig from "../config.ts";
 import * as ServerSettings from "../serverSettings.ts";
 import * as DeviceService from "../device/DeviceService.ts";
+import * as ComputerUseService from "../computerUse/ComputerUseService.ts";
 import * as HtmlRender from "../htmlRender/HtmlRender.ts";
 import * as ThreadCommandExecutor from "../orchestration-v2/ThreadCommandExecutor.ts";
 import * as ThreadManagementService from "../orchestration-v2/ThreadManagementService.ts";
@@ -77,6 +79,12 @@ import {
 } from "./toolkits/device/tools.ts";
 import * as HtmlHandlers from "./toolkits/html/handlers.ts";
 import { HtmlPreviewTool, HtmlPreviewToolkit, HtmlRenderToolkit } from "./toolkits/html/tools.ts";
+import * as ComputerUseHandlers from "./toolkits/computerUse/handlers.ts";
+import {
+  ComputerUseScreenshotTool,
+  ComputerUseScreenshotToolkit,
+  ComputerUseToolkit,
+} from "./toolkits/computerUse/tools.ts";
 
 const mcpResourceMetadataUrl = (request: HttpServerRequest.HttpServerRequest) =>
   HttpServerRequest.toURL(request).pipe(
@@ -104,7 +112,7 @@ const unauthorized = (input: {
   return HttpServerResponse.jsonUnsafe(
     {
       error: "invalid_mcp_credential",
-      message: "A valid T3 Code MCP credential is required.",
+      message: "A valid T4 Code MCP credential is required.",
     },
     {
       status: 401,
@@ -621,7 +629,7 @@ interface ImageToolResult {
 /** Expose only undescribed failures' tags; remote messages may contain renderer or device output. */
 const imageToolFailure =
   <E>(toolName: string, operation: string, failureText: string | ((error: E) => string)) =>
-  (cause: Cause.Cause<E>) => {
+  (cause: Cause.Cause<E>): Effect.Effect<McpSchema.CallToolResult> => {
     if (Cause.hasInterrupts(cause) || cause.reasons.some(Cause.isDieReason)) {
       return Effect.failCause(cause).pipe(Effect.orDie);
     }
@@ -660,7 +668,7 @@ const imageToolFailure =
       operation,
       errorTag,
       failureCount: failures.length,
-    }).pipe(Effect.as(result));
+    }).pipe(Effect.as(result), Effect.orDie);
   };
 
 /**
@@ -679,7 +687,7 @@ const registerImageTool = Effect.fn("McpHttpServer.registerImageTool")(function*
   ) => Effect.Effect<
     { readonly encodedResult: unknown },
     E,
-    McpInvocationContext.McpInvocationContext
+    McpInvocationContext.McpInvocationContext | McpSchema.McpServerClient
   >,
   operation: string,
   failureText: string | ((error: E) => string),
@@ -708,8 +716,10 @@ const registerImageTool = Effect.fn("McpHttpServer.registerImageTool")(function*
           fiber.context,
           McpInvocationContext.McpInvocationContext,
         );
+        const client = Context.getUnsafe(fiber.context, McpSchema.McpServerClient);
         return provide(handle(payload as Tool.Parameters<T>)).pipe(
           Effect.provideService(McpInvocationContext.McpInvocationContext, invocation),
+          Effect.provideService(McpSchema.McpServerClient, client),
           Effect.matchCauseEffect({
             onFailure: imageToolFailure(tool.name, operation, failureText),
             onSuccess: ({ encodedResult }) => {
@@ -746,7 +756,7 @@ const registerImageTool = Effect.fn("McpHttpServer.registerImageTool")(function*
             },
           }),
         );
-      }),
+      }).pipe(Effect.orDie),
   });
 });
 
@@ -777,8 +787,33 @@ const registerDeviceScreenshot = Effect.fn("McpHttpServer.registerDeviceScreensh
   );
 });
 
+const registerComputerUseScreenshot = Effect.fn("McpHttpServer.registerComputerUseScreenshot")(
+  function* () {
+    const computerUse = yield* ComputerUseService.ComputerUseService;
+    const threads = yield* ThreadManagementService.ThreadManagementService;
+    const settings = yield* ServerSettings.ServerSettingsService;
+    const built = yield* decodeAsAdvertised(ComputerUseScreenshotToolkit);
+    yield* registerImageTool(
+      ComputerUseScreenshotTool,
+      (payload) =>
+        built
+          .handle("computer_use_screenshot", payload)
+          .pipe(Stream.unwrap, Stream.run(Sink.last()), Effect.flatMap(Effect.fromOption)),
+      (effect) =>
+        effect.pipe(
+          Effect.provideService(ComputerUseService.ComputerUseService, computerUse),
+          Effect.provideService(ThreadManagementService.ThreadManagementService, threads),
+          Effect.provideService(ServerSettings.ServerSettingsService, settings),
+        ),
+      "screenshot",
+      (error) => (isComputerUseError(error) ? error.message : "Computer screen capture failed."),
+    );
+  },
+);
+
 const isOrchestratorMcpFailure = Schema.is(OrchestratorMcpFailure);
 const isDeviceToolError = Schema.is(DeviceToolError);
+const isComputerUseError = Schema.is(ComputerUseError);
 
 const registerHtmlPreview = Effect.fn("McpHttpServer.registerHtmlPreview")(function* () {
   const htmlRender = yield* HtmlRender.HtmlRender;
@@ -1058,7 +1093,10 @@ export const toolkitRegistration = <Tools extends Record<string, Tool.Any>, EX, 
   const registered = registration as Layer.Layer<
     never,
     never,
-    Exclude<Layer.Services<typeof registration>, McpInvocationContext.McpInvocationContext>
+    Exclude<
+      Layer.Services<typeof registration>,
+      McpInvocationContext.McpInvocationContext | McpSchema.McpServerClient
+    >
   >;
   return registered.pipe(Layer.provide(McpToolAccess.HandlersLayer.layer(handlers)));
 };
@@ -1066,10 +1104,20 @@ export const toolkitRegistration = <Tools extends Record<string, Tool.Any>, EX, 
 const imageToolRegistration = <Tools extends Record<string, Tool.Any>, A, E, R, EX, RX>(
   register: Effect.Effect<A, E, R>,
   handlers: McpToolAccess.HandlersLayer<Tools, EX, RX>,
-) =>
-  Layer.effectDiscard(withToolAnalytics(register)).pipe(
+) => {
+  const registration = Layer.effectDiscard(withToolAnalytics(register)).pipe(
     Layer.provide(McpToolAccess.HandlersLayer.layer(handlers)),
   );
+  // @effect-diagnostics-next-line unsafeEffectTypeAssertion:off - the MCP transport provides the client per request.
+  return registration as Layer.Layer<
+    never,
+    never,
+    Exclude<
+      Layer.Services<typeof registration>,
+      McpInvocationContext.McpInvocationContext | McpSchema.McpServerClient
+    >
+  >;
+};
 
 export const layerHtmlToolkit = Layer.mergeAll(
   toolkitRegistration(HtmlRenderToolkit, HtmlHandlers.layerRender),
@@ -1140,15 +1188,20 @@ export const layerDeviceToolkit = Layer.mergeAll(
   layerDeviceScreenshotRegistration,
 );
 
+const layerComputerUseToolkit = Layer.mergeAll(
+  toolkitRegistration(ComputerUseToolkit, ComputerUseHandlers.layerAction),
+  imageToolRegistration(registerComputerUseScreenshot(), ComputerUseHandlers.layerScreenshot),
+);
+
 export const layerMcpTransport = McpServer.layerHttp({
-  name: "T3 Code",
+  name: "T4 Code",
   version: packageJson.version,
   path: "/mcp",
   protocols: [McpProtocol.v2025_06_18],
   allowSessionTermination: true,
 }).pipe(Layer.provide(layerMcpAuthMiddleware));
 
-/** Every tool the T3 MCP server advertises. AgentContextBudget.test.ts measures this set. */
+/** Every tool the T4 Code MCP server advertises. AgentContextBudget.test.ts measures this set. */
 export const layerTools = Layer.mergeAll(
   layerPreviewToolkit,
   layerOrchestratorToolkit,
@@ -1160,6 +1213,7 @@ export const layerTools = Layer.mergeAll(
   layerWorktreeToolkitRegistration,
   layerPullRequestsToolkit,
   layerDeviceToolkit,
+  layerComputerUseToolkit,
   layerHtmlToolkit,
 );
 

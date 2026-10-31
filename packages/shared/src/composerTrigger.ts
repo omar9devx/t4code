@@ -3,7 +3,8 @@ export type ComposerTriggerKind =
   | "pull-request"
   | "slash-command"
   | "slash-model"
-  | "skill";
+  | "skill"
+  | "plugin";
 export type ComposerSlashCommand = "model" | "plan" | "default";
 
 export interface ComposerTrigger {
@@ -142,6 +143,14 @@ export function detectComposerTrigger(
     return {
       kind: "skill",
       query: token.slice(skillPrefix[0].length),
+      rangeStart: tokenStart,
+      rangeEnd: cursor,
+    };
+  }
+  if (token.startsWith("^")) {
+    return {
+      kind: "plugin",
+      query: token.slice(1),
       rangeStart: tokenStart,
       rangeEnd: cursor,
     };

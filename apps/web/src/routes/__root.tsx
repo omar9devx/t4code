@@ -62,7 +62,7 @@ import { shouldResumeSnapShotSetupOnStartup } from "../lib/snapShotSetupResume";
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
-    // Guest links open on the owner's tunnel host in a browser with no T3 session, and must
+    // Guest links open on the owner's tunnel host in a browser with no T4 Code session, and must
     // not trigger pairing or an environment connection.
     if (location.pathname === GUEST_PAGE_PATH) {
       return {
@@ -106,12 +106,25 @@ export const Route = createRootRoute({
     };
   },
   component: RootRouteView,
+  pendingComponent: RootRoutePendingView,
+  pendingMs: 0,
+  pendingMinMs: 0,
   errorComponent: RootRouteErrorView,
   notFoundComponent: RootRouteNotFoundView,
   head: () => ({
     meta: [{ name: "title", content: APP_DISPLAY_NAME }],
   }),
 });
+
+function RootRoutePendingView() {
+  return (
+    <div id="boot-shell" role="status" aria-busy="true" aria-label="Loading T4 Code">
+      <div id="boot-shell-card">
+        <img id="boot-shell-logo" src="/apple-touch-icon.png" alt="" />
+      </div>
+    </div>
+  );
+}
 
 function RootRouteNotFoundView() {
   return (

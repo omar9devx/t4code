@@ -7,6 +7,7 @@ import type {
   EnvironmentMachineKind,
   PullRequestContextMetadata,
   ScopedThreadRef,
+  ServerProviderPlugin,
   ServerProviderSkill,
   ServerProviderSlashCommand,
 } from "@t3tools/contracts";
@@ -71,6 +72,13 @@ export type ComposerCommandItem =
       readonly skill: ServerProviderSkill;
       readonly label: string;
       readonly description: string;
+    }
+  | {
+      readonly id: string;
+      readonly type: "plugin";
+      readonly plugin: ServerProviderPlugin;
+      readonly label: string;
+      readonly description: string;
     };
 
 interface ComposerCommandPopoverProps {
@@ -115,6 +123,8 @@ function itemIcon(item: ComposerCommandItem): AppSymbolName | null {
     case "slash-command":
     case "provider-slash-command":
       return "terminal";
+    case "plugin":
+      return "cable.connector";
     case "skill":
       return SKILL_SOURCE_SYMBOL_BY_KIND[resolveProviderSkillSourceKind(item.skill)];
     case "path":
@@ -134,6 +144,8 @@ function groupLabel(triggerKind: ComposerTriggerKind | null): string | null {
       return "Commands";
     case "skill":
       return "Skills";
+    case "plugin":
+      return "Codex plugins";
     case "path":
       return "Files";
     default:
@@ -152,6 +164,8 @@ function emptyText(triggerKind: ComposerTriggerKind | null, isLoading: boolean):
       return "No matching files or folders.";
     case "skill":
       return "No skills found.";
+    case "plugin":
+      return "No installed Codex plugins found.";
     case "slash-command":
       return "No matching commands.";
     default:

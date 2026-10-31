@@ -133,6 +133,7 @@ import { registerSettleAndAdvance } from "../settleAndAdvance";
 import { startNewThreadFromContext } from "../lib/chatThreadActions";
 import { useBoringSidebarEnabled, useClientSettings } from "../hooks/useSettings";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
+import { threadTranscriptMarkdown } from "@t3tools/shared/threadTranscriptMarkdown";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useNowMinute } from "../hooks/useNowMinute";
 import {
@@ -153,9 +154,11 @@ import { environmentPresentations } from "../state/presentation";
 import { primaryServerKeybindingsAtom } from "../state/server";
 import { environmentProjects } from "../state/projects";
 import { threadEnvironment } from "../state/threads";
+import { orchestrationEnvironment } from "../state/orchestration";
 import { useOlderSettledShelf, useOlderSettledShelfGrowth } from "../state/olderSettledShelf";
 import { useThreadSearch } from "../state/queries";
 import { useOrchestrationCommand } from "../state/use-orchestration-command";
+import { useAtomCommand } from "../state/use-atom-command";
 import { readEnvironmentScope, useEnvironmentScope } from "../state/session";
 import { appAtomRegistry } from "../rpc/atomRegistry";
 import { canShareWithGuestAtom } from "./chat/guestShareAvailability";
@@ -924,6 +927,9 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
   const updateThreadMetadata = useOrchestrationCommand(threadEnvironment.updateMetadata, {
     reportFailure: false,
   });
+  const loadThreadTranscript = useAtomCommand(orchestrationEnvironment.threadTranscript, {
+    reportFailure: false,
+  });
   const { copyToClipboard: copyPathToClipboard } = useCopyToClipboard<{ path: string }>({
     onCopy: ({ path }) => {
       toastManager.add({
@@ -978,6 +984,23 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
         }),
       );
     },
+  });
+  const { copyToClipboard: copyTranscriptToClipboard } = useCopyToClipboard<{ title: string }>({
+    target: "conversation",
+    onCopy: ({ title }) =>
+      toastManager.add({
+        type: "success",
+        title: "Conversation copied as Markdown",
+        description: title,
+      }),
+    onError: (error) =>
+      toastManager.add(
+        stackedThreadToast({
+          type: "error",
+          title: "Failed to copy conversation",
+          description: error instanceof Error ? error.message : "An error occurred.",
+        }),
+      ),
   });
   const boringSidebarEnabled = useBoringSidebarEnabled();
   const folderRowsMultiline = useClientSettings((settings) => settings.boringSidebarMultilineRows);
@@ -2775,6 +2798,29 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
           case "copy-thread":
             void copyThreadReference(threadChipCopyTarget(threadRef, thread.title));
             return;
+          case "copy-transcript": {
+            const transcript = await loadThreadTranscript({
+              environmentId: threadRef.environmentId,
+              input: { threadId: threadRef.threadId },
+            });
+            if (transcript._tag !== "Success") {
+              if (!isAtomCommandInterrupted(transcript)) {
+                const error = squashAtomCommandFailure(transcript);
+                toastManager.add(
+                  stackedThreadToast({
+                    type: "error",
+                    title: "Failed to load conversation",
+                    description: error instanceof Error ? error.message : "An error occurred.",
+                  }),
+                );
+              }
+              return;
+            }
+            copyTranscriptToClipboard(threadTranscriptMarkdown(transcript.value), {
+              title: thread.title,
+            });
+            return;
+          }
           case "copy-thread-id":
             copyThreadIdToClipboard(thread.id, { threadId: thread.id });
             return;

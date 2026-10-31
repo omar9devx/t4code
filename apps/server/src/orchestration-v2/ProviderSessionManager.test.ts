@@ -641,6 +641,8 @@ function makeBrowserAccessProject(projectId: ProjectId): Project {
 
 function runBrowserAccessScenario(input: {
   readonly enableAgentBrowserAccess: boolean;
+  readonly enableComputerUseSupport?: boolean;
+  readonly enableAgentComputerUseAccess?: boolean;
   readonly projectOverride: boolean;
   readonly deviceOverride?: boolean;
   readonly createThread?: boolean;
@@ -697,6 +699,12 @@ function runBrowserAccessScenario(input: {
           projectServiceLayer: layerProjectService,
           serverSettingsLayer: ServerSettings.layerTest({
             enableAgentBrowserAccess: input.enableAgentBrowserAccess,
+            ...(input.enableComputerUseSupport === undefined
+              ? {}
+              : { enableComputerUseSupport: input.enableComputerUseSupport }),
+            ...(input.enableAgentComputerUseAccess === undefined
+              ? {}
+              : { enableAgentComputerUseAccess: input.enableAgentComputerUseAccess }),
             projectSettingsOverrides: {
               [projectId]: {
                 enableAgentBrowserAccess: input.projectOverride,
@@ -3804,6 +3812,22 @@ it.effect(
         projectExists: false,
       });
       assert.isFalse(denied?.capabilities?.has("device"));
+
+      const computerUseEnabled = yield* runBrowserAccessScenario({
+        enableAgentBrowserAccess: false,
+        projectOverride: false,
+        enableComputerUseSupport: true,
+        enableAgentComputerUseAccess: true,
+      });
+      assert.isTrue(computerUseEnabled?.capabilities?.has("computer-use"));
+
+      const computerUseDenied = yield* runBrowserAccessScenario({
+        enableAgentBrowserAccess: false,
+        projectOverride: false,
+        enableComputerUseSupport: true,
+        enableAgentComputerUseAccess: false,
+      });
+      assert.isFalse(computerUseDenied?.capabilities?.has("computer-use"));
     }),
 );
 

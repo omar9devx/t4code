@@ -6,6 +6,7 @@ import {
   OrchestrationV2SearchThreadsResult,
 } from "./orchestrationV2.ts";
 import { OrchestrationDispatchCommandError } from "./orchestrationDispatch.ts";
+import { ComputerUseError } from "./computerUse.ts";
 import {
   McpAppCallToolInput,
   McpAppCallToolResult,
@@ -484,6 +485,7 @@ export const WS_METHODS = {
   previewStopLocalServer: "preview.stopLocalServer",
 
   deviceConfigure: "device.configure",
+  computerUseSelectScreen: "computerUse.selectScreen",
   deviceList: "device.list",
   deviceTestHost: "device.testHost",
   deviceEasAccount: "device.easAccount",
@@ -1675,6 +1677,12 @@ const WsDeviceConfigureRpc = Rpc.make(WS_METHODS.deviceConfigure, {
   error: Schema.Union([DeviceError, EnvironmentAuthorizationError]),
 });
 
+const WsComputerUseSelectScreenRpc = Rpc.make(WS_METHODS.computerUseSelectScreen, {
+  payload: Schema.Void,
+  success: Schema.Void,
+  error: Schema.Union([ComputerUseError, EnvironmentAuthorizationError]),
+});
+
 const WsDeviceOpenRpc = Rpc.make(WS_METHODS.deviceOpen, {
   payload: DeviceOpenInput,
   success: DeviceSession,
@@ -2145,6 +2153,7 @@ export const WsRpcGroup = RpcGroup.make(
   WsPreviewStopLocalServerRpc,
   WsSubscribeDiscoveredLocalServersRpc,
   WsDeviceConfigureRpc,
+  WsComputerUseSelectScreenRpc,
   WsDeviceListRpc,
   WsDeviceTestHostRpc,
   WsDeviceEasAccountRpc,

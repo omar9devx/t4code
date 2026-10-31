@@ -36,6 +36,7 @@ import { PullRequestReviewGuideService } from "../pullRequest/PullRequestReviewG
 import { ScheduledTaskService } from "../scheduledTasks/ScheduledTaskService.ts";
 import { SecretRequests } from "../secrets/SecretRequests.ts";
 import { ServerSettingsService } from "../serverSettings.ts";
+import * as ComputerUseService from "../computerUse/ComputerUseService.ts";
 import { SourceControlRepositoryService } from "../sourceControl/SourceControlRepositoryService.ts";
 import { GitVcsDriver } from "../vcs/GitVcsDriver.ts";
 import { VcsStatusBroadcaster } from "../vcs/VcsStatusBroadcaster.ts";
@@ -46,6 +47,23 @@ import budget from "./agentContextBudget.json" with { type: "json" };
 
 // Registration only stores tool definitions, so the handlers' services are never called.
 const toolHandlerServices = Layer.mergeAll(
+  Layer.mock(ComputerUseService.ComputerUseService)({
+    selectScreen: Effect.void,
+    screenshot: () =>
+      Effect.succeed({
+        imageData: "",
+        screenWidth: 0,
+        screenHeight: 0,
+        imageWidth: 0,
+        imageHeight: 0,
+      }),
+    movePointer: () => Effect.void,
+    click: () => Effect.void,
+    scroll: () => Effect.void,
+    typeText: () => Effect.void,
+    pressKey: () => Effect.void,
+    close: Effect.void,
+  }),
   Layer.mock(DeviceService)({}),
   Layer.mock(DocumentText)({}),
   Layer.mock(GitVcsDriver)({}),
@@ -99,7 +117,7 @@ const codexAdditionalContext = () =>
   Object.values(
     buildCodexAdditionalContext(
       { model: "gpt-6.1-sol", modelName: "GPT-6.1 Sol", reasoningEffort: "high" },
-      { browser: true, device: true },
+      { browser: true, device: true, computerUse: true },
     ),
   )
     .map((entry) => entry.value)

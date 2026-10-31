@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @effect-diagnostics nodeBuiltinImport:off
 /**
- * Replays small fake threads on a Claude or Codex model to check T3's MCP tool use. A trimmed
+ * Replays small fake threads on a Claude or Codex model to check T4 Code's MCP tool use. A trimmed
  * harness capture supplies the prompt and native tools; a cheap model plays the shell. See
  * README.md for how to run it and add cases.
  */
@@ -43,6 +43,10 @@ import { makeSideChatContext } from "../../apps/server/src/orchestration-v2/Cont
 import { withInlineContext } from "../../apps/server/src/orchestration-v2/ContextHandoffDelivery.ts";
 import { AttachmentToolkit } from "../../apps/server/src/mcp/toolkits/attachment/tools.ts";
 import { DeviceToolkit } from "../../apps/server/src/mcp/toolkits/device/tools.ts";
+import {
+  ComputerUseScreenshotToolkit,
+  ComputerUseToolkit,
+} from "../../apps/server/src/mcp/toolkits/computerUse/tools.ts";
 import { EnvironmentToolkit } from "../../apps/server/src/mcp/toolkits/environment/tools.ts";
 import { HtmlToolkit } from "../../apps/server/src/mcp/toolkits/html/tools.ts";
 import { OrchestratorToolkit } from "../../apps/server/src/mcp/toolkits/orchestrator/tools.ts";
@@ -121,9 +125,9 @@ export type SampleRun = {
   stopReason: string;
   /** The agent's final answer: its last response's text, if it ended its turn. */
   readonly finalText?: string;
-  /** PRs linked to the thread when the sample ends, by the agent or by T3. */
+  /** PRs linked to the thread when the sample ends, by the agent or by T4 Code. */
   readonly linked?: ReadonlyArray<string>;
-  /** The `agent-device` commands T3's device_open returned, prior turns included. */
+  /** The `agent-device` commands T4 Code's device_open returned, prior turns included. */
   readonly launchers?: ReadonlyArray<string>;
 };
 
@@ -132,7 +136,7 @@ const Rest = [Schema.Record(Schema.String, Schema.Unknown)] as const;
 const PriorToolCall = Schema.Struct({
   tool: Schema.String,
   input: Schema.Unknown,
-  /** For a device tool, `"default"` runs the call on the world's devices for T3's result. */
+  /** For a device tool, `"default"` runs the call on the world's devices for T4 Code's result. */
   result: Schema.Unknown,
 });
 
@@ -187,7 +191,7 @@ const McpToolUseWorld = Schema.StructWithRest(
         Schema.StructWithRest(Schema.Struct({ sha: Schema.String, subject: Schema.String }), Rest),
       ),
     ),
-    /** Simulators and emulators. With them, T3's device tools answer from this world. */
+    /** Simulators and emulators. With them, T4 Code's device tools answer from this world. */
     devices: Schema.optional(Schema.Array(DeviceSummary)),
     /** Labels of the SSH device hosts in `devices`, by id. The local host always exists. */
     deviceHosts: Schema.optional(Schema.Record(Schema.String, Schema.String)),
@@ -201,12 +205,14 @@ const McpToolUseWorld = Schema.StructWithRest(
     /**
      * Hosts whose hub fails to list devices, by id, with the error, such as F1's
      * `{"_tag": "DeviceOperationError", "operation": "list", "reason": "request_failed", "cause": null}`.
-     * T3 marks each one failed on every call and lists none of its devices.
+     * T4 Code marks each one failed on every call and lists none of its devices.
      */
     deviceDiscoveryFailures: Schema.optional(Schema.Record(Schema.String, DeviceOperationError)),
-    /** false: agent device access is off. T3 denies every device call and drops its device text. */
+    /** false: agent device access is off. T4 Code denies every device call and drops its device text. */
     deviceAgentAccess: Schema.optional(Schema.Boolean),
-    /** Every capture reaches T3 with adb screencap's warning ahead of the PNG: T3 reports 0×0. */
+    /** false: the thread's MCP credential does not grant Computer Use. */
+    computerUseAccess: Schema.optional(Schema.Boolean),
+    /** Every capture reaches T4 Code with adb screencap's warning ahead of the PNG: T4 Code reports 0×0. */
     deviceInvalidCapture: Schema.optional(Schema.Boolean),
     /** Devices another thread's agent-device session holds, by device id: that thread's id. */
     deviceOwners: Schema.optional(Schema.Record(Schema.String, Schema.String)),
@@ -227,9 +233,9 @@ export const McpToolUseCase = Schema.Struct({
     role: Schema.Literals(["top", "delegated-child", "native-subagent"]),
     /** Runs only on this harness, for cases whose right answer depends on it. */
     harness: Schema.optional(Schema.Literals(["claude", "codex"])),
-    /** The Linked environments beta is on, so T3 lists its link tools. */
+    /** The Linked environments beta is on, so T4 Code lists its link tools. */
     linkedEnvironments: Schema.optional(Schema.Boolean),
-    /** delegate_task `role` for a delegated child. T3 builds the child's first message from it. */
+    /** delegate_task `role` for a delegated child. T4 Code builds the child's first message from it. */
     delegateRole: Schema.optional(OrchestratorMcpTaskRole),
     context: Schema.optional(Schema.String),
     priorTurns: Schema.optional(
@@ -243,21 +249,21 @@ export const McpToolUseCase = Schema.Struct({
     ),
     world: Schema.optional(McpToolUseWorld),
     /**
-     * Canned tool results by bare name, T3 or native. `"default"` uses the runner's result. For a
-     * device tool, a T3 `DeviceError` (`{"_tag": ..., "cause": null}`) fails it inside T3.
+     * Canned tool results by bare name, T4 Code or native. `"default"` uses the runner's result. For a
+     * device tool, a T4 Code `DeviceError` (`{"_tag": ..., "cause": null}`) fails it inside T4 Code.
      */
     mocks: Schema.optional(Schema.Record(Schema.String, Schema.Unknown)),
     /** Regexes on one part of a shell command. A match wins over the shell simulator. */
     shellMocks: Schema.optional(
       Schema.Array(Schema.Struct({ match: Schema.String, output: Schema.String })),
     ),
-    /** The thread is a side chat's first turn: T3 puts the parent's digest ahead of `prompt`. */
+    /** The thread is a side chat's first turn: T4 Code puts the parent's digest ahead of `prompt`. */
     sideChat: Schema.optional(
       Schema.Struct({ parentThreadId: Schema.String, digest: Schema.Array(Schema.String) }),
     ),
   }),
   prompt: Schema.String,
-  /** Records for the context chips `prompt` links, projected as T3 sends them. */
+  /** Records for the context chips `prompt` links, projected as T4 Code sends them. */
   promptContext: Schema.optional(Schema.Struct({ records: Schema.Array(ComposerContextRecord) })),
   expect: McpToolUseExpect,
   /** Model calls this case may need. Overrides `--max-steps`. */
@@ -333,7 +339,7 @@ const isT3Name = (name: string) => name.startsWith(T3_PREFIX) || name.startsWith
 const hasTool = (tools: ReadonlyArray<ApiTool>, name: string) =>
   tools.some((tool) => tool.name === name);
 
-/** Grading name: T3 tools lose their MCP prefix, native tools keep the part after the last `_`. */
+/** Grading name: T4 Code tools lose their MCP prefix, native tools keep the part after the last `_`. */
 const CODEX_NAMES: Readonly<Record<string, string>> = {
   exec_command: "Bash",
   shell_command: "Bash",
@@ -369,6 +375,8 @@ const t3SourceTools: ReadonlyArray<Tool.Any> = [
   PullRequestsToolkit,
   PreviewToolkit,
   DeviceToolkit,
+  ComputerUseToolkit,
+  ComputerUseScreenshotToolkit,
   HtmlToolkit,
 ].flatMap((toolkit): ReadonlyArray<Tool.Any> => Object.values(toolkit.tools));
 const t3Tools: ReadonlyArray<ApiTool> = t3SourceTools.map((tool) => ({
@@ -384,9 +392,9 @@ const enabledWhen = (predicate: () => boolean) =>
       )
       .map((tool) => `${T3_PREFIX}${tool.name}`),
   );
-// T3 does not offer these to a delegated child, so its harness never lists them.
+// T4 Code does not offer these to a delegated child, so its harness never lists them.
 const hiddenFromSubagents = enabledWhen(McpInvocationContext.hiddenFromSubagents);
-// The Linked environments beta starts off, and T3 lists its tools only while it is on.
+// The Linked environments beta starts off, and T4 Code lists its tools only while it is on.
 const hiddenWhileLinksOff = enabledWhen(McpInvocationContext.hiddenWhileLinksOff);
 const visibleT3Tools = (options: { readonly subagent?: boolean; readonly links?: boolean }) =>
   t3Tools.filter(
@@ -396,7 +404,7 @@ const visibleT3Tools = (options: { readonly subagent?: boolean; readonly links?:
   );
 
 /**
- * T3's Claude Code options for an eval thread: its system prompt append and its hooks. `device` says
+ * T4 Code's Claude Code options for an eval thread: its system prompt append and its hooks. `device` says
  * whether the thread holds the `device` capability, as agent device access decides.
  */
 const claudeQueryOptions = (model: Model, device = true) => {
@@ -414,18 +422,18 @@ const claudeQueryOptions = (model: Model, device = true) => {
   return makeClaudeQueryOptions(input);
 };
 
-/** Text T3 appends to Claude Code's system prompt. Delegated children get the same text. */
+/** Text T4 Code appends to Claude Code's system prompt. Delegated children get the same text. */
 export const t3SystemAppend = (model: Model, device = true) => {
   const { systemPrompt } = claudeQueryOptions(model, device);
   if (isRecord(systemPrompt) && systemPrompt.type === "preset" && systemPrompt.append) {
     return systemPrompt.append;
   }
-  throw new Error("makeClaudeQueryOptions no longer appends T3 text to a preset prompt.");
+  throw new Error("makeClaudeQueryOptions no longer appends T4 Code text to a preset prompt.");
 };
 
 /**
- * The context T3's SubagentStart hooks give a native subagent, which gets none of the append.
- * Empty when T3 registers no such hook.
+ * The context T4 Code's SubagentStart hooks give a native subagent, which gets none of the append.
+ * Empty when T4 Code registers no such hook.
  */
 export const t3SubagentContext = async (model: Model, device = true) => {
   const hooks = (claudeQueryOptions(model, device).hooks?.SubagentStart ?? []).flatMap(
@@ -453,7 +461,7 @@ export const t3SubagentContext = async (model: Model, device = true) => {
 };
 
 /**
- * Size of the context T3 adds: the system text every Claude thread gets, and the tool
+ * Size of the context T4 Code adds: the system text every Claude thread gets, and the tool
  * descriptions and schemas (loaded on demand here, sent up front by harnesses without
  * deferred tools). Tokens are estimated at 4 characters each.
  */
@@ -462,7 +470,7 @@ const t3ContextReport = (model: Model) => {
   const descriptions = t3Tools.reduce((sum, tool) => sum + valueText(tool.description).length, 0);
   const schemas = JSON.stringify(t3Tools).length;
   return [
-    `- T3 context: system text ${size((isCodex(model) ? JSON.stringify(buildCodexAdditionalContext({ model }, { browser: true, device: true })) : t3SystemAppend(model)).length)}`,
+    `- T4 Code context: system text ${size((isCodex(model) ? JSON.stringify(buildCodexAdditionalContext({ model }, { browser: true, device: true, computerUse: true })) : t3SystemAppend(model)).length)}`,
     `tool descriptions ${size(descriptions)}`,
     `full tool schemas ${size(schemas)} across ${t3Tools.length} tools.`,
   ].join(", ");
@@ -499,9 +507,9 @@ export const buildBase = (
     readonly keepUserInstructions: boolean;
     readonly subagent?: boolean;
     readonly links?: boolean;
-    /** A native subagent starts from its task: T3 appends nothing to its system prompt. */
+    /** A native subagent starts from its task: T4 Code appends nothing to its system prompt. */
     readonly nativeSubagent?: boolean;
-    /** false: the thread has no agent device access, so T3's text leaves devices out. */
+    /** false: the thread has no agent device access, so T4 Code's text leaves devices out. */
     readonly deviceAccess?: boolean;
   },
 ) => {
@@ -530,7 +538,7 @@ export const buildBase = (
   const anonymize = (value: string) =>
     home === undefined ? value : value.replaceAll(home, home.replace(/[^/]+$/, "user"));
   const system = systemTexts.map((value) => {
-    // T3's append is the tail of its block: runtime info, PR linking, then orchestration.
+    // T4 Code's append is the tail of its block: runtime info, PR linking, then orchestration.
     const at = value.indexOf(RUNTIME_MARKER);
     return anonymize(at === -1 ? value : value.slice(0, at) + append)
       .replace(DEFERRED_LIST, (_, header: string) => `${header}${names}\n`)
@@ -562,7 +570,7 @@ export const buildBase = (
       date: /Today's date is ([\d-]+)/.exec(reminders.join("\n"))?.[1],
     },
     nativeTools: template.tools.filter((tool) => !isT3Name(tool.name)),
-    /** Tools ToolSearch loads: T3 tools from source, and native tools the template only names. */
+    /** Tools ToolSearch loads: T4 Code tools from source, and native tools the template only names. */
     t3,
     deferred: [...t3, ...nativeDeferred.map((name) => ({ name, ...nativeSchema(name) }))],
   };
@@ -570,7 +578,7 @@ export const buildBase = (
 
 type Base = ReturnType<typeof buildBase> & {
   readonly codex?: typeof ResponsesRequest.Type;
-  /** What T3's SubagentStart hooks give a native subagent. */
+  /** What T4 Code's SubagentStart hooks give a native subagent. */
   readonly subagentContext?: string;
 };
 
@@ -583,8 +591,10 @@ const buildCodexBase = (
     readonly effort?: string | undefined;
     readonly subagent?: boolean;
     readonly links?: boolean;
-    /** false: the thread has no agent device access, so T3's text leaves devices out. */
+    /** false: the thread has no agent device access, so T4 Code's text leaves devices out. */
     readonly deviceAccess?: boolean;
+    /** false: the thread has no Computer Use access, so T4 Code's text leaves it out. */
+    readonly computerUseAccess?: boolean;
   },
 ): Base => {
   const t3 = visibleT3Tools(options);
@@ -593,8 +603,8 @@ const buildCodexBase = (
       ? item.content.map((block: Block) => valueText(block.text)).join("\n")
       : valueText(item.content);
   const joined = template.input.map(contentText).join("\n");
-  if (!joined.includes("<t3_code_runtime>"))
-    throw new Error("Codex template needs full T3 context.");
+  if (!/<t[34]_code_runtime>/u.test(joined))
+    throw new Error("Codex template needs full T4 Code context.");
   const cwd = /<cwd>(.*?)<\/cwd>/.exec(joined)?.[1] ?? "/home/user/app";
   const home = /^\/(?:home|Users)\/[^/]+/.exec(cwd)?.[0];
   const clean = (s: string) => (home ? s.replaceAll(home, home.replace(/[^/]+$/, "user")) : s);
@@ -607,7 +617,7 @@ const buildCodexBase = (
   // The captured <collaboration_mode> message stays: Codex supplies its own mode text natively.
   const input = template.input.flatMap((item) => {
     const content = contentText(item);
-    if (content.includes("<t3_code_")) return [];
+    if (/<t[34]_code_/u.test(content)) return [];
     if (item.role === "user") {
       const env = /<environment_context>[\s\S]*?<\/environment_context>/.exec(content)?.[0];
       return env ? [message(clean(options.keepUserInstructions ? content : env), "user")] : [];
@@ -620,7 +630,11 @@ const buildCodexBase = (
   });
   const context = buildCodexAdditionalContext(
     { model: options.model, reasoningEffort: effort },
-    { browser: true, device: options.deviceAccess ?? true },
+    {
+      browser: true,
+      device: options.deviceAccess ?? true,
+      computerUse: options.computerUseAccess ?? true,
+    },
   );
   input.push(
     ...Object.entries(context).map(([key, entry]) => message(`<${key}>${entry.value}</${key}>`)),
@@ -700,14 +714,14 @@ const codexMessages = (messages: ReadonlyArray<ApiMessage>): Array<Block> =>
   );
 /** One tool call the shell simulator has answered, or one from the case's prior turns. */
 type ShellEntry = { readonly tool: string; readonly input: unknown; readonly output: string };
-/** PRs T3 links by itself because a shell command created them, as `gh pr create` does. */
+/** PRs T4 Code links by itself because a shell command created them, as `gh pr create` does. */
 const createdPullRequests = ({ tool, input, output }: ShellEntry) =>
   tool === "Bash" && isRecord(input) && typeof input.command === "string"
     ? changeRequestsCreatedBy(input.command, output).map(({ url }) => url)
     : [];
 /**
  * One sample's state. ToolSearch adds loaded schemas to `tools`, like Claude Code. `shell` is the
- * history the simulator keeps consistent with; `linked` and `nextTask` do the same for T3 results.
+ * history the simulator keeps consistent with; `linked` and `nextTask` do the same for T4 Code results.
  */
 type Sample = {
   readonly testCase: McpToolUseCase;
@@ -719,9 +733,9 @@ type Sample = {
   readonly linked: Set<string>;
   readonly codeStore: Record<string, unknown>;
   nextTask: number;
-  /** T3's device tools, once `withDevices` builds them for a world with devices. */
+  /** T4 Code's device tools, once `withDevices` builds them for a world with devices. */
   devices?: DeviceTools;
-  /** T3's results for prior device calls whose case result is "default". */
+  /** T4 Code's results for prior device calls whose case result is "default". */
   readonly priorResults: Map<unknown, string>;
 };
 
@@ -757,8 +771,8 @@ export const makeSample = (testCase: McpToolUseCase, base: Base): Sample => {
 };
 
 /**
- * Builds T3's device tools for a world with devices. Prior device calls whose result is "default"
- * run first, in order and without the case's mocks, so their results and sessions are T3's. As in
+ * Builds T4 Code's device tools for a world with devices. Prior device calls whose result is "default"
+ * run first, in order and without the case's mocks, so their results and sessions are T4 Code's. As in
  * the real flow, device_open starts no agent-device session: one starts at a launcher `open` in the
  * sample's shell history, prior turns included, or where `world.agentDeviceSessions` declares it.
  */
@@ -850,11 +864,13 @@ export const buildMessages = (sample: Sample) => {
       const tool = findTool(base, call.tool);
       if (tool === undefined) throw new Error(`${testCase.id}: unknown prior tool ${call.tool}.`);
       if (call.result === "default" && isDeviceTool(call.tool) && !sample.priorResults.has(call)) {
-        throw new Error(`${testCase.id}: prior ${call.tool} needs T3's result; run withDevices.`);
+        throw new Error(
+          `${testCase.id}: prior ${call.tool} needs T4 Code's result; run withDevices.`,
+        );
       }
       return { ...call, id: `toolu_prior_${nextId++}`, name: tool.name, tool, prior: call };
     });
-    // Prior T3 calls load their schemas first, as in a real deferred session.
+    // Prior T4 Code calls load their schemas first, as in a real deferred session.
     const unloaded = [...new Set(calls.map((call) => call.tool))].filter(
       (tool) => !hasTool(tools, tool.name),
     );
@@ -900,7 +916,7 @@ export const buildMessages = (sample: Sample) => {
   return messages;
 };
 
-// Results for T3 tools a case does not mock. The model ids are public in this repo's catalog.
+// Results for T4 Code tools a case does not mock. The model ids are public in this repo's catalog.
 const claudeModel = (id: string) => ({ id, options: [{ id: "effort", values: EFFORTS }] });
 const codexModel = (id: string) => ({ id, options: [{ id: "reasoningEffort", values: EFFORTS }] });
 // Mirrors the real catalog's main models, so a case's named model is not missing by accident.
@@ -938,7 +954,7 @@ const DEFAULT_THREAD = {
 const HTML_RENDERED =
   "Shown to the reader above your reply. Don't mention or describe the page; reply with only what it doesn't already say.";
 
-/** Pull request identity from a `url` or `repository` plus `number` input, like T3's results. */
+/** Pull request identity from a `url` or `repository` plus `number` input, like T4 Code's results. */
 const pullRequest = (repo: string, input: Readonly<Record<string, unknown>>) => {
   const url = typeof input.url === "string" ? input.url : "";
   const repository =
@@ -952,7 +968,7 @@ const pullRequest = (repo: string, input: Readonly<Record<string, unknown>>) => 
   };
 };
 
-/** A believable T3 result for a tool the case does not mock. */
+/** A believable T4 Code result for a tool the case does not mock. */
 const t3Default = (sample: Sample, name: string, input: Readonly<Record<string, unknown>>) => {
   const pr = () => pullRequest(sample.repo, input);
   switch (name) {
@@ -996,7 +1012,7 @@ const t3Default = (sample: Sample, name: string, input: Readonly<Record<string, 
       return { ...pr(), alreadyLinked };
     }
     case "request_secret": {
-      // T3 names both a ref and a file with 32 hex characters, and keeps files in its secrets dir.
+      // T4 Code names both a ref and a file with 32 hex characters, and keeps files in its secrets dir.
       const id = "5f0c9e2a7b4d4183a6e1c8d2b9f07a64";
       const home =
         /^\/(?:home|Users)\/[^/]+/.exec(sample.base.environment.cwd)?.[0] ?? "/home/user";
@@ -1050,7 +1066,7 @@ const t3Default = (sample: Sample, name: string, input: Readonly<Record<string, 
 /** The machine the fake threads live on. */
 const EVAL_ENVIRONMENT_ID = EnvironmentId.make("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
 
-/** Fields T3 adds to real thread and task results, applied to mocks and defaults alike. */
+/** Fields T4 Code adds to real thread and task results, applied to mocks and defaults alike. */
 const withProductFields = (name: string, value: unknown, child: boolean): unknown => {
   if (!isRecord(value)) return value;
   const linked = (thread: unknown, idKey = "threadId") => {
@@ -1174,7 +1190,7 @@ export const shellRequest = (sample: Sample, call: Omit<ShellEntry, "output">, m
     ...(devices?.describe(shell, typeof command === "string" ? command : undefined) ?? []),
     ...(world?.deviceInvalidCapture
       ? [
-          "T3's device_screenshot gets each capture with adb screencap's multi-display warning ahead of the PNG, so it reports 0×0. agent-device's own screenshot finds the PNG and is unaffected.",
+          "T4 Code's device_screenshot gets each capture with adb screencap's multi-display warning ahead of the PNG, so it reports 0×0. agent-device's own screenshot finds the PNG and is unaffected.",
         ]
       : []),
     ...(context ? [`The agent was told: ${context}`] : []),
@@ -1186,7 +1202,7 @@ export const shellRequest = (sample: Sample, call: Omit<ShellEntry, "output">, m
     max_tokens: 8_000,
     // The "facts" field keeps the simulator's reasoning out of the output the agent sees.
     output_config: { effort: "low", format: { type: "json_schema", schema: SHELL_REPLY_SCHEMA } },
-    // A case with devices also gets agent-device's own CLI, so T3's launchers answer as it does.
+    // A case with devices also gets agent-device's own CLI, so T4 Code's launchers answer as it does.
     system: devices ? `${SHELL_PROMPT}\n\n${AGENT_DEVICE_SHELL}` : SHELL_PROMPT,
     messages: [
       {
@@ -1226,7 +1242,7 @@ type Config = {
 
 /**
  * Output for a command that needs no simulator: a matching shell mock, else, for a plain command
- * on a launcher T3 returned, agent-device's help or its error for a session not yet started.
+ * on a launcher T4 Code returned, agent-device's help or its error for a session not yet started.
  */
 export const cannedOutput = (sample: Sample, command: string) =>
   mockOutput(sample, command) ??
@@ -1289,7 +1305,7 @@ const answerToolCall = Effect.fn("evaluateMcpToolUse.answerToolCall")(function* 
     return loadTools(tools, call.id, found);
   }
   const mock = testCase.setup.mocks?.[name];
-  // T3 answers device calls from the world. A mock that is a T3 device error fails inside T3.
+  // T4 Code answers device calls from the world. A mock that is a T4 Code device error fails inside T4 Code.
   const failure = deviceFailure(mock);
   const fromWorld = mock === undefined || mock === "default" || failure !== undefined;
   if (sample.devices && isT3Name(call.name) && isDeviceTool(name) && fromWorld) {
@@ -1304,7 +1320,7 @@ const answerToolCall = Effect.fn("evaluateMcpToolUse.answerToolCall")(function* 
         : withProductFields(name, mock, testCase.setup.role === "delegated-child"),
     );
   if (isT3Name(call.name)) {
-    // T3 refuses a watch from a delegated child.
+    // T4 Code refuses a watch from a delegated child.
     if (name === "watch_pull_request" && testCase.setup.role === "delegated-child") {
       return failed(SUBAGENT_WATCH_ERROR);
     }
@@ -1825,7 +1841,7 @@ export const summarize = (
   );
   const errorNote = `- Errored: ${errors.map(([id, failed]) => `${id} ×${failed.length}`).join(", ")}. These samples did not finish, even after retries, so pass rates leave them out; tokens they spent are counted.`;
   const nativeNote =
-    "- native-subagent cases are approximate: the harness gives subagents their own system prompt, which this runner does not rebuild. T3's append is left out and its SubagentStart hook context added after the task.";
+    "- native-subagent cases are approximate: the harness gives subagents their own system prompt, which this runner does not rebuild. T4 Code's append is left out and its SubagentStart hook context added after the task.";
   const identityNote = `- The captured Claude Code identity line is replaced with "${NEUTRAL_IDENTITY}"`;
   const finished = rows.filter((row) => row.error === undefined).length;
   return [
@@ -1907,12 +1923,12 @@ const main = Effect.gen(function* () {
       "max-steps": string,
       effort: string,
       "shell-model": { ...string, default: "claude-haiku-5-5" },
-      // T3's text must work for every user, so the captured CLAUDE.md is dropped by default.
+      // T4 Code's text must work for every user, so the captured CLAUDE.md is dropped by default.
       "user-instructions": { ...string, default: "drop" },
       "dry-run": { type: "boolean", default: false },
       "stop-on-regression": { type: "boolean", default: false },
       "regression-budget": string,
-      // Prints the size of T3's text and tool schemas, then exits. Needs no template or key.
+      // Prints the size of T4 Code's text and tool schemas, then exits. Needs no template or key.
       context: { type: "boolean", default: false },
     },
   });
@@ -1961,6 +1977,7 @@ const main = Effect.gen(function* () {
   const buildFor = (
     role: McpToolUseCase["setup"]["role"],
     deviceAccess: boolean,
+    computerUseAccess: boolean,
     links: boolean,
   ): Effect.Effect<Base, Schema.SchemaError> =>
     codex
@@ -1973,6 +1990,7 @@ const main = Effect.gen(function* () {
               subagent: role === "delegated-child",
               links,
               deviceAccess,
+              computerUseAccess,
             }),
           ),
         )
@@ -1995,18 +2013,22 @@ const main = Effect.gen(function* () {
         );
   // Codex has no native subagents; its cases with that role run as top-level threads.
   const baseKey = ({ setup }: McpToolUseCase) =>
-    `${codex && setup.role === "native-subagent" ? "top" : setup.role}:${setup.world?.deviceAgentAccess !== false}:${setup.linkedEnvironments === true}`;
-  const base = yield* buildFor("top", true, false);
-  const bases = new Map<string, Base>([["top:true:false", base]]);
+    `${codex && setup.role === "native-subagent" ? "top" : setup.role}:${setup.world?.deviceAgentAccess !== false}:${setup.world?.computerUseAccess !== false}:${setup.linkedEnvironments === true}`;
+  const base = yield* buildFor("top", true, true, false);
+  const bases = new Map<string, Base>([["top:true:true:false", base]]);
   for (const testCase of selected) {
     const key = baseKey(testCase);
     if (bases.has(key)) continue;
-    const [role = "top", access, links] = key.split(":") as [
+    const [role = "top", access, computerUse, links] = key.split(":") as [
       McpToolUseCase["setup"]["role"],
       string,
       string,
+      string,
     ];
-    bases.set(key, yield* buildFor(role, access === "true", links === "true"));
+    bases.set(
+      key,
+      yield* buildFor(role, access === "true", computerUse === "true", links === "true"),
+    );
   }
   const baseFor = (testCase: McpToolUseCase) => bases.get(baseKey(testCase)) ?? base;
   const effort = flags.effort ?? base.codex?.reasoning.effort ?? "high";

@@ -396,13 +396,13 @@ describe("ThreadLiveEventCoalescer", () => {
           const serializedBytes = (events: ReadonlyArray<ThreadEvent>) =>
             events.reduce((sum, event) => sum + Buffer.byteLength(encodeEvent(event)), 0);
           yield* coalescer.offerAll(first);
-          yield* TestClock.adjust("40 millis");
+          yield* TestClock.adjust("20 millis");
           yield* coalescer.offerAll(latest);
           expect(yield* coalescer.usage).toEqual({
             retainedItems: 4,
             retainedSerializedBytes: serializedBytes([...first, ...latest]),
           });
-          yield* TestClock.adjust("10 millis");
+          yield* TestClock.adjust("5 millis");
           const expectedUsage = {
             retainedItems: 2,
             retainedSerializedBytes: serializedBytes(latest),
@@ -414,7 +414,7 @@ describe("ThreadLiveEventCoalescer", () => {
 
           const next = [makeStreamingMessage(5), makeTextItem(6)];
           yield* coalescer.offerAll(next);
-          yield* TestClock.adjust("50 millis");
+          yield* TestClock.adjust("25 millis");
           expect(yield* pull).toEqual(next);
           yield* coalescer.end;
           yield* pull.pipe(Effect.result);

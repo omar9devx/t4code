@@ -61,6 +61,29 @@ describe("resolveComposerMenuSelection", () => {
   });
 });
 
+describe("plugin mention selection", () => {
+  it("inserts the provider plugin id into the prompt", () => {
+    expect(
+      resolveComposerCommandSelection({
+        draftMessage: "Review ^git",
+        trigger: { rangeStart: 7, rangeEnd: 11 },
+        item: {
+          id: "plugin:publisher/reviewer",
+          type: "plugin",
+          plugin: { id: "publisher/reviewer", name: "reviewer" },
+          label: "Code Review",
+          description: "Review code changes",
+        },
+        allowInteractionMode: true,
+      }),
+    ).toEqual({
+      text: "Review ^publisher/reviewer ",
+      cursor: 27,
+      interactionMode: null,
+    });
+  });
+});
+
 describe("mobile slash commands", () => {
   const antigravity = {
     driver: ProviderDriverKind.make("antigravity"),
@@ -94,7 +117,7 @@ describe("mobile slash commands", () => {
     },
   );
 
-  it("still applies the T3 plan command for supported providers", () => {
+  it("still applies the T4 Code plan command for supported providers", () => {
     const items = buildComposerSlashCommandItems({
       query: "plan",
       atMessageStart: true,
@@ -106,7 +129,7 @@ describe("mobile slash commands", () => {
       },
     });
     const item = items[0];
-    if (!item) throw new Error("Expected the T3 plan command");
+    if (!item) throw new Error("Expected the T4 Code plan command");
     expect(
       resolveComposerCommandSelection({
         draftMessage: "/plan",

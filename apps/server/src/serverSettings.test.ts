@@ -97,6 +97,26 @@ const recordProviderUsage = (provider: string, instanceId: string | null = provi
   });
 
 it.layer(NodeServices.layer)("server settings", (it) => {
+  it.effect("persists a partial computer use permission update", () =>
+    Effect.gen(function* () {
+      const config = yield* ServerConfig.ServerConfig;
+      const fs = yield* FileSystem.FileSystem;
+      const service = yield* ServerSettingsModule.ServerSettingsService;
+
+      const settings = yield* service.updateSettings({ computerUsePermissions: { pointer: true } });
+      assert.deepStrictEqual(settings.computerUsePermissions, {
+        screen: false,
+        pointer: true,
+        click: false,
+        keyboard: false,
+      });
+      const persisted = yield* decodeServerSettingsJson(
+        yield* fs.readFileString(config.settingsPath),
+      );
+      assert.deepStrictEqual(persisted.computerUsePermissions, settings.computerUsePermissions);
+    }).pipe(Effect.provide(layerServerSettings())),
+  );
+
   it.effect("serializes concurrent model preference edits without cancelling duplicate adds", () =>
     Effect.gen(function* () {
       const service = yield* ServerSettingsModule.ServerSettingsService;

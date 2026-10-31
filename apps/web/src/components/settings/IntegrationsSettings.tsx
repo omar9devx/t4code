@@ -46,6 +46,7 @@ import { previewBridge } from "~/components/preview/previewBridge";
 import { cn, randomUUID } from "~/lib/utils";
 import { useEnvironments, usePrimaryEnvironment } from "~/state/environments";
 import { deviceEnvironment, useDeviceState } from "~/state/device";
+import { computerUseEnvironment } from "~/state/computerUse";
 import { readEnvironmentScope, useEnvironmentScope } from "~/state/session";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { formatEnvironmentQueryError } from "~/state/query";
@@ -625,7 +626,7 @@ function BrowserRecordingFrameRateSetting({ disabled }: { readonly disabled: boo
 
 const LINK_TARGET_LABELS: Readonly<Record<BrowserLinkTarget, string>> = {
   system: "Your default browser",
-  app: "T3 Code",
+  app: "T4 Code",
 };
 
 function BrowserLinkTargetSetting({ disabled }: { readonly disabled: boolean }) {
@@ -762,11 +763,11 @@ export function PullRequestLinksOpenInAppSetting() {
   return (
     <SettingsRow
       {...searchableSetting("pull-request-links-open-in-app")}
-      description="Clicking a pull request link opens it in T3 Code. Turn off to open pull request links like any other link, on your git host."
+      description="Clicking a pull request link opens it in T4 Code. Turn off to open pull request links like any other link, on your git host."
       resetAction={
         openInApp ? null : (
           <SettingResetButton
-            label="open pull requests in T3 Code"
+            label="open pull requests in T4 Code"
             onClick={() => updateSettings({ pullRequestLinksOpenInApp: true })}
           />
         )
@@ -777,7 +778,7 @@ export function PullRequestLinksOpenInAppSetting() {
           onCheckedChange={(checked) =>
             updateSettings({ pullRequestLinksOpenInApp: Boolean(checked) })
           }
-          aria-label="Open pull requests in T3 Code"
+          aria-label="Open pull requests in T4 Code"
         />
       }
     />
@@ -807,6 +808,179 @@ function DeviceIntegrationSettings() {
         supportsSimlock={state.supportsSimlockHosts === true}
       />
     </>
+  );
+}
+
+function ComputerUseIntegrationSettings() {
+  const settings = useScopedSettings();
+  const updateSettings = useUpdateScopedSettings();
+  const { environment, scope } = useSettingsScope();
+  const connected =
+    environment?.connection.phase === "connected" && environment.serverConfig !== null;
+  const environmentId = connected ? environment.environmentId : null;
+  const canConfigure = useEnvironmentScope(environmentId, AuthSettingsWriteScope);
+  const environmentOnly = scope.kind !== "project" && scope.kind !== "checkout";
+  const baseDisabled = !connected || !canConfigure || !environmentOnly;
+  const selectScreen = useAtomCommand(computerUseEnvironment.selectScreen, {
+    reportFailure: false,
+  });
+  const [selectingScreen, setSelectingScreen] = useState(false);
+
+  const chooseScreen = async () => {
+    if (!environmentId || selectingScreen) return;
+    setSelectingScreen(true);
+    const result = await selectScreen({ environmentId, input: undefined });
+    setSelectingScreen(false);
+    if (result._tag === "Failure") {
+      toastManager.add({
+        type: "error",
+        title: "Screen access not granted",
+        description: formatEnvironmentQueryError(result.cause),
+      });
+      return;
+    }
+    toastManager.add({ type: "success", title: "Screen selected" });
+  };
+
+  return (
+    <SettingsSection id="computer-use" title="Computer Use">
+      <SettingsRow
+        {...searchableSetting("computer-use")}
+        serverScoped
+        settingKeys={["enableComputerUseSupport"]}
+        description="Let agents see and control the desktop hosted by this environment. The operating system will ask you to approve screen and input access."
+        control={
+          <ScopedSwitch
+            settingKeys={["enableComputerUseSupport"]}
+            checked={settings.enableComputerUseSupport}
+            disabled={baseDisabled}
+            aria-label="Enable Computer Use"
+            onCheckedChange={(checked) =>
+              updateSettings({ enableComputerUseSupport: Boolean(checked) })
+            }
+          />
+        }
+      />
+      <SettingsRow
+        {...searchableSetting("agent-computer-use-access")}
+        serverScoped
+        settingKeys={["enableAgentComputerUseAccess"]}
+        description="Allow new agent sessions to use Computer Use. Start a new agent session after enabling this; existing sessions keep their original tool access. The desktop permission prompt lets you choose a screen on first use."
+        control={
+          <ScopedSwitch
+            settingKeys={["enableAgentComputerUseAccess"]}
+            checked={settings.enableAgentComputerUseAccess}
+            disabled={baseDisabled || !settings.enableComputerUseSupport}
+            aria-label="Agent Computer Use access"
+            onCheckedChange={(checked) =>
+              updateSettings({ enableAgentComputerUseAccess: Boolean(checked) })
+            }
+          />
+        }
+      />
+      <SettingsRow
+        {...searchableSetting("computer-use-approval-mode")}
+        serverScoped
+        settingKeys={["computerUseApprovalMode"]}
+        title="Agent action approval"
+        description="Choose when Computer Use actions need your approval in the conversation. Existing action permissions still apply; providers that cannot request approval are denied."
+        control={
+          <Select
+            value={settings.computerUseApprovalMode}
+            onValueChange={(value) => {
+              if (
+                value === "always-allow" ||
+                value === "always-ask" ||
+                value === "allow-move-and-screenshot"
+              ) {
+                updateSettings({ computerUseApprovalMode: value });
+              }
+            }}
+            disabled={baseDisabled || !settings.enableComputerUseSupport}
+          >
+            <SelectTrigger size="sm" className="w-full sm:w-64" aria-label="Agent action approval">
+              <SelectValue>
+                {
+                  {
+                    "always-allow": "Always allow",
+                    "always-ask": "Always ask",
+                    "allow-move-and-screenshot": "Ask except move and screenshot",
+                  }[settings.computerUseApprovalMode]
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end" alignItemWithTrigger={false}>
+              <SelectItem value="always-allow">Always allow</SelectItem>
+              <SelectItem value="always-ask">Always ask</SelectItem>
+              <SelectItem value="allow-move-and-screenshot">
+                Ask except move and screenshot
+              </SelectItem>
+            </SelectPopup>
+          </Select>
+        }
+      />
+      {(
+        [
+          ["screen", "Read the selected screen", "Send screen images to the agent."],
+          ["pointer", "Move the pointer", "Allow pointer movement on the selected screen."],
+          [
+            "click",
+            "Click, double-click, and drag",
+            "Allow button presses and dragging on the selected screen. Dragging also requires pointer access.",
+          ],
+          ["keyboard", "Use the keyboard", "Allow typing text and pressing supported keys."],
+        ] as const
+      ).map(([permission, label, description]) => (
+        <SettingsRow
+          key={permission}
+          serverScoped
+          settingKeys={["computerUsePermissions"]}
+          title={label}
+          description={description}
+          control={
+            <div className="flex items-center gap-2">
+              {permission === "screen" ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={
+                    baseDisabled ||
+                    selectingScreen ||
+                    !settings.enableComputerUseSupport ||
+                    !settings.enableAgentComputerUseAccess ||
+                    !settings.computerUsePermissions.screen
+                  }
+                  onClick={() => void chooseScreen()}
+                >
+                  {selectingScreen ? "Choose on desktop…" : "Choose screen…"}
+                </Button>
+              ) : null}
+              <Switch
+                checked={settings.computerUsePermissions[permission]}
+                disabled={
+                  baseDisabled ||
+                  !settings.enableComputerUseSupport ||
+                  ((permission === "pointer" || permission === "click") &&
+                    !settings.computerUsePermissions.screen)
+                }
+                aria-label={label}
+                onCheckedChange={(checked) =>
+                  updateSettings({
+                    computerUsePermissions: {
+                      [permission]: Boolean(checked),
+                    },
+                  })
+                }
+              />
+            </div>
+          }
+        />
+      ))}
+      <p className="px-1 text-xs text-muted-foreground">
+        Linux Wayland uses the system's XDG permission dialog to select one display and approve the
+        requested input devices. Computer Use stays off until you enable it here.
+      </p>
+    </SettingsSection>
   );
 }
 
@@ -1591,6 +1765,7 @@ export function DevicesSettingsPanel() {
   return (
     <SettingsPageContainer>
       <DeviceIntegrationSettings />
+      <ComputerUseIntegrationSettings />
     </SettingsPageContainer>
   );
 }

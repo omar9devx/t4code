@@ -208,7 +208,7 @@ export function codexProviderTurnTokenUsage(
     updatedAt,
   };
 }
-const CODEX_ASSISTANT_DELTA_FLUSH_INTERVAL_MS = 50;
+const CODEX_ASSISTANT_DELTA_FLUSH_INTERVAL_MS = 25;
 // Plan flushes store three copies; use the client's assistant-text cadence.
 const CODEX_PLAN_DELTA_FLUSH_INTERVAL_MS = 400;
 const CodexBackgroundTerminalTerminateResponse = Schema.Struct({
@@ -419,6 +419,15 @@ function codexItemStatus(status: "inProgress" | "completed" | "failed" | "declin
  */
 function codexSkillMentionText(text: string): string {
   return text.replace(SKILL_MENTION_PATTERN, "$1$$$2");
+}
+
+const CODEX_PLUGIN_MENTION_PATTERN = /(^|\s)\^([a-zA-Z0-9][a-zA-Z0-9@:_-]*)(?=\s|$)/gu;
+
+function codexPluginMentionText(text: string): string {
+  return text.replace(
+    CODEX_PLUGIN_MENTION_PATTERN,
+    '$1Use the installed Codex plugin "$2" for this request.',
+  );
 }
 
 const BACKGROUND_COMMAND_DETAIL_COMMAND_MAX_LENGTH = 200;
@@ -745,6 +754,7 @@ export const buildCodexTurnStartParams = Effect.fn("CodexAdapterV2.buildCodexTur
     readonly hasT3Mcp?: boolean;
     readonly browserToolsAvailable?: boolean;
     readonly deviceToolsAvailable?: boolean;
+    readonly computerUseToolsAvailable?: boolean;
     /** ChatGPT token sharing does not accept service tiers. */
     readonly omitServiceTier?: boolean;
     readonly appContext?: ProviderAdapter.ProviderAdapterV2TurnInput["appContext"];
@@ -781,6 +791,7 @@ export const buildCodexTurnStartParams = Effect.fn("CodexAdapterV2.buildCodexTur
             {
               browser: input.browserToolsAvailable ?? true,
               device: input.deviceToolsAvailable ?? false,
+              computerUse: input.computerUseToolsAvailable ?? false,
             },
           )
         : undefined;
@@ -1330,7 +1341,7 @@ export const CODEX_THREAD_CONFIG = {
   mcp_optional_startup_grace_ms: 10_000,
 } as const;
 
-// T3 waits can block for an hour; keep Codex's MCP timeout above that.
+// T4 Code waits can block for an hour; keep Codex's MCP timeout above that.
 const CODEX_T3_MCP_TOOL_TIMEOUT_SEC = 65 * 60;
 
 function codexThreadRuntimeParams(input: {
@@ -1351,7 +1362,7 @@ function codexThreadRuntimeParams(input: {
       ...(mcpSession === undefined
         ? {}
         : {
-            // Override only T3's server so launch-argument MCP servers survive.
+            // Override only T4 Code's server so launch-argument MCP servers survive.
             "mcp_servers.t3-code": {
               url: mcpSession.endpoint,
               tool_timeout_sec: CODEX_T3_MCP_TOOL_TIMEOUT_SEC,
@@ -1749,7 +1760,7 @@ export const makeCodexAdapterV2 = Effect.fn("makeCodexAdapterV2")(function* (
               return yield* new ProviderSetupError({
                 instanceId: adapterOptions.instanceId,
                 operation: "runtime",
-                detail: `Codex ${version} does not work with this T3 Code release. Update Codex to ${target}, then retry.`,
+                detail: `Codex ${version} does not work with this T4 Code release. Update Codex to ${target}, then retry.`,
               });
             }
             yield* client.notify("initialized", undefined);
@@ -3223,7 +3234,7 @@ export const makeCodexAdapterV2 = Effect.fn("makeCodexAdapterV2")(function* (
         ) {
           const inputItems: Array<CodexSchema.V2TurnStartParams__UserInput> = [];
           const text = yield* providerMessageTextWithAttachmentPaths({
-            text: codexSkillMentionText(turnInput.message.text),
+            text: codexPluginMentionText(codexSkillMentionText(turnInput.message.text)),
             attachments: turnInput.message.attachments,
             resolveExtractedTextPath: (path) =>
               DocumentText.resolveExtractedTextPath(path).pipe(
@@ -6650,6 +6661,7 @@ export const makeCodexAdapterV2 = Effect.fn("makeCodexAdapterV2")(function* (
               hasT3Mcp: mcpSession !== undefined,
               browserToolsAvailable: mcpSession?.browserToolsAvailable ?? true,
               deviceToolsAvailable: mcpSession?.capabilities?.has("device") ?? false,
+              computerUseToolsAvailable: mcpSession?.capabilities?.has("computer-use") ?? false,
               omitServiceTier: adapterOptions.resolveRuntime !== undefined,
               ...(turnInput.appContext === undefined ? {} : { appContext: turnInput.appContext }),
             });

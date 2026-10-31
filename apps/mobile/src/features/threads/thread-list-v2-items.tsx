@@ -14,6 +14,7 @@ import { appAtomRegistry } from "../../state/atom-registry";
 import { threadArrangementOpenAtom } from "../../state/thread-order";
 import { threadEnvironment } from "../../state/threads";
 import { useAtomCommand } from "../../state/use-atom-command";
+import { orchestrationEnvironment } from "../../state/orchestration";
 import { useVisibleSecondClock } from "./use-visible-second-clock";
 import type { ThreadMoveDestination } from "./threadOrder";
 import type {
@@ -43,8 +44,10 @@ import { ProjectFavicon } from "../../components/ProjectFavicon";
 import { ProviderIcon, ProviderInstanceIcon } from "../../components/ProviderIcon";
 import { useNowAfter } from "../../lib/clock";
 import { cn } from "../../lib/cn";
-import { copyTextWithHaptic } from "../../lib/copyTextWithHaptic";
+import { copyTextWithHaptic, tryCopyTextWithHaptic } from "../../lib/copyTextWithHaptic";
 import { copyThreadReference } from "../../lib/copyThreadReference";
+import { threadTranscriptMarkdown } from "@t3tools/shared/threadTranscriptMarkdown";
+import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import { useUniwindTheme } from "../../lib/useUniwindTheme";
 import { useEnvironmentScope } from "../../state/session";
 import type { PendingNewTask } from "../../state/use-pending-new-tasks";
@@ -700,6 +703,9 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
   const timeLabel = props.timeLabel;
 
   const visitThread = useAtomCommand(threadEnvironment.visit, { reportFailure: false });
+  const loadThreadTranscript = useAtomCommand(orchestrationEnvironment.threadTranscript, {
+    reportFailure: false,
+  });
   const handleAcknowledgeWoke = useCallback(() => {
     if (props.wokeAt === null) return;
     void visitThread({
@@ -951,6 +957,26 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
       if (nativeEvent.event === "copy-thread-id") {
         copyTextWithHaptic(thread.id, { target: "thread-id" });
       }
+      if (nativeEvent.event === "copy-transcript") {
+        void (async () => {
+          const result = await loadThreadTranscript({
+            environmentId: thread.environmentId,
+            input: { threadId: thread.id },
+          });
+          if (result._tag !== "Success") {
+            const error = squashAtomCommandFailure(result);
+            Dialog.alert(
+              "Could not copy conversation",
+              error instanceof Error ? error.message : "Try again when connected.",
+            );
+            return;
+          }
+          const copied = await tryCopyTextWithHaptic(threadTranscriptMarkdown(result.value), {
+            target: "conversation",
+          });
+          if (!copied) Dialog.alert("Could not copy conversation", "Try again when connected.");
+        })();
+      }
       if (nativeEvent.event === "delete") handleDelete();
       if (nativeEvent.event === "snooze:custom") {
         setCustomSnoozeOpen(true);
@@ -990,6 +1016,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
       setCustomSnoozeOpen,
       snoozePresets,
       props.snoozePresets,
+      loadThreadTranscript,
     ],
   );
   const primaryAction = useMemo(() => {
@@ -1400,7 +1427,21 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
     );
 
   if (!canOperateThread)
-    return <View style={rowAppearance.swipeContainerStyle}>{rowContent(() => {})}</View>;
+    return (
+      <View style={rowAppearance.swipeContainerStyle}>
+        <Menu
+          actions={[
+            { id: "copy-thread", title: "Copy thread", image: "text.bubble" },
+            { id: "copy-transcript", title: "Copy conversation (Markdown)", image: "doc.text" },
+            { id: "copy-thread-id", title: "Copy thread ID", image: "doc.on.doc" },
+          ]}
+          onPressAction={handleMenuAction}
+          shouldOpenOnLongPress
+        >
+          {rowContent(() => {})}
+        </Menu>
+      </View>
+    );
 
   return (
     <View collapsable={false}>
@@ -1438,6 +1479,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
                   ]
                 : []),
               { id: "copy-thread", title: "Copy thread", image: "text.bubble" },
+              { id: "copy-transcript", title: "Copy conversation (Markdown)", image: "doc.text" },
               { id: "copy-thread-id", title: "Copy thread ID", image: "doc.on.doc" },
               ...(snoozedRow
                 ? snoozedMenuActions

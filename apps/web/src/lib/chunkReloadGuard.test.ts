@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 
-import { clearChunkReloadGuard, reloadOnceForChunkLoadError } from "./chunkReloadGuard";
+import {
+  clearChunkReloadGuard,
+  isDynamicImportLoadError,
+  reloadOnceForChunkLoadError,
+} from "./chunkReloadGuard";
 
 function createStorageStub(): Storage {
   const store = new Map<string, string>();
@@ -52,5 +56,23 @@ describe("reloadOnceForChunkLoadError", () => {
     expect(reloadOnceForChunkLoadError(blocked, reload)).toBe(false);
     expect(reload).not.toHaveBeenCalled();
     expect(() => clearChunkReloadGuard(blocked)).not.toThrow();
+  });
+});
+
+describe("isDynamicImportLoadError", () => {
+  it("recognizes browser module fetch errors from the bootstrap import", () => {
+    expect(
+      isDynamicImportLoadError(
+        new TypeError("Failed to fetch dynamically imported module: /src/main.tsx"),
+      ),
+    ).toBe(true);
+    expect(isDynamicImportLoadError(new TypeError("Importing a module script failed."))).toBe(true);
+  });
+
+  it("does not reload for unrelated startup failures", () => {
+    expect(isDynamicImportLoadError(new TypeError("Failed to fetch /api/settings"))).toBe(false);
+    expect(isDynamicImportLoadError(new Error("Failed to fetch dynamically imported module"))).toBe(
+      false,
+    );
   });
 });

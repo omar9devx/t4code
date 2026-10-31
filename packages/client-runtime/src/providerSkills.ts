@@ -4,6 +4,7 @@ import {
   PROVIDER_WORKSPACE_SNAPSHOT_TTL_MS,
   type ProviderInstanceId,
   type ServerProvider,
+  type ServerProviderPlugin,
   type ServerProviderSkill,
   type ServerProviderSlashCommand,
 } from "@t3tools/contracts";
@@ -95,6 +96,13 @@ function resolveProviderWorkspaceSnapshot(
 ) {
   if (!cwd) return undefined;
   return provider.workspaceSnapshots?.find((snapshot) => snapshot.cwd === cwd);
+}
+
+export function resolveProviderPluginsForCwd(
+  provider: ServerProvider,
+  cwd: string | null | undefined,
+): ReadonlyArray<ServerProviderPlugin> {
+  return resolveProviderWorkspaceSnapshot(provider, cwd)?.plugins ?? [];
 }
 
 export function hasCompleteProviderWorkspaceSnapshot(

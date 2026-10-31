@@ -34,11 +34,10 @@ const managedAuthShellModule =
       : import("./components/clerk/BrowserManagedAuthShell")
     : null;
 
-export const startup = Promise.all([
-  managedAuthShellModule?.then((module) => module.default) ?? null,
-  router.load(),
-])
-  .then(([ManagedAuthShell]) => {
+export const startup = (
+  managedAuthShellModule?.then((module) => module.default) ?? Promise.resolve(null)
+)
+  .then((ManagedAuthShell) => {
     // Route chunk failures resolve router.load() and surface later through the error boundary.
     if (reloadScheduled) return;
     if (!chunkLoadFailed) clearChunkReloadGuard();
@@ -51,8 +50,27 @@ export const startup = Promise.all([
         )}
       </React.StrictMode>,
     );
+    scheduleBackgroundServices(router);
   })
   .catch((error: unknown) => {
     if (reloadScheduled) return;
     throw error;
   });
+
+function scheduleBackgroundServices(router: ReturnType<typeof startAppServices>): void {
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    window.setTimeout(() => {
+      void import("./appBackgroundInit")
+        .then(({ startBackgroundAppServices }) => startBackgroundAppServices(router))
+        .catch((error: unknown) => {
+          console.error("Could not start background app services.", error);
+        });
+    }, 0);
+  };
+
+  window.requestAnimationFrame(start);
+  window.setTimeout(start, 250);
+}

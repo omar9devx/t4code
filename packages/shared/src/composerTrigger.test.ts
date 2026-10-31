@@ -42,6 +42,17 @@ describe("detectComposerTrigger", () => {
     });
   });
 
+  it("detects a provider plugin mention and preserves the token range", () => {
+    const text = "Use ^github for this";
+    expect(detectComposerTrigger(text, 11)).toEqual({
+      kind: "plugin",
+      query: "github",
+      rangeStart: 4,
+      rangeEnd: 11,
+    });
+    expect(detectComposerTrigger("prefix^github", 13)).toBeNull();
+  });
+
   it.each([
     "budget $9.99",
     "only $.99",

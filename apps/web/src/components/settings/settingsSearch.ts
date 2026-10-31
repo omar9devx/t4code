@@ -846,6 +846,27 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: ["allow simulator emulator ios android drive tools sessions"],
   },
   {
+    id: "computer-use",
+    title: "Computer Use",
+    to: "/settings/devices",
+    targetId: "computer-use",
+    searchTerms: ["desktop screen mouse pointer click keyboard control computer access"],
+  },
+  {
+    id: "agent-computer-use-access",
+    title: "Agents can use this computer",
+    to: "/settings/devices",
+    targetId: "computer-use",
+    searchTerms: ["desktop screen mouse pointer click keyboard agent permission"],
+  },
+  {
+    id: "computer-use-approval-mode",
+    title: "Computer Use approval",
+    to: "/settings/devices",
+    targetId: "computer-use",
+    searchTerms: ["computer use actions always allow always ask confirm approval prompts"],
+  },
+  {
     id: "device-hub",
     title: "Use devices",
     to: "/settings/devices",
@@ -920,7 +941,7 @@ export const SETTINGS_SEARCH_ITEMS = [
   },
   {
     id: "pull-request-links-open-in-app",
-    title: "Open pull requests in T3 Code",
+    title: "Open pull requests in T4 Code",
     to: "/settings/diffs",
     searchTerms: [
       `pr commit links ${SOURCE_CONTROL_HOST_LABELS} browser external click default pull request view panel`,

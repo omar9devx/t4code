@@ -24,7 +24,10 @@ import {
 import { stackedThreadToast, toastManager } from "../components/ui/toast";
 import { copyThreadReference } from "../lib/copyThreadReference";
 import { threadChipCopyTarget } from "@t3tools/client-runtime/thread-reference";
+import { threadTranscriptMarkdown } from "@t3tools/shared/threadTranscriptMarkdown";
 import { threadEnvironment } from "../state/threads";
+import { orchestrationEnvironment } from "../state/orchestration";
+import { useAtomCommand } from "../state/use-atom-command";
 import { useOrchestrationCommand } from "../state/use-orchestration-command";
 import { readEnvironmentScope } from "../state/session";
 import {
@@ -90,6 +93,9 @@ export function useThreadActionMenu(input: {
   const updateThreadMetadata = useOrchestrationCommand(threadEnvironment.updateMetadata, {
     reportFailure: false,
   });
+  const loadThreadTranscript = useAtomCommand(orchestrationEnvironment.threadTranscript, {
+    reportFailure: false,
+  });
   const handleNewThread = useNewThreadHandler();
   const confirmThreadDelete = useClientSettings((s) => s.confirmThreadDelete);
   const confirmThreadArchive = useClientSettings((s) => s.confirmThreadArchive);
@@ -112,6 +118,16 @@ export function useThreadActionMenu(input: {
       toastManager.add({ type: "success", title: "Thread ID copied", description: threadId });
     },
     onError: (error) => failureToast("Failed to copy thread ID", error),
+  });
+  const { copyToClipboard: copyTranscriptToClipboard } = useCopyToClipboard<{ title: string }>({
+    target: "conversation",
+    onCopy: ({ title }) =>
+      toastManager.add({
+        type: "success",
+        title: "Conversation copied as Markdown",
+        description: title,
+      }),
+    onError: (error) => failureToast("Failed to copy conversation", error),
   });
 
   const openMenu = (position: { x: number; y: number }) => {
@@ -297,6 +313,22 @@ export function useThreadActionMenu(input: {
         case "copy-thread":
           void copyThreadReference(threadChipCopyTarget(threadRef, thread.title));
           return;
+        case "copy-transcript": {
+          const transcript = await loadThreadTranscript({
+            environmentId: threadRef.environmentId,
+            input: { threadId: threadRef.threadId },
+          });
+          if (transcript._tag !== "Success") {
+            if (!isAtomCommandInterrupted(transcript)) {
+              failureToast("Failed to load conversation", squashAtomCommandFailure(transcript));
+            }
+            return;
+          }
+          copyTranscriptToClipboard(threadTranscriptMarkdown(transcript.value), {
+            title: thread.title,
+          });
+          return;
+        }
         case "copy-thread-id":
           copyThreadIdToClipboard(thread.id, { threadId: thread.id });
           return;

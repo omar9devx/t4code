@@ -10,6 +10,7 @@ import * as Result from "effect/Result";
 import * as Schema from "effect/Schema";
 import * as Schedule from "effect/Schedule";
 import * as Scope from "effect/Scope";
+import * as Stream from "effect/Stream";
 import * as Types from "effect/Types";
 import * as ChildProcess from "effect/process/ChildProcess";
 import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner";
@@ -35,7 +36,11 @@ import {
   formatCodexModelName,
 } from "@t3tools/shared/model";
 import { resolveSpawnCommand } from "@t3tools/shared/shell";
-import { codexAppServerArgs, resolveCodexLaunchArgs } from "./codexLaunchArgs.ts";
+import {
+  codexAppServerArgs,
+  codexExecLaunchArgs,
+  resolveCodexLaunchArgs,
+} from "./codexLaunchArgs.ts";
 import {
   buildServerProvider,
   COMPACT_SLASH_COMMAND,
@@ -73,9 +78,9 @@ const CODEX_APP_SERVER_PROBE_FORCE_KILL_AFTER = "2 seconds" as const;
 const CODEX_CATALOG_REFRESH_TIMEOUT_MS = 3_000;
 const CODEX_CONFIG_PROBE_TIMEOUT_MS = 3_000;
 const CODEX_CATALOG_REFRESH_POLL = "100 millis" as const;
-const CODEX_CLIENT_NAME = "T3 Code";
-// Handshake plus account/models/skills requests can exceed the shared 10s probe budget.
-const CODEX_AUTH_PROBE_TIMEOUT_MS = 20_000;
+const CODEX_CLIENT_NAME = "T4 Code";
+// Allow slow app-server startup and optional account, model, skill, and usage discovery to finish.
+const CODEX_AUTH_PROBE_TIMEOUT_MS = 50_000;
 const CODEX_DISCOVERY_MARGIN_MS = 250;
 // `codex-cli 0.159.0`, `codex-cli 0.160.0-alpha.1` or the npm CLI's bare `0.1.4161006`.
 // Keep a prerelease suffix so compatibility stays unknown for it, as it does for `initialize`.
@@ -644,7 +649,65 @@ const probeCodexCliVersion = Effect.fn("probeCodexCliVersion")(
   ),
 );
 
-export const probeCodexSkillsForCwd = Effect.fn("probeCodexSkillsForCwd")(function* (input: {
+function parseCodexPluginList(text: string) {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (typeof parsed !== "object" || parsed === null || !("installed" in parsed)) return [];
+    const installed = parsed.installed;
+    if (!Array.isArray(installed)) return [];
+    return installed.flatMap((entry) => {
+      if (typeof entry !== "object" || entry === null) return [];
+      const plugin = entry as Record<string, unknown>;
+      if (
+        plugin.installed !== true ||
+        plugin.enabled !== true ||
+        typeof plugin.pluginId !== "string" ||
+        typeof plugin.name !== "string"
+      ) {
+        return [];
+      }
+      return [{ id: plugin.pluginId, name: plugin.name }];
+    });
+  } catch {
+    return [];
+  }
+}
+
+const probeCodexPluginsForCwd = Effect.fn("probeCodexPluginsForCwd")(function* (input: {
+  readonly binaryPath: string;
+  readonly homePath?: string;
+  readonly launchArgs?: string;
+  readonly cwd: string;
+  readonly environment?: NodeJS.ProcessEnv;
+}) {
+  const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+  const environment = yield* codexProcessEnvironment(input);
+  const spawnCommand = yield* resolveSpawnCommand(
+    input.binaryPath,
+    [...codexExecLaunchArgs(input.launchArgs), "plugin", "list", "--json"],
+    { env: environment, extendEnv: true },
+  );
+  const child = yield* spawner.spawn(
+    ChildProcess.make(spawnCommand.command, spawnCommand.args, {
+      cwd: input.cwd,
+      env: environment,
+      extendEnv: true,
+      forceKillAfter: CODEX_APP_SERVER_PROBE_FORCE_KILL_AFTER,
+      shell: spawnCommand.shell,
+    }),
+  );
+  const [stdout, , exitCode] = yield* Effect.all(
+    [
+      child.stdout.pipe(Stream.decodeText(), Stream.mkString),
+      child.stderr.pipe(Stream.runDrain),
+      child.exitCode,
+    ],
+    { concurrency: "unbounded" },
+  );
+  return exitCode === 0 ? parseCodexPluginList(stdout) : [];
+}, Effect.scoped);
+
+export const probeCodexWorkspaceForCwd = Effect.fn("probeCodexWorkspaceForCwd")(function* (input: {
   readonly binaryPath: string;
   readonly homePath?: string;
   readonly launchArgs?: string;
@@ -652,8 +715,15 @@ export const probeCodexSkillsForCwd = Effect.fn("probeCodexSkillsForCwd")(functi
   readonly environment?: NodeJS.ProcessEnv;
 }) {
   const { client } = yield* withCodexAppServerClient(input);
-  const skillsResponse = yield* client.request("skills/list", { cwds: [input.cwd] });
-  return parseCodexSkillsListResponse(skillsResponse, input.cwd);
+  const [skillsResponse, plugins] = yield* Effect.all([
+    client.request("skills/list", { cwds: [input.cwd] }),
+    probeCodexPluginsForCwd(input).pipe(
+      Effect.timeoutOption(Duration.seconds(3)),
+      Effect.map(Option.getOrElse(() => [])),
+      Effect.orElseSucceed(() => []),
+    ),
+  ]);
+  return { skills: parseCodexSkillsListResponse(skillsResponse, input.cwd), plugins };
 });
 
 const emptyCodexModelsFromSettings = (codexSettings: CodexSettings): ServerProvider["models"] =>
@@ -677,7 +747,7 @@ const makePendingCodexProvider = Effect.fn("CodexProvider.makePendingCodexProvid
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Codex is disabled in T3 Code settings.",
+        message: "Codex is disabled in T4 Code settings.",
       },
     });
   }
@@ -770,7 +840,7 @@ export const checkCodexProviderStatus = Effect.fn("checkCodexProviderStatus")(fu
         version: null,
         status: "warning",
         auth: { status: "unknown" },
-        message: "Codex is disabled in T3 Code settings.",
+        message: "Codex is disabled in T4 Code settings.",
       },
     });
   }

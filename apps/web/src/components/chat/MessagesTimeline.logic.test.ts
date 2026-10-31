@@ -147,7 +147,7 @@ describe("deriveMessagesTimelineRows", () => {
       toolSource: { key: "mcp:node_repl", name: "node repl", kind: "integration" as const },
       input: {
         title: "Restrict the breakpoint to Git actions",
-        code: "await sky.type_text({app:'T3 Code (Nightly)',text:'debug(ga.run)'});",
+        code: "await sky.type_text({app:'T4 Code (Nightly)',text:'debug(ga.run)'});",
       },
     };
     const entries = deriveTimelineEntriesFromVisibleTurnItems({
@@ -1786,11 +1786,12 @@ describe("deriveMessagesTimelineRows", () => {
       supportsConversationRollback: false,
     });
 
-    expect(rows.map((row) => row.kind)).toEqual(["working", "work-live"]);
+    expect(rows.map((row) => row.kind)).toEqual(["working", "work-live", "work"]);
     expect(rows.some((row) => row.kind === "thinking")).toBe(false);
     expect(rows.find((row) => row.kind === "work-live")).toMatchObject({
       entry: { id: "running-command" },
       active: true,
+      expanded: true,
       groupedEntries: [
         { id: "running-command" },
         { id: "completed-edit" },
@@ -1942,6 +1943,7 @@ describe("deriveMessagesTimelineRows", () => {
       "user:resume",
       "working",
       "work-live",
+      "work",
     ]);
 
     expect(shape(rows({ resume: "failed", working: false }))).toEqual([
@@ -2069,6 +2071,7 @@ describe("deriveMessagesTimelineRows", () => {
       "work:before",
       "work:question",
       "work-live:after + running",
+      "work:after + running",
     ]);
   });
 
@@ -2262,7 +2265,13 @@ describe("deriveMessagesTimelineRows", () => {
       supportsConversationRollback: false,
     });
 
-    expect(rows.map((row) => row.kind)).toEqual(["working", "work-live", "message", "work-live"]);
+    expect(rows.map((row) => row.kind)).toEqual([
+      "working",
+      "work-live",
+      "message",
+      "work-live",
+      "work",
+    ]);
     expect(rows.filter((row) => row.kind === "work-live").map((row) => row.entry.id)).toEqual([
       "first-running",
       "second-running",
@@ -2363,9 +2372,11 @@ describe("deriveMessagesTimelineRows", () => {
     const deriveRows = (
       toolLifecycleStatus: "inProgress" | "completed" | "failed" | "declined" | null,
       expandedWorkGroupIds?: ReadonlySet<string>,
+      collapsedWorkGroupIds?: ReadonlySet<string>,
     ) =>
       deriveMessagesTimelineRows({
         ...(expandedWorkGroupIds ? { expandedWorkGroupIds } : {}),
+        ...(collapsedWorkGroupIds ? { collapsedWorkGroupIds } : {}),
         timelineEntries:
           toolLifecycleStatus === null
             ? []
@@ -2409,8 +2420,19 @@ describe("deriveMessagesTimelineRows", () => {
     const completedActivityRow = completedRows.find((row) => row.id === "live-activity-row");
 
     expect(initialActivityRow).toMatchObject({ kind: "thinking" });
-    expect(runningActivityRow).toMatchObject({ kind: "work-live", active: true });
-    expect(completedActivityRow).toMatchObject({ kind: "work-live", active: true });
+    expect(runningActivityRow).toMatchObject({ kind: "work-live", active: true, expanded: true });
+    expect(completedActivityRow).toMatchObject({ kind: "work-live", active: true, expanded: true });
+    expect(runningRows.at(-1)).toMatchObject({ kind: "work", isExpandedToolGroup: true });
+    const runningGroupId =
+      runningActivityRow?.kind === "work-live" ? runningActivityRow.groupId : undefined;
+    const collapsedRunningRows = deriveRows(
+      "inProgress",
+      undefined,
+      new Set(runningGroupId ? [runningGroupId] : []),
+    );
+    expect(collapsedRunningRows.find((row) => row.kind === "work-live")).toMatchObject({
+      expanded: false,
+    });
     expect(failedRows.some((row) => row.kind === "work-live")).toBe(false);
     expect(failedRows.at(-1)).toMatchObject({ kind: "thinking", id: "live-activity-row" });
     const failedThinkingRow = failedRows.at(-1);

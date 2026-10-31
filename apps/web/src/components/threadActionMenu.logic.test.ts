@@ -74,4 +74,13 @@ describe("buildThreadActionMenuItems", () => {
     expect(items.find((item) => item.id === "archive")?.disabled).toBe(true);
     expect(items.find((item) => item.id === "turn-into-project")?.disabled).toBe(true);
   });
+
+  it("keeps transcript copying available to read-only connections", () => {
+    const items = buildThreadActionMenuItems({ ...baseState, canOperate: false });
+    const copy = items.find((item) => item.id === "copy");
+
+    const transcript = copy?.children?.find((item) => item.id === "copy-transcript");
+    expect(transcript?.label).toBe("Conversation as Markdown");
+    expect(transcript?.disabled).toBeUndefined();
+  });
 });

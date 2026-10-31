@@ -31,6 +31,7 @@ import { RpcGroup, RpcMessage, RpcServer } from "effect/rpc";
 import * as SqlClient from "effect/sql/SqlClient";
 
 import * as PreviewAutomationBroker from "./mcp/PreviewAutomationBroker.ts";
+import * as ComputerUseService from "./computerUse/ComputerUseService.ts";
 import * as ServerBrowser from "./preview/ServerBrowser.ts";
 import * as AcpRegistryRuntimeCoordinator from "@t3tools/provider-acp-registry/server/AcpRegistryRuntimeCoordinator";
 import * as AcpRegistrySupport from "@t3tools/provider-acp-registry/server/AcpRegistrySupport";
@@ -479,6 +480,23 @@ it.effect("shell snapshots omit idle children and older settled threads only on 
 
 // Build the production RPC layer; unrelated capabilities fail if this test calls them.
 const layerUnusedConfigRpcServices = Layer.mergeAll(
+  Layer.mock(ComputerUseService.ComputerUseService)({
+    selectScreen: Effect.void,
+    screenshot: () =>
+      Effect.succeed({
+        imageData: "",
+        screenWidth: 0,
+        screenHeight: 0,
+        imageWidth: 0,
+        imageHeight: 0,
+      }),
+    movePointer: () => Effect.void,
+    click: () => Effect.void,
+    scroll: () => Effect.void,
+    typeText: () => Effect.void,
+    pressKey: () => Effect.void,
+    close: Effect.void,
+  }),
   Layer.mock(DocumentText.DocumentText)({}),
   Layer.mock(ServerSecretStore.ServerSecretStore)({}),
   Layer.mock(WorkspacePaths.WorkspacePaths)({}),

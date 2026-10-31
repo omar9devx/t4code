@@ -1114,7 +1114,7 @@ describe("AcpRegistryAdapterV2", () => {
     }).pipe(Effect.provide(layerTest), Effect.scoped),
   );
 
-  it.effect("gives Copilot T3's MCP server over HTTP when it advertises HTTP", () =>
+  it.effect("gives Copilot T4 Code's MCP server over HTTP when it advertises HTTP", () =>
     Effect.gen(function* () {
       const selfInvocation = yield* resolveSelfInvocation();
       const mockAgentPath = yield* (yield* Path.Path).fromFileUrl(
@@ -1259,7 +1259,12 @@ describe("AcpRegistryAdapterV2", () => {
               ordinal === 1
                 ? t3AcpPromptWithInstructions({
                     prompt: "test prompt",
-                    state: { interactionMode: "default", hasT3Mcp: false, hasDeviceTools: false },
+                    state: {
+                      interactionMode: "default",
+                      hasT3Mcp: false,
+                      hasDeviceTools: false,
+                      hasComputerUseTools: false,
+                    },
                   })
                 : "test prompt",
           },

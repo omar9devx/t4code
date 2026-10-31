@@ -76,6 +76,15 @@ describe("fallbackTextGenerationModelSelection", () => {
   });
 });
 
+describe("applyServerSettingsPatch", () => {
+  it("merges individual computer use permission updates with the existing permissions", () => {
+    const patch = decodeServerSettingsPatch({ computerUsePermissions: { pointer: true } });
+    expect(applyServerSettingsPatch(DEFAULT_SERVER_SETTINGS, patch).computerUsePermissions).toEqual(
+      { screen: false, pointer: true, click: false, keyboard: false },
+    );
+  });
+});
+
 describe("serverSettings helpers", () => {
   it("translates a shipped client's idle compaction switch into a mode", () => {
     const off = applyServerSettingsPatch(DEFAULT_SERVER_SETTINGS, { idleCompaction: "off" });

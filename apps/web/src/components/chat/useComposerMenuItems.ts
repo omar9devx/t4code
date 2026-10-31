@@ -53,7 +53,7 @@ const COMPOSER_PULL_REQUEST_RESULT_LIMIT = 12;
 const EMPTY_PULL_REQUEST_LIST_TARGETS: ReadonlyArray<EnvironmentQueryTarget<PullRequestListInput>> =
   [];
 
-/** Builds the @, /, $ and # suggestion lists, running the searches each trigger needs. */
+/** Builds the @, /, $, ^ and # suggestion lists, running the searches each trigger needs. */
 export function useComposerMenuItems({
   composerTrigger,
   environmentId,
@@ -69,6 +69,8 @@ export function useComposerMenuItems({
   compactSlashCommandAvailable,
   selectedProvider,
   selectedProviderSkills,
+  selectedProviderPlugins,
+  selectedProviderPluginsLoading,
   selectedProviderSlashCommands,
   showSkillsInSlashMenu,
   questionAttachmentTarget,
@@ -87,6 +89,10 @@ export function useComposerMenuItems({
   readonly compactSlashCommandAvailable: boolean;
   readonly selectedProvider: ProviderDriverKind;
   readonly selectedProviderSkills: ServerProvider["skills"];
+  readonly selectedProviderPlugins: NonNullable<
+    ServerProvider["workspaceSnapshots"]
+  >[number]["plugins"];
+  readonly selectedProviderPluginsLoading: boolean;
   readonly selectedProviderSlashCommands: ServerProvider["slashCommands"];
   readonly showSkillsInSlashMenu: boolean;
   readonly questionAttachmentTarget: DraftId | null;
@@ -308,6 +314,23 @@ export function useComposerMenuItems({
           (skill.scope ? `${skill.scope} skill` : "Run provider skill"),
       }));
     }
+    if (composerTrigger.kind === "plugin") {
+      const query = composerTrigger.query.trim().toLowerCase();
+      return (selectedProviderPlugins ?? [])
+        .filter((plugin) =>
+          `${plugin.name} ${plugin.displayName ?? ""} ${plugin.id} ${plugin.description ?? ""}`
+            .toLowerCase()
+            .includes(query),
+        )
+        .slice(0, 20)
+        .map((plugin) => ({
+          id: `plugin:${plugin.id}`,
+          type: "plugin" as const,
+          plugin,
+          label: plugin.displayName ?? plugin.name,
+          description: plugin.description ?? plugin.id,
+        }));
+    }
     if (
       composerTrigger.kind === "pull-request" &&
       pullRequestProjectId !== null &&
@@ -372,6 +395,7 @@ export function useComposerMenuItems({
     return [];
   })();
   const isLoading =
+    (composerTriggerKind === "plugin" && selectedProviderPluginsLoading) ||
     (composerTriggerKind === "path" && pathTriggerQuery.length > 0 && workspaceEntries.isPending) ||
     (composerTriggerKind === "pull-request" &&
       pullRequestProjectId !== null &&
@@ -381,6 +405,9 @@ export function useComposerMenuItems({
         pullRequestTriggerNumber !== debouncedPullRequestNumber ||
         exactPullRequestLookup.isPending));
   const emptyState = (() => {
+    if (composerTriggerKind === "plugin") {
+      return "No installed Codex plugins found.";
+    }
     if (composerTriggerKind === "skill") {
       return "No skills found. Try / to browse provider commands.";
     }
