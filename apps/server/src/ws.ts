@@ -2835,7 +2835,9 @@ export const layerWsRpc = (
                   message:
                     cause._tag === "ProjectNotEmptyError"
                       ? cause.message
-                      : "Failed to mutate project.",
+                      : cause._tag === "ProjectConflictError"
+                        ? "This workspace is already added to another project. Open that project or choose a different workspace."
+                        : "Failed to mutate project.",
                   cause,
                 }),
             ),
