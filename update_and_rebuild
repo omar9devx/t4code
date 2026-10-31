@@ -47,9 +47,18 @@ cat >"$wrapper_tmp" <<'EOF'
 #!/usr/bin/env sh
 set -eu
 
-profile="$HOME/.local/share/vorynixal/t4-code-nightly"
+app="$HOME/.local/opt/vorynixal/t4-code-nightly/T4 Code Nightly.AppImage"
 cli="$HOME/.local/share/vorynixal/t4-code-nightly/home/bin/t3"
 export T3CODE_HOME="$HOME/.local/share/vorynixal/t4-code-nightly/home"
+export T3CODE_DESKTOP_LAUNCHER_PATH="$HOME/.local/bin/t4"
+
+case "${1-}" in
+  t3code:*|t3code-dev:*) exec "$app" "$@" ;;
+esac
+
+if [ "$#" -eq 0 ]; then
+  exec "$app"
+fi
 
 if [ ! -x "$cli" ]; then
   printf '%s\n' 'The bundled T4 CLI is missing. Open T4 Code Nightly once to initialize its command-line tools.' >&2
