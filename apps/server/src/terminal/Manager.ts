@@ -101,7 +101,7 @@ const DEFAULT_SUBPROCESS_POLL_INTERVAL_MS = 1_000;
 const MAX_SUBPROCESS_POLL_INTERVAL_MS = 60_000;
 // `ps` and WMI can take seconds on a loaded host and their tables are still
 // valid then; the timeout only ends a query that is truly stuck.
-const PROCESS_TABLE_QUERY_TIMEOUT = "15 seconds";
+const PROCESS_TABLE_QUERY_TIMEOUT = "25 seconds";
 // closeIdle queries while holding the thread lock, so it keeps a short budget
 // rather than stalling other operations on that thread behind a slow table.
 const CLOSE_IDLE_QUERY_TIMEOUT = { posix: "1 second", win32: "1500 millis" } as const;

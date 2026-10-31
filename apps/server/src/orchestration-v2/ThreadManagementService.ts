@@ -1327,7 +1327,7 @@ const make = Effect.gen(function* () {
       }
       // Bounded so a provider that never answers cannot hold the thread lock.
       yield* runtime.value.stopTask({ providerThread, taskId }).pipe(
-        Effect.timeout("15 seconds"),
+        Effect.timeout("25 seconds"),
         Effect.mapError(
           (cause) =>
             new OrchestrationV2StopWorkflowError({
@@ -1376,7 +1376,7 @@ const make = Effect.gen(function* () {
     const { matched } = yield* runtime.value
       .awaitBackgroundTasks({ providerThread, taskIds: input.taskIds, awaited: input.awaited })
       .pipe(
-        Effect.timeout("15 seconds"),
+        Effect.timeout("25 seconds"),
         Effect.mapError(
           (cause) =>
             new ThreadManagementBackgroundWaitError({

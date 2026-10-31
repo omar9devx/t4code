@@ -778,7 +778,7 @@ function useCreateProject(environment: EnvironmentOption | null) {
     // draft treats a missing project as a reason to return to the chooser.
     const project = await waitForProject(
       { environmentId: environment.environmentId, projectId },
-      15_000,
+      25_000,
     );
     if (project === null) {
       Dialog.alert(
@@ -1128,7 +1128,7 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
     // must not open before the create event has arrived.
     const project = await waitForProject(
       { environmentId: environment.environmentId, projectId },
-      15_000,
+      25_000,
     );
     submittingRef.current = false;
     setIsSubmitting(false);
@@ -1410,7 +1410,7 @@ export function AddProjectDestinationScreen(props: {
       // Wait for the create event; the client store otherwise falls back to the project picker and loses clone controls.
       const project = await waitForProject(
         { environmentId: environment.environmentId, projectId },
-        15_000,
+        25_000,
       );
       if (project === null) {
         setError(

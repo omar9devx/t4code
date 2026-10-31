@@ -85,8 +85,8 @@ const unitTestProject = {
     name: "unit",
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: ["src/**/*.browser.test.{ts,tsx}"],
-    hookTimeout: 15_000,
-    testTimeout: 15_000,
+    hookTimeout: 25_000,
+    testTimeout: 25_000,
     setupFiles: [
       "../../packages/shared/src/testing/longTempDir.ts",
       "../../packages/shared/src/testing/providerEnv.ts",
@@ -126,8 +126,8 @@ const browserTestProject = {
   test: {
     name: "browser",
     include: ["src/**/*.browser.test.{ts,tsx}"],
-    hookTimeout: 15_000,
-    testTimeout: 15_000,
+    hookTimeout: 25_000,
+    testTimeout: 25_000,
     setupFiles: ["./test/browserSetup.ts"],
     api: { port: browserTestApiPort, strictPort: false },
     browser: {

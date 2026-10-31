@@ -28,7 +28,7 @@ export default {
       const limits = limitsFrom(env.LIMITS);
       const url = new URL(request.url);
       deadline = new Deadline(
-        url.pathname.endsWith('/store') ? limits.deadlineMs : Math.min(limits.deadlineMs, 15000),
+        url.pathname.endsWith('/store') ? limits.deadlineMs : Math.min(limits.deadlineMs, 25000),
         request.signal,
       );
       const route =

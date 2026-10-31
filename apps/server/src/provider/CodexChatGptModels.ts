@@ -71,4 +71,4 @@ export const chatGptModels = Effect.fn("chatGptModels")(function* (
         isCustom: false,
       };
     });
-}, Effect.timeout("15 seconds"));
+}, Effect.timeout("25 seconds"));

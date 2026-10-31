@@ -43,7 +43,7 @@ import {
 } from "../state/serverConfigProjection.ts";
 import { environmentMismatchError } from "../connection/errors.ts";
 
-const SOCKET_OPEN_TIMEOUT = "15 seconds";
+const SOCKET_OPEN_TIMEOUT = "25 seconds";
 
 export interface RpcSession {
   readonly client: WsRpcProtocolClient;

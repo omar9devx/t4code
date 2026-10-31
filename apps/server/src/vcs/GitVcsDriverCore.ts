@@ -4659,7 +4659,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
     "pruneWorktrees",
   )(function* (input) {
     yield* executeGit("GitVcsDriver.pruneWorktrees", input.cwd, ["worktree", "prune"], {
-      timeoutMs: 15_000,
+      timeoutMs: 25_000,
       fallbackErrorDetail: "git worktree prune failed",
     });
   });

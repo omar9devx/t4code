@@ -127,7 +127,7 @@ export interface DeviceStreamTarget {
 export type DeviceHardwareButton = "home" | "back" | "recents" | "power" | "appSwitcher";
 
 const RETRY_DELAY_MS = 1_000;
-const FIRST_FRAME_TIMEOUT_MS = 15_000;
+const FIRST_FRAME_TIMEOUT_MS = 25_000;
 // A WebRTC feed that shows no frame for this long is reconnected; checked
 // every WEBRTC_STALL_CHECK_MS, so a transient `disconnected` peer that
 // recovers is left alone.

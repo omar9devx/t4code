@@ -34,7 +34,7 @@ import { writeAgentDeviceConfig } from "./AgentDeviceTarget.ts";
 import * as DeviceHost from "./DeviceHost.ts";
 
 const CATALOG_TTL_MS = 60_000;
-const REQUEST_TIMEOUT = Duration.seconds(15);
+const REQUEST_TIMEOUT = Duration.seconds(25);
 // The gateway queues a lease request for up to five minutes when every device is busy.
 const OPEN_TIMEOUT = Duration.minutes(7);
 const COMMAND_TIMEOUT = Duration.minutes(2);

@@ -123,7 +123,7 @@ const make = Effect.gen(function* () {
                 Effect.sync(
                   () =>
                     new Deadline(
-                      writing ? defaults.deadlineMs : 15000,
+                      writing ? defaults.deadlineMs : 25000,
                       AbortSignal.any([request.signal, controller.signal]),
                     ),
                 ),
@@ -218,7 +218,7 @@ const make = Effect.gen(function* () {
           ),
         )
         .pipe(
-          Effect.timeout(writing ? "2 minutes" : "15 seconds"),
+          Effect.timeout(writing ? "2 minutes" : "25 seconds"),
           Effect.catchTags({
             AdmissionRejected: () =>
               Effect.fail(new CacheError({ status: 503, reason: "concurrency_limit" })),

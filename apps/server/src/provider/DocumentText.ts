@@ -68,7 +68,7 @@ const make = Effect.gen(function* () {
             [...(isExecutable ? [] : [entry]), "__document-text", path, `.${extension}`],
             {
               signal,
-              timeout: 15_000,
+              timeout: 25_000,
               maxBuffer: 4 * 1024 * 1024 + 1024,
               encoding: "utf8",
               windowsHide: true,

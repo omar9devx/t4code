@@ -8,7 +8,7 @@ import { chromium } from "playwright";
 
 const distDir = NodeURL.fileURLToPath(new URL("../dist/", import.meta.url));
 const origin = "http://t3-boot.test";
-// With no server, the client retries its session for about 15s before it renders.
+// With no server, the client retries its session for about 25s before it renders.
 const timeoutMs = 60_000;
 
 if (!NodeFS.existsSync(NodePath.join(distDir, "index.html"))) {

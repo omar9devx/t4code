@@ -554,7 +554,7 @@ export const make = Effect.gen(function* PreviewAutomationBrokerMake() {
       }
       // First open may install Chromium for ten minutes; keep it alive without replaying effects.
       const timeoutMs =
-        input.timeoutMs ?? (input.operation === "open" && connection.preferred ? 660_000 : 15_000);
+        input.timeoutMs ?? (input.operation === "open" && connection.preferred ? 660_000 : 25_000);
       const canReuseAssignedTab =
         assigned !== undefined &&
         assigned.connectionId === connection.connectionId &&

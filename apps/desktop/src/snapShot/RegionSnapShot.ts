@@ -6,7 +6,7 @@ import * as Electron from "electron";
 
 import type { ActiveWindow } from "./ActiveWindow.ts";
 
-const CAPTURE_TIMEOUT_MS = 15_000;
+const CAPTURE_TIMEOUT_MS = 25_000;
 
 export type RegionSnapShotRequest = { readonly region: Electron.Rectangle };
 export type RegionSnapShotResult =

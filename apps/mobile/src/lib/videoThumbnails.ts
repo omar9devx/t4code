@@ -24,7 +24,7 @@ async function extractFrame(uri: string, signal: AbortSignal) {
       cancel = () => resolve(null);
     });
     signal.addEventListener("abort", cancel, { once: true });
-    timeout = setTimeout(cancel, 15_000);
+    timeout = setTimeout(cancel, 25_000);
     const frame = (async () => {
       await player.replaceAsync({ uri, contentType: "progressive" });
       if (disposed || signal.aborted) return null;

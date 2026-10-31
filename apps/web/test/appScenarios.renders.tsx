@@ -79,7 +79,7 @@ async function quiet() {
       seen = now;
       expect(settled).toBe(true);
     },
-    { interval: 100, timeout: 15_000 },
+    { interval: 100, timeout: 25_000 },
   );
 }
 
@@ -266,7 +266,7 @@ const openSettings =
       await vi.waitFor(
         () =>
           expect([...document.querySelectorAll("div")].some((node) => node.shadowRoot)).toBe(true),
-        { interval: 100, timeout: 15_000 },
+        { interval: 100, timeout: 25_000 },
       );
     }
   };

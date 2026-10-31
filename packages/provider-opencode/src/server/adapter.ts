@@ -1089,7 +1089,7 @@ export const makeOpenCodeAdapterV2 = Effect.fn("makeOpenCodeAdapterV2")(function
           });
           const failure = yield* visit(rootId, false);
           if (failure) return yield* failure;
-        }, Effect.timeout("15 seconds"));
+        }, Effect.timeout("25 seconds"));
 
         const updateProviderSession =
           /* Provider events include streaming deltas; avoid a span for each update. */

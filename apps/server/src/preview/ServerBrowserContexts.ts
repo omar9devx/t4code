@@ -200,7 +200,7 @@ export class ServerBrowserContexts {
 
   async connectDesktopPage(endpoint: string) {
     const { chromium } = loadPlaywright();
-    const browser = await chromium.connectOverCDP(endpoint, { timeout: 15_000 });
+    const browser = await chromium.connectOverCDP(endpoint, { timeout: 25_000 });
     const page = browser.contexts().flatMap((context) => context.pages())[0];
     if (!page) {
       await browser.close().catch(constVoid);

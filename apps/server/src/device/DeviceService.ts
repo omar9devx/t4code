@@ -1316,7 +1316,7 @@ export const make = Effect.gen(function* () {
             command: node,
             args: [path.join(path.dirname(launcher), "agent-device-launcher.mjs"), "close"],
             env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-            timeout: "15 seconds",
+            timeout: "25 seconds",
             timeoutBehavior: "timedOutResult",
           }),
         ),

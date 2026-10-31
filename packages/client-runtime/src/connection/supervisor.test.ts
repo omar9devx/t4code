@@ -478,7 +478,7 @@ describe("EnvironmentSupervisor", () => {
 
       expect(yield* Ref.get(harness.prepareCount)).toBe(1);
 
-      yield* TestClock.adjust("15 seconds");
+      yield* TestClock.adjust("25 seconds");
       const retrying = yield* awaitState(
         supervisor.state,
         (state) => state.phase === "backoff" && state.attempt === 1,
@@ -933,7 +933,7 @@ describe("EnvironmentSupervisor", () => {
   );
 
   it.effect.each(["application-active-probe", "network-changed"] as const)(
-    "gives a live remote socket 15 seconds to answer a %s probe",
+    "gives a live remote socket 25 seconds to answer a %s probe",
     (wakeup) =>
       Effect.gen(function* () {
         // A slow path delays the fresh request as much as the probe.
@@ -947,7 +947,7 @@ describe("EnvironmentSupervisor", () => {
 
         yield* awaitState(supervisor.state, (state) => state.phase === "connected");
         yield* harness.wake(wakeup);
-        yield* TestClock.adjust("20 seconds");
+        yield* TestClock.adjust("30 seconds");
 
         expect(yield* Ref.get(harness.sessionCount)).toBe(1);
         expect((yield* SubscriptionRef.get(supervisor.state)).generation).toBe(1);

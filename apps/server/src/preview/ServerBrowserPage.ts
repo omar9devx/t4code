@@ -71,7 +71,7 @@ export const toOperationError = (
   return new ServerBrowserOperationError("PreviewAutomationExecutionError", firstLine);
 };
 
-const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_TIMEOUT_MS = 25_000;
 
 const pageRefs = new WeakMap<Page, { generation: string; refs: Map<string, string> }>();
 // A compact runtime namespace prevents old refs from aliasing after a server restart.
@@ -203,7 +203,7 @@ const withoutTreeDataPayloads = (tree: string) =>
     })
     .join("\n");
 
-// The broker waits 15s for the host; a snapshot, retry included, answers well before.
+// The broker waits 25s for the host; a snapshot, retry included, answers well before.
 const SNAPSHOT_TIMEOUT_MS = 10_000;
 const FRAME_ANSWER_MS = 1_000;
 

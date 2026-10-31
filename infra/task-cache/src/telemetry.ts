@@ -161,7 +161,7 @@ export function observeSummaries(
 
 export async function flushTelemetry(home = NodeOS.homedir(), env = process.env) {
   const queue = NodePath.join(home, ".cache/t3-task-cache/telemetry");
-  const deadline = Date.now() + 15_000;
+  const deadline = Date.now() + 25_000;
   const skipped = new Set<string>();
   // A flusher that finds the lock taken exits and leaves its event to the holder. Re-check after
   // releasing, or an event queued after the holder's last scan waits for the next command.

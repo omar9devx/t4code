@@ -347,7 +347,7 @@ export const make = Effect.fn("SshDeviceHost.make")(function* (
       yield* waitForHttpReady({
         baseUrl: baseUrl!,
         path: route!,
-        timeoutMs: 15000,
+        timeoutMs: 25000,
         makeError: () =>
           new DeviceHost.DeviceHostError({
             hostId: config.id,

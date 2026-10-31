@@ -1044,7 +1044,7 @@ async function allowIosNotificationsUntilReady(udid: string, ready: Promise<void
 
 async function presentIosLockScreen(udid: string): Promise<void> {
   await runAxe(udid, ["button", "lock"]);
-  const deadline = Date.now() + 15_000;
+  const deadline = Date.now() + 25_000;
   while (!(await iosSimulatorLocked(udid))) {
     if (Date.now() > deadline) throw new Error(`Simulator ${udid} did not lock.`);
     await delay(500);

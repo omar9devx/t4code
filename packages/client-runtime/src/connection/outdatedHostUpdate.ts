@@ -36,7 +36,7 @@ import {
 
 // A v1 host restarting into v2 runs migrations before its descriptor answers again.
 const OUTDATED_HOST_RESTART_TIMEOUT = Duration.minutes(4);
-const SOCKET_OPEN_TIMEOUT = "15 seconds";
+const SOCKET_OPEN_TIMEOUT = "25 seconds";
 
 export class OutdatedHostUpdateError extends Schema.TaggedError<OutdatedHostUpdateError>()(
   "OutdatedHostUpdateError",

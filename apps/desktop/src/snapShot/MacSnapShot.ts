@@ -7,7 +7,7 @@ import * as Electron from "electron";
 import type { ActiveWindow } from "./ActiveWindow.ts";
 
 const MAC_SCREEN_CAPTURE_PATH = "/usr/sbin/screencapture";
-const MAC_SCREEN_CAPTURE_TIMEOUT_MS = 15_000;
+const MAC_SCREEN_CAPTURE_TIMEOUT_MS = 25_000;
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 export type MacSnapShotSource = {

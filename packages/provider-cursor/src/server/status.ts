@@ -32,7 +32,7 @@ const EMPTY_CAPABILITIES: ModelCapabilities = createModelCapabilities({
   optionDescriptors: [],
 });
 
-const CURSOR_SDK_CATALOG_TIMEOUT_MS = 15_000;
+const CURSOR_SDK_CATALOG_TIMEOUT_MS = 25_000;
 
 export const buildInitialCursorProviderSnapshot = Effect.fn(
   "CursorProviderStatus.buildInitialCursorProviderSnapshot",

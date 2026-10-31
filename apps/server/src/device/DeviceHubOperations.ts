@@ -58,7 +58,7 @@ export const makeDeviceHubOperations = (options: {
     request: HttpClientRequest.HttpClientRequest,
     schema: Schema.Codec<A, I>,
     operation: string,
-    timeout: Duration.Input = Duration.seconds(15),
+    timeout: Duration.Input = Duration.seconds(25),
   ) =>
     httpClient.execute(request).pipe(
       Effect.flatMap(HttpClientResponse.filterStatusOk),

@@ -125,7 +125,7 @@ const EDITABLE_AT_POINT_SCRIPT = `(x, y) => {
   return !nonText.includes(element.type) && !element.disabled && !element.readOnly;
 }`;
 const UNATTACHED_FILL_VIEWPORT = { width: 1280, height: 800 } as const;
-const NAVIGATION_TIMEOUT_MS = 15_000;
+const NAVIGATION_TIMEOUT_MS = 25_000;
 const VIEWER_NAVIGATION_OPTIONS = { waitUntil: "commit", timeout: NAVIGATION_TIMEOUT_MS } as const;
 const ACTION_TIMELINE_LIMIT = 50;
 

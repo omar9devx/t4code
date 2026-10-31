@@ -41,12 +41,12 @@ import {
 
 const RETRY_BASE_DELAY_MS = 1_000;
 const RETRY_MAX_DELAY_MS = 300_000;
-// A cold server with a large database can take longer than 15 seconds to
+// A cold server with a large database can take longer than 25 seconds to
 // answer, and that is not a reason to drop a working connection.
-const CONNECTION_ESTABLISHMENT_TIMEOUT = "15 seconds";
+const CONNECTION_ESTABLISHMENT_TIMEOUT = "25 seconds";
 const establishmentTimeout = Duration.fromInputUnsafe(CONNECTION_ESTABLISHMENT_TIMEOUT);
 const synchronizationTimeout = Duration.fromInputUnsafe("75 seconds");
-const CONNECTION_PROBE_TIMEOUT = "15 seconds";
+const CONNECTION_PROBE_TIMEOUT = "25 seconds";
 const QUICK_CONNECTION_PROBE_TIMEOUT = "3 seconds";
 // A probe still unanswered this long checks the host with a fresh request. If
 // the host answers while the socket stays silent, the socket is dead.
@@ -743,7 +743,7 @@ export const make = Effect.fn("EnvironmentSupervisor.make")(function* (
         silentSocket = yield* Effect.forkChild(awaitSilentSocket(lease, routeKind));
         recheck = false;
       });
-      // The web and desktop foreground probe allows a busy host 15 seconds,
+      // The web and desktop foreground probe allows a busy host 25 seconds,
       // and a busy host can answer a fresh request before a queued probe.
       const armSilentSocketCheck = Effect.fnUntraced(function* (signal: SupervisorSignal) {
         if (signal._tag === "Wakeup" && signal.reason === "application-active") return;

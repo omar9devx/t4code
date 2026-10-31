@@ -7382,7 +7382,7 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
                 // An unanswered stop must not delay turn settlement.
                 yield* liveQuery.query
                   .stopTask(taskId)
-                  .pipe(Effect.timeout("15 seconds"), Effect.ignore, Effect.forkIn(sessionScope));
+                  .pipe(Effect.timeout("25 seconds"), Effect.ignore, Effect.forkIn(sessionScope));
               }
               yield* updateClaudeSubagentNode({
                 context: input.context,

@@ -26,7 +26,7 @@ dead and is replaced, even while the network reports offline: at once on
 loopback and LAN, and 2.5 seconds after the check starts elsewhere, where one
 lost packet can stall a live socket. Without that evidence the probe deadline
 decides: 3 seconds on loopback and LAN routes and after a long mobile
-suspension, when the data on screen is stale; 15 seconds elsewhere, because a
+suspension, when the data on screen is stale; 25 seconds elsewhere, because a
 tailnet over DERP or a VPN can be slower than that on a live socket. A long
 suspension's probe that times out also replaces the socket regardless of the
 network report. The web and desktop foreground probe skips the fresh request,

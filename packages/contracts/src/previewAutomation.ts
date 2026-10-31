@@ -20,7 +20,7 @@ const PROFILE_GUIDANCE =
   "Profile id or name from preview_status, for a new tab. Default: the user's. A tab keeps its profile.";
 const OptionalTimeoutMs = Schema.optional(
   Schema.Int.check(Schema.isGreaterThan(0)).check(Schema.isLessThanOrEqualTo(60_000)),
-).annotate({ description: "Default 15000." });
+).annotate({ description: "Default 25000." });
 
 export const PREVIEW_AUTOMATION_V1_OPERATIONS = [
   "status",

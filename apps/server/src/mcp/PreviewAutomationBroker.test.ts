@@ -963,7 +963,7 @@ it.effect("fails requests assigned to the stream that is replaced", () =>
         providerInstanceId: scope.thread.providerInstanceId,
         clientId: "client-1",
         requestId: "preview-0",
-        timeoutMs: 15_000,
+        timeoutMs: 25_000,
       });
     }),
   ),

@@ -523,7 +523,7 @@ const INTERRUPT_TIMEOUT = "10 seconds";
 const INSTRUCTIONS_KEY = "t3-code";
 const RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = "2 seconds";
-const RECONCILE_TIMEOUT = "15 seconds";
+const RECONCILE_TIMEOUT = "25 seconds";
 const RECONNECT_WAIT = "30 seconds";
 const LOST_BACKGROUND =
   "T4 Code lost its connection to OpenCode while this subagent ran, so its result is not shown.";

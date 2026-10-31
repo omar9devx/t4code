@@ -150,7 +150,7 @@ it.effect("falls back to public npm only when npm is not installed", () =>
     expect(yield* service.get({ spec: "nightly" })).toEqual({ version, databaseMigration: 42 });
     expect(yield* service.get({ spec: "9.9.9" })).toBeNull();
     const stalled = yield* service.get({ spec: "latest" }).pipe(Effect.result, Effect.forkChild);
-    yield* TestClock.adjust("15 seconds");
+    yield* TestClock.adjust("25 seconds");
     expect(Result.isFailure(yield* Fiber.join(stalled))).toBe(true);
     expect(urls).toEqual([
       "https://registry.npmjs.org/t3/nightly",

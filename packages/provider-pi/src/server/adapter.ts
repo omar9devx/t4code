@@ -80,7 +80,7 @@ const DEFAULT_PI_SETTINGS = Schema.decodeSync(PiSettings)({});
 const PI_INHERIT_MODEL_SLUG = "default";
 
 const STREAM_FLUSH_MS = 50;
-const PI_REQUEST_TIMEOUT_MS = 15_000;
+const PI_REQUEST_TIMEOUT_MS = 25_000;
 const PI_SESSION_TIMEOUT_MS = 60_000;
 const PI_UNSOLICITED_ACTIVITY_ERROR =
   "Pi started agent work outside an active T4 Code turn. The session was stopped to prevent invisible tool execution.";

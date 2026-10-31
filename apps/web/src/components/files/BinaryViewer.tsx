@@ -105,7 +105,7 @@ export default function BinaryViewer(props: {
       setBusy(false);
       workerRef.current?.terminate();
       workerRef.current = null;
-    }, 15_000);
+    }, 25_000);
     workerRef.current?.postMessage(request);
   };
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- Own the binary fetch, archive or database worker, message subscription, and request timeout for this file.

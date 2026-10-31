@@ -874,7 +874,7 @@ it.layer(
       yield* TestClock.adjust("2 minutes");
 
       const [hung, next] = queries;
-      expect(hung!.end! - hung!.start).toBe(15_000);
+      expect(hung!.end! - hung!.start).toBe(25_000);
       expect(next!.start - hung!.end!).toBe(60_000);
       yield* manager.close({ threadId: "thread-1" });
     }).pipe(Effect.provide(TestClock.layer())),

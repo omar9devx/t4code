@@ -68,7 +68,7 @@ export const make = Effect.fn("NpmRelease.make")(function* () {
       if (response.status < 200 || response.status >= 300) return yield* unreachable;
       return Option.some(yield* response.text);
     }).pipe(
-      Effect.timeout(Duration.seconds(15)),
+      Effect.timeout(Duration.seconds(25)),
       Effect.mapError(() => unreachable),
     );
     return Option.isNone(json) ? null : yield* toRelease(spec, json.value);
@@ -88,7 +88,7 @@ export const make = Effect.fn("NpmRelease.make")(function* () {
             command: npmPath,
             // Named fields keep the output small; the full package document grows with every release.
             args: ["view", "--global", "--json", `t3@${spec}`, "version", "t3code"],
-            timeout: Duration.seconds(15),
+            timeout: Duration.seconds(25),
             maxOutputBytes: 256 * 1024,
           }),
         )

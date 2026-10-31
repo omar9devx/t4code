@@ -321,7 +321,7 @@ class LinuxCaptureConnection {
     if (!withFeedback) return { png, window };
     const animationStarted = decodeBoolean(reply.body[2]);
     // Keep the same authenticated sender alive through activation and the compositor flight.
-    this.feedbackTimer = setTimeout(() => this.close(), 15_000);
+    this.feedbackTimer = setTimeout(() => this.close(), 25_000);
     let flight: Promise<void> | undefined;
     const feedback: LinuxCaptureFeedback = {
       animationStarted,

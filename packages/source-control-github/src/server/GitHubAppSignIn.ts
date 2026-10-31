@@ -30,7 +30,7 @@ import * as GitHubClient from "../shared/definition.ts";
 export const CLIENT_ID_VARIABLE = "T3CODE_GITHUB_APP_CLIENT_ID";
 
 const KIND = SourceControlProviderKind.make("github");
-const REQUEST_TIMEOUT = Duration.seconds(15);
+const REQUEST_TIMEOUT = Duration.seconds(25);
 // Refresh ahead of expiry so a token never lapses between the check and a long request.
 const REFRESH_MARGIN_MS = Duration.toMillis(Duration.minutes(5));
 

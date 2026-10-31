@@ -203,7 +203,7 @@ export function makeDevice(options: DeviceOptions) {
   const waitFor = Effect.fn("device.waitFor")(function* (
     description: string,
     predicate: (state: ProbeState) => boolean,
-    timeoutMs = 15_000,
+    timeoutMs = 25_000,
   ) {
     const deadline = (yield* Clock.currentTimeMillis) + timeoutMs;
     let last: ProbeState | null = null;

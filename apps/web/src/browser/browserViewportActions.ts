@@ -13,7 +13,7 @@ export interface BrowserViewportTarget {
   readonly runtimeTabId: string;
 }
 
-const BROWSER_VIEWPORT_COMMIT_TIMEOUT_MS = 15_000;
+const BROWSER_VIEWPORT_COMMIT_TIMEOUT_MS = 25_000;
 
 class BrowserViewportCommitTimeoutError extends Error {
   override readonly name = "BrowserViewportCommitTimeoutError";

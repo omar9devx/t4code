@@ -91,7 +91,7 @@ export const releaseAgentDeviceSession =
       Effect.filterOrElse((response) => response.status === 404, HttpClientResponse.filterStatusOk),
       Effect.flatMap(HttpClientResponse.schemaBodyJson(AgentCloseResult)),
       Effect.scoped,
-      Effect.timeout(Duration.seconds(15)),
+      Effect.timeout(Duration.seconds(25)),
       Effect.asVoid,
       Effect.mapError(
         (cause) =>

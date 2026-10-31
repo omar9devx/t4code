@@ -111,7 +111,7 @@ const nodeErrorCode = (cause: unknown) => {
 
 // Hub responses can contain credentials; expose only failure kind, HTTP status or Node code.
 const describeManagementFailure = (error: unknown) => {
-  if (Cause.isTimeoutError(error)) return "The hub did not answer within 15 seconds.";
+  if (Cause.isTimeoutError(error)) return "The hub did not answer within 25 seconds.";
   if (HttpClientError.isHttpClientError(error)) {
     const reason = error.reason;
     if (reason._tag === "StatusCodeError") {
@@ -182,7 +182,7 @@ export const makeCliproxyApi = Effect.gen(function* () {
       .pipe(
         Effect.flatMap(HttpClientResponse.filterStatusOk),
         Effect.flatMap((response) => response.json),
-        Effect.timeout("15 seconds"),
+        Effect.timeout("25 seconds"),
         Effect.mapError(
           (error) => new UsageLimitSourceError({ detail: describeManagementFailure(error) }),
         ),

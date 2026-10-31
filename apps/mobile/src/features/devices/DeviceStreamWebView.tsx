@@ -124,7 +124,7 @@ function DeviceStreamDocumentView({
     active.current = true;
     resetInput();
     const view = webView.current;
-    bootstrapTimer.current = setTimeout(bootstrapTimedOut, 15_000);
+    bootstrapTimer.current = setTimeout(bootstrapTimedOut, 25_000);
     return () => {
       if (bootstrapTimer.current !== null) clearTimeout(bootstrapTimer.current);
       bootstrapTimer.current = null;
