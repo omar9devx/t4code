@@ -123,8 +123,8 @@ const make = Effect.gen(function* () {
             // agent-device install-from-source picks the archive type from this name.
             // iOS clients are uploaded as a tarred .app, Android ones as the bare APK.
             "Content-Disposition": `attachment; filename="${key.split("/").at(-1)}.${key.startsWith("ios/") ? "tgz" : "apk"}"`,
-            "X-T4 Code-Digest": object.customMetadata?.digest ?? "",
-            "X-T4 Code-Build-Ms": object.customMetadata?.buildMs ?? "0",
+            "X-T4-Digest": object.customMetadata?.digest ?? "",
+            "X-T4-Build-Ms": object.customMetadata?.buildMs ?? "0",
           },
         });
       }
