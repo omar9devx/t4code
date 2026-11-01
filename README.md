@@ -1,12 +1,12 @@
 # T4 Code
 
-T4 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t4-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t4tools.T4CODE)), [web app](https://app.t3.codes) and [Electron-based desktop app](https://t3.codes).
+T4 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t4-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t4tools.T4CODE)), web app, and Electron-based desktop app.
 
 Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCode, Google Antigravity, and fx. If they're set up on your computer, T4 Code can control them.
 
 ## Vorynixal versioning
 
-Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is built from the latest available [T3 Code Nightly](https://github.com/pingdotgg/t3code/releases) source at the time of the build. T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
+Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is based on [T3 Code Nightly 0.1.7-nightly.20261101.4035](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261101.4035) (source commit `80120b1aa34a`). T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
 
 ## "Wait, what are you selling me?"
 

@@ -13,7 +13,7 @@ const repoRoot = NodePath.resolve(desktopDir, "..", "..");
 const devBundleIdSuffix = NodePath.basename(repoRoot)
   .toLowerCase()
   .replaceAll(/[^a-z0-9]+/g, "");
-const APP_DISPLAY_NAME = isDevelopment ? "T4 Code (Dev)" : "T4 Code (Beta)";
+const APP_DISPLAY_NAME = isDevelopment ? "T4 Code (Dev)" : "T4 Code";
 const APP_BUNDLE_ID = isDevelopment
   ? `com.t4tools.T4CODE.dev.${devBundleIdSuffix || "local"}`
   : "com.t4tools.T4CODE";

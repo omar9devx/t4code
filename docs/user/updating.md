@@ -138,11 +138,11 @@ directory and pair with the running server.
 ### macOS app does not reopen after an Alpha update
 
 Updating an older **T4 Code (Alpha)** installation can replace it with
-**T4 Code (Beta)** without reopening the app. Open **T4 Code (Beta)** from
+**T4 Code** without reopening the app. Open **T4 Code** from
 Applications, or run:
 
 ```sh
-open "/Applications/T4 Code (Beta).app"
+open "/Applications/T4 Code.app"
 ```
 
 If an old Dock shortcut no longer opens the app, remove it and add the Beta app

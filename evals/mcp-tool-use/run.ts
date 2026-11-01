@@ -362,12 +362,15 @@ export const normalizeToolName = (name: string) => {
     ? bare.slice(T4_PREFIX.length)
     : (CODEX_NAMES[bare] ?? bare.slice(bare.lastIndexOf("_") + 1));
 };
-export const normalizeToolInput = (name: string, input: unknown) =>
-  normalizeToolName(name) === "Bash" && isRecord(input)
+export const normalizeToolInput = (name: string, input: unknown) => {
+  const decode = t4InputDecoders.get(normalizeToolName(name));
+  if (decode !== undefined) return Option.getOrElse(decode(input), () => input);
+  return normalizeToolName(name) === "Bash" && isRecord(input)
     ? { ...input, command: input.command ?? input.cmd }
     : typeof input === "string" && normalizeToolName(name) === "Edit"
       ? { patch: input }
       : input;
+};
 
 // McpHttpServer advertises each tool's JSON schema, and Claude Code passes the MCP name,
 // description, and schema through unchanged.
@@ -384,6 +387,15 @@ const t4SourceTools: ReadonlyArray<Tool.Any> = [
   DeviceToolkit,
   HtmlToolkit,
 ].flatMap((toolkit): ReadonlyArray<Tool.Any> => Object.values(toolkit.tools));
+// McpHttpServer decodes arguments with each tool's JSON codec, which drops undeclared keys.
+const t4InputDecoders = new Map(
+  t4SourceTools.map((tool) => [
+    tool.name,
+    Schema.decodeUnknownOption(
+      Schema.toCodecJson(tool.parametersSchema as Schema.Codec<unknown, unknown>),
+    ),
+  ]),
+);
 const t4tools: ReadonlyArray<ApiTool> = t4SourceTools.map((tool) => ({
   name: `${T4_PREFIX}${tool.name}`,
   description: Tool.getDescription(tool) ?? "",
@@ -532,7 +544,7 @@ export const buildBase = (
     throw new Error(`The template needs one ${RUNTIME_MARKER} block and a deferred tool list.`);
   }
   const nativeDeferred = deferredList.split("\n").filter((name) => name && !isT4Name(name));
-  const names = [...nativeDeferred, ...t3.map((tool) => tool.name)].toSorted().join("\n");
+  const names = [...nativeDeferred, ...t4.map((tool) => tool.name)].toSorted().join("\n");
   const { model } = options;
   const append = options.nativeSubagent ? "" : t4SystemAppend(model, options.deviceAccess);
   const modelLine = `You are powered by the model named ${MODELS[model]}. The exact model ID is ${model}.`;
@@ -577,7 +589,7 @@ export const buildBase = (
     nativeTools: template.tools.filter((tool) => !isT4Name(tool.name)),
     /** Tools ToolSearch loads: T4 tools from source, and native tools the template only names. */
     t4,
-    deferred: [...t3, ...nativeDeferred.map((name) => ({ name, ...nativeSchema(name) }))],
+    deferred: [...t4, ...nativeDeferred.map((name) => ({ name, ...nativeSchema(name) }))],
   };
 };
 
@@ -661,7 +673,7 @@ const buildCodexBase = (
     },
     nativeTools,
     t4,
-    deferred: [...t3],
+    deferred: [...t4],
     codex: { ...template, input, reasoning: { ...template.reasoning, effort } },
   };
 };
@@ -1562,7 +1574,7 @@ export const executeCodex = async (
 };
 
 const codexCatalog = (base: Base) => [
-  ...base.t3.map((tool) => ({
+  ...base.t4.map((tool) => ({
     name: tool.name.replace("mcp__t4-code__", "mcp__t4_code__"),
     description: `${valueText(tool.description)}\nInput JSON schema: ${JSON.stringify(tool.input_schema)}`,
   })),
