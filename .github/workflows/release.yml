@@ -557,12 +557,14 @@ jobs:
           pnpm_config_cache_dir: ${{ runner.temp }}/pnpm-metadata
 
       - name: Download relay client tracing config
+        if: needs.relay_public_config.result == 'success'
         uses: actions/download-artifact@v8
         with:
           name: relay-client-tracing-config
           path: ${{ runner.temp }}/relay-client-tracing
 
       - name: Load relay client tracing config
+        if: needs.relay_public_config.result == 'success'
         shell: bash
         run: |
           config_path="$RUNNER_TEMP/relay-client-tracing/relay-client-tracing.env"
