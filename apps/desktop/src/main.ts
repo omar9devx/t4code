@@ -220,7 +220,7 @@ const layerDesktopApplication = Layer.mergeAll(
 const layerDesktopClerk = DesktopClerk.layer.pipe(
   Layer.provide(DesktopPreReadyFileSystem.layer),
   Layer.provideMerge(ElectronShell.layer),
-  Layer.provideMerge(layerDesktopEnvironment),
+  Layer.provideMerge(layerDesktopEnvironment.pipe(Layer.provide(DesktopPreReadyFileSystem.layer))),
   Layer.provideMerge(NodeServices.layer),
   Layer.provideMerge(ElectronApp.layer),
 );

@@ -181,7 +181,7 @@ export function buildNewThreadLink(input: {
   return url.toString();
 }
 
-const APP_SCHEME = /^T4CODE(?:-[a-z]+)?:$/;
+const APP_SCHEME = /^T4CODE(?:-[a-z]+)?:$/i;
 const THREAD_PATH = /^\/([^/]+)\/([^/]+)\/?$/;
 
 export function promptLinkAppPath(

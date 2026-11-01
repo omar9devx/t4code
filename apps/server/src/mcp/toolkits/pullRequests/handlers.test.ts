@@ -248,7 +248,7 @@ describe("pull request toolkit handlers", () => {
       });
       expect(result).toEqual({
         host: "github.com",
-        repository: "t4tools/T4CODE",
+        repository: "t4tools/t4code",
         number: 123,
         url: "https://github.com/t4tools/T4CODE/pull/123/files",
         alreadyLinked: false,
@@ -258,7 +258,7 @@ describe("pull request toolkit handlers", () => {
           type: "thread.pull-request.link",
           threadId: THREAD_ID,
           host: "github.com",
-          repository: "t4tools/T4CODE",
+          repository: "t4tools/t4code",
           number: 123,
           source: "agent",
         },
@@ -503,7 +503,7 @@ describe("pull request toolkit handlers", () => {
       });
       expect(linked).toEqual({
         host: "github.com",
-        repository: "t4tools/T4CODE",
+        repository: "t4tools/t4code",
         number: 5,
         wasLinked: true,
       });
@@ -527,8 +527,8 @@ describe("pull request toolkit handlers", () => {
         urls: [url(1), url(2), url(3), url(3), "https://example.com/not-a-pr"],
       });
       expect(result).toEqual({
-        linked: [{ host: "github.com", repository: "t4tools/T4CODE", numbers: [2, 3] }],
-        alreadyLinked: [{ host: "github.com", repository: "t4tools/T4CODE", numbers: [1] }],
+        linked: [{ host: "github.com", repository: "t4tools/t4code", numbers: [2, 3] }],
+        alreadyLinked: [{ host: "github.com", repository: "t4tools/t4code", numbers: [1] }],
         linkedCount: 3,
         invalidUrls: ["https://example.com/not-a-pr"],
       });
@@ -559,8 +559,8 @@ describe("pull request toolkit handlers", () => {
       });
       expect(result).toEqual({
         unlinked: [
-          { host: "github.com", repository: "t4tools/T4CODE", state: "merged", numbers: [1] },
-          { host: "github.com", repository: "t4tools/T4CODE", state: "closed", numbers: [3] },
+          { host: "github.com", repository: "t4tools/t4code", state: "merged", numbers: [1] },
+          { host: "github.com", repository: "t4tools/t4code", state: "closed", numbers: [3] },
         ],
         unlinkedCount: 2,
         remaining: 2,
@@ -701,7 +701,7 @@ describe("pull request guide tools", () => {
           result.guides.map((guide) => [guide.repository, guide.number, guide.outcome]),
         ).toEqual([
           ["acme/web", 7, "started"],
-          ["t4tools/T4CODE", 12, "started"],
+          ["t4tools/t4code", 12, "started"],
           ["someone/else", 1, "failed"],
         ]);
         expect(result.guides[2]?.detail).toContain("No project in this environment");

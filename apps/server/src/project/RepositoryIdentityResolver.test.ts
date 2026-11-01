@@ -41,7 +41,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const resolvedCwd = NodeFS.realpathSync.native(cwd);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+      expect(identity?.canonicalKey).toBe("github.com/t4tools/t4code");
       expect(normalizeResolvedPath(resolvedIdentityRoot)).toBe(normalizeResolvedPath(resolvedCwd));
       expect(identity?.displayName).toBe("t4tools/T4CODE");
       expect(identity?.provider).toBe("github");
@@ -69,7 +69,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
 
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(cwd);
-      expect(identity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+      expect(identity?.canonicalKey).toBe("github.com/t4tools/t4code");
       expect(identity?.locator.remoteUrl).toBe("git@github.com:t4tools/T4CODE.git");
       expect(identity?.locator.remoteName).toBe("origin");
     }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
@@ -95,7 +95,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const resolvedRepoRoot = NodeFS.realpathSync.native(repoRoot);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+      expect(identity?.canonicalKey).toBe("github.com/t4tools/t4code");
       expect(normalizeResolvedPath(resolvedIdentityRoot)).toBe(
         normalizeResolvedPath(resolvedRepoRoot),
       );
@@ -133,7 +133,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
 
         const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
         const checkoutIdentity = yield* resolver.resolve(checkout);
-        expect(checkoutIdentity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+        expect(checkoutIdentity?.canonicalKey).toBe("github.com/t4tools/t4code");
         const resolvedBareGitDir = NodeFS.realpathSync.native(bareGitDir);
         const projectRoots = layout === "dot-bare" ? [root, bareGitDir] : [root];
 
@@ -218,7 +218,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
 
       const mixedIdentity = yield* resolver.resolve(mixedDir);
       expect(mixedIdentity?.locator.remoteName).toBe("mirror");
-      expect(mixedIdentity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+      expect(mixedIdentity?.canonicalKey).toBe("github.com/t4tools/t4code");
     }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
   );
 
@@ -240,7 +240,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
         const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
         const initialIdentity = yield* resolver.resolve(cwd);
         expect(initialIdentity?.canonicalKey).toBe(
-          change === "add" ? "github.com/julius/T4CODE" : "github.com/t4tools/previous",
+          change === "add" ? "github.com/julius/t4code" : "github.com/t4tools/previous",
         );
 
         yield* git(cwd, [
@@ -254,7 +254,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
 
         expect(identity).not.toBeNull();
         expect(identity?.locator.remoteName).toBe("upstream");
-        expect(identity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+        expect(identity?.canonicalKey).toBe("github.com/t4tools/t4code");
         expect(identity?.displayName).toBe("t4tools/T4CODE");
         expect(yield* resolver.resolve(cwd)).toEqual(identity);
       }).pipe(Effect.provide(RepositoryIdentityResolver.layer)),
@@ -274,10 +274,10 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const resolver = yield* RepositoryIdentityResolver.RepositoryIdentityResolver;
       const identity = yield* resolver.resolve(cwd);
 
-      expect(identity?.canonicalKey).toBe("github.com/t4tools/T4CODE");
+      expect(identity?.canonicalKey).toBe("github.com/t4tools/t4code");
       expect(identity?.displayName).toBe("t4tools/T4CODE");
       expect(identity?.origin).toEqual({
-        canonicalKey: "github.com/julius/T4CODE-fork",
+        canonicalKey: "github.com/julius/t4code-fork",
         remoteUrl: "git@github.com:julius/T4CODE-fork.git",
         displayName: "julius/T4CODE-fork",
       });
@@ -298,7 +298,7 @@ it.layer(NodeServices.layer)("RepositoryIdentityResolverLive", (it) => {
       const identity = yield* resolver.resolve(cwd);
 
       expect(identity).not.toBeNull();
-      expect(identity?.canonicalKey).toBe("gitlab.com/t4tools/platform/T4CODE");
+      expect(identity?.canonicalKey).toBe("gitlab.com/t4tools/platform/t4code");
       expect(identity?.displayName).toBe("t4tools/platform/T4CODE");
       expect(identity?.owner).toBe("t4tools");
       expect(identity?.name).toBe("T4CODE");

@@ -165,7 +165,7 @@ describe("DesktopAppIdentity", () => {
         const identity = yield* DesktopAppIdentity.DesktopAppIdentity;
         assert.equal(
           yield* identity.resolveUserDataPath,
-          "/Users/alice/Library/Application Support/T4 Code (Dev)",
+          "/Users/alice/Library/Application Support/Vorynixal T4 Code (Dev)",
         );
       }),
       {

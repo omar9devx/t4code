@@ -202,7 +202,7 @@ describe("DesktopLinuxUrlHandler", () => {
         );
         assert.include(
           recorded.files[0]?.content,
-          "Exec=/home/alice/Applications/T4 Code-Code.AppImage %U",
+          'Exec="/home/alice/Applications/T4 Code-Code.AppImage" %U',
         );
         assert.include(recorded.files[0]?.content, "MimeType=x-scheme-handler/T4CODE;");
         assert.deepEqual(recorded.commands, [
@@ -567,8 +567,8 @@ it.layer(NodeServices.layer)("DesktopLinuxUrlHandler theme icons", (it) => {
 
       yield* registerWithRealFileSystem(run);
       assert.deepEqual([...(yield* fileSystem.readDirectory(fixture.appsDir))].sort(), [
-        "com.t4tools.T4CODE.png",
-        "com.t4tools.T4CODE.png",
+        "com.vorynixal.T4Code.png",
+        "com.vorynixal.t4code.png",
       ]);
       for (const name of ["com.vorynixal.t4code", "com.vorynixal.T4Code"]) {
         const target = path.join(fixture.appsDir, `${name}.png`);

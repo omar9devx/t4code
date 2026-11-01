@@ -493,8 +493,8 @@ export const makeOpenCode2ModelLoader = <E>(
         Effect.repeat({
           until: (models) => {
             if (models.length > 0) latest = models;
-            const fingerprint = models.length > 0 ? catalogFingerprint(models) : undefined;
-            const settled = fingerprint !== undefined && fingerprint === previous;
+            const fingerprint = catalogFingerprint(models);
+            const settled = previous !== undefined && fingerprint === previous;
             previous = fingerprint;
             return settled;
           },

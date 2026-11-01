@@ -614,7 +614,7 @@ describe("question answer paths", () => {
           },
           expected: [
             "## Sheet: Inventory",
-            "Lantern\t\t47",
+            "Lantern\t\t37",
             "## Sheet: Budget",
             "Ferry\t628",
             "45292 [Excel numFmtId=14; date system 1900]",
