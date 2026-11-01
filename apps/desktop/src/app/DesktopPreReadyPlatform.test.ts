@@ -156,7 +156,7 @@ describe("DesktopPreReadyPlatform", () => {
         assert.equal(identity.desktopName, "com.vorynixal.T4Code.desktop");
         assert.include(identity.desktopEntry ?? "", "Exec=/Applications/current.AppImage %U");
         assert.include(identity.desktopEntry ?? "", "Name=T4 Code (Stable)");
-        assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/T4CODE;");
+        assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/t4code;");
         assert.include(
           identity.desktopEntry ?? "",
           "Icon=/xdg/icons/com.vorynixal.T4Code.desktop.png",

@@ -42,13 +42,15 @@ describe("vendored libghostty-vt WebAssembly", () => {
     const main = mainResult instanceof WebAssembly.Instance ? mainResult : mainResult.instance;
     const memory = main.exports.memory as WebAssembly.Memory;
     let reply = "";
+    const writePty = (_terminal: number, _userdata: number, pointer: number, length: number) => {
+      reply += new TextDecoder().decode(new Uint8Array(memory.buffer, pointer, length));
+    };
     const trampolineResult = await WebAssembly.instantiate(
       decodeWasmDataUrl(writePtyWasmDataUrl).buffer as ArrayBuffer,
       {
         env: {
-          t4_write_pty: (_terminal: number, _userdata: number, pointer: number, length: number) => {
-            reply += new TextDecoder().decode(new Uint8Array(memory.buffer, pointer, length));
-          },
+          t3_write_pty: writePty,
+          t4_write_pty: writePty,
         },
       },
     );

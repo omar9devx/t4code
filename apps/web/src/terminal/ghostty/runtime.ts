@@ -213,13 +213,15 @@ export class GhosttyRuntime {
     if (!response.ok) {
       throw new Error(`Unable to load the libghostty-vt PTY trampoline (${response.status})`);
     }
+    const writePty = (_terminal: number, userdata: number, pointer: number, length: number) => {
+      const writer = this.ptyWriters.get(userdata);
+      if (!writer || length === 0) return;
+      writer(textDecoder.decode(new Uint8Array(this.memory.buffer, pointer, length)));
+    };
     const result = await WebAssembly.instantiate(await response.arrayBuffer(), {
       env: {
-        t4_write_pty: (_terminal: number, userdata: number, pointer: number, length: number) => {
-          const writer = this.ptyWriters.get(userdata);
-          if (!writer || length === 0) return;
-          writer(textDecoder.decode(new Uint8Array(this.memory.buffer, pointer, length)));
-        },
+        t3_write_pty: writePty,
+        t4_write_pty: writePty,
       },
     });
     const trampoline = result.instance.exports.ghostty_write_pty;
