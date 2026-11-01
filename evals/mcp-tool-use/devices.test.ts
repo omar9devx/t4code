@@ -85,7 +85,7 @@ it.effect("answers device calls with T4 Code's handlers over the case's world", 
     );
     const opened = json((yield* tools.call("device_open", { hostId: MAC, deviceId: IPHONE })).text);
     const { command } = opened.agentDevice;
-    assert.match(command, /^\/home\/user\/\.t3\/userdata\/device\/.+\/agent-device$/);
+    assert.match(command, /^\/home\/user\/\.t4\/userdata\/device\/.+\/agent-device$/);
     assert.include(opened.quickStart, command);
     assert.deepEqual(tools.launchers, [command]);
     // The image never reaches the model; T4 Code's text result has the rest.
@@ -225,8 +225,8 @@ it("prints agent-device's own help for a lone help command on a returned launche
       ?.split("\n$ agent-device help")[0]
       ?.trimEnd();
   // Commands from the paired runs. The simulator once answered the first with a placeholder.
-  const launcher = "/home/user/.t3/userdata/device/bin/agent-device";
-  const target = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-4c43aa31e607633b85e9ff2f`;
+  const launcher = "/home/user/.t4/userdata/device/bin/agent-device";
+  const target = `--platform ios --udid ${IPHONE} --config /home/user/.t4/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-4c43aa31e607633b85e9ff2f`;
   const asked = (command: string) => launcherHelp([launcher], command);
   assert.match(help("") ?? "", /^agent-device <command> \[args\] \[--json\]\n/);
   assert.equal(asked(`${launcher} help ${target}`), help(""));
@@ -331,7 +331,7 @@ it.effect("answers the returned launcher as agent-device does before and after o
 );
 
 const shared = (session: string): LauncherTarget => ({
-  command: "/home/user/.t3/userdata/device/bin/agent-device",
+  command: "/home/user/.t4/userdata/device/bin/agent-device",
   session,
   bound: false,
   deviceId: IPHONE,
@@ -339,7 +339,7 @@ const shared = (session: string): LauncherTarget => ({
   iosSimulator: true,
 });
 const boundTarget: LauncherTarget = {
-  command: "/home/user/.t3/userdata/device/targets/t4-bound/agent-device",
+  command: "/home/user/.t4/userdata/device/targets/t4-bound/agent-device",
   session: "t4-bound",
   bound: true,
   deviceId: IPHONE,
@@ -358,7 +358,7 @@ const errorCode = (
 ) => agentDeviceSessionError(targets, agentDeviceSessions(targets, {}, history), command)?.code;
 
 it("names the session on either ref: the bound launcher's own, or the shared one's --session", () => {
-  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json`;
+  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t4/userdata/device/hosts/x.json`;
   const sharedTargets = [shared("t4-a"), shared("t4-b")];
   // The shared launcher answers each session its flags name; without one, its own check (not
   // modelled) refuses before agent-device runs.
@@ -444,7 +444,7 @@ it("follows the session through aliases, compound calls, snapshots and whole-scr
 it("follows the shared launcher's session through flags held in a variable or an array", () => {
   // Forms Sonnet used with the shared launcher in a live sample.
   const target = shared("t4-a");
-  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t4-a`;
+  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t4/userdata/device/hosts/x.json --session t4-a`;
   const after = (history: ShellCall, targets = [target]) =>
     agentDeviceSessions(targets, {}, [history]).get("t4-a");
   const opened = bash(
@@ -539,7 +539,7 @@ it.effect(
 
 it("keeps a redirection's descriptor out of the app an open names, on either launcher", () => {
   // Sol R10 B1: `open 2>&1` once read as `open 2`, an app the real shell never passes.
-  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t4-a`;
+  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t4/userdata/device/hosts/x.json --session t4-a`;
   for (const [target, args] of [
     [shared("t4-a"), ` ${flags}`],
     [boundTarget, ""],

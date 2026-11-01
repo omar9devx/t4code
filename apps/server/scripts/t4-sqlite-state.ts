@@ -203,8 +203,8 @@ export const runSqliteState = Effect.fn("runSqliteState")(function* (
     ];
     const [canonicalBaseDir, canonicalSharedHomes] = yield* Effect.all([
       fs.realPath(baseDir),
-      Effect.all(
-        sharedHomes.map((home) => fs.realPath(home).pipe(Effect.orElseSucceed(() => home))),
+      Effect.forEach(sharedHomes, (home) =>
+        fs.realPath(home).pipe(Effect.orElseSucceed(() => home)),
       ),
     ]);
     if (canonicalSharedHomes.includes(canonicalBaseDir)) {

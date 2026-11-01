@@ -266,7 +266,7 @@ it("rebuilds the template from this checkout and sends a child T4 Code's task pr
   });
   assert.notInclude(String(child.system[2]?.text), "mcp__t4-code__watch_pull_request");
   assert.notInclude(
-    child.t3.map((tool) => tool.name),
+    child.t4.map((tool) => tool.name),
     "mcp__t4-code__unwatch_pull_request",
   );
   const reminders = buildMessages(makeSample(childCase, base))[0]?.content.map((b) => b.text);
@@ -287,11 +287,11 @@ it("lists link tools only while a case turns the beta on, and sends chips as T4 
     links: true,
   });
   assert.notInclude(
-    off.t3.map((tool) => tool.name),
+    off.t4.map((tool) => tool.name),
     "mcp__t4-code__t4_environment_link",
   );
   assert.include(
-    on.t3.map((tool) => tool.name),
+    on.t4.map((tool) => tool.name),
     "mcp__t4-code__t4_environment_link",
   );
 

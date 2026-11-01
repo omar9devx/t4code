@@ -487,7 +487,7 @@ const t4ContextReport = (model: Model) => {
   const descriptions = t4tools.reduce((sum, tool) => sum + valueText(tool.description).length, 0);
   const schemas = JSON.stringify(t4tools).length;
   return [
-    `- T4 context: system text ${size((isCodex(model) ? JSON.stringify(buildCodexAdditionalContext({ model }, { browser: true, device: true })) : t4SystemAppend(model)).length)}`,
+    `- T4 context: system text ${size((isCodex(model) ? JSON.stringify(buildCodexAdditionalContext({ model }, { browser: true, device: true, computerUse: true })) : t4SystemAppend(model)).length)}`,
     `tool descriptions ${size(descriptions)}`,
     `full tool schemas ${size(schemas)} across ${t4tools.length} tools.`,
   ].join(", ");
@@ -645,7 +645,7 @@ const buildCodexBase = (
   });
   const context = buildCodexAdditionalContext(
     { model: options.model, reasoningEffort: effort },
-    { browser: true, device: options.deviceAccess ?? true },
+    { browser: true, device: options.deviceAccess ?? true, computerUse: false },
   );
   input.push(
     ...Object.entries(context).map(([key, entry]) => message(`<${key}>${entry.value}</${key}>`)),

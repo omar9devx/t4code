@@ -473,7 +473,7 @@ export const runMigrateDevDb = Effect.fn("runMigrateDevDb")(function* (
   ];
   const [canonicalBaseDir, canonicalSharedHomes] = yield* Effect.all([
     fs.realPath(baseDir).pipe(Effect.orElseSucceed(() => baseDir)),
-    Effect.all(sharedHomes.map((home) => fs.realPath(home).pipe(Effect.orElseSucceed(() => home)))),
+    Effect.forEach(sharedHomes, (home) => fs.realPath(home).pipe(Effect.orElseSucceed(() => home))),
   ]);
   if (canonicalSharedHomes.includes(canonicalBaseDir)) {
     return yield* new MigrateDevDbSharedHomeError();

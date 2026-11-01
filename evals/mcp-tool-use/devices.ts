@@ -816,6 +816,18 @@ export const makeDeviceTools = Effect.fn("evaluateMcpToolUse.makeDeviceTools")(f
     protocolVersion: "2025-06-18",
     clientCapabilities: {},
   });
+  const client = McpSchema.McpServerClient.of({
+    clientId: 0,
+    clientCapabilities: {},
+    clientInfo: { name: "mcp-tool-use-eval", version: "1.0.0" },
+    protocolVersion: "2025-06-18",
+    initializePayload: {
+      protocolVersion: "2025-06-18",
+      capabilities: {},
+      clientInfo: { name: "mcp-tool-use-eval", version: "1.0.0" },
+    },
+    getClient: Effect.die("unused"),
+  });
   const launchers: Array<string> = [];
   const targets: Array<LauncherTarget> = [];
   const call = Effect.fn("evaluateMcpToolUse.deviceCall")(function* (
@@ -829,6 +841,7 @@ export const makeDeviceTools = Effect.fn("evaluateMcpToolUse.makeDeviceTools")(f
     const result = yield* entry.handle(input).pipe(
       Effect.provideService(McpInvocationContext.McpInvocationContext, scope),
       Effect.provideService(McpSchema.McpRequestContext, request),
+      Effect.provideService(McpSchema.McpServerClient, client),
       Effect.provideService(HostProcess.ExecutablePath, NODE),
       Effect.provideService(HostProcess.Platform, environment.platform as NodeJS.Platform),
       Effect.provideService(Injected, failure),
