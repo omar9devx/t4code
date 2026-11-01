@@ -13,8 +13,8 @@ import * as Scope from "effect/Scope";
 import * as Electron from "electron";
 
 export const DESKTOP_HOST = "app";
-const DESKTOP_PRODUCTION_SCHEME = "T4CODE";
-const DESKTOP_DEVELOPMENT_SCHEME = "T4CODE-dev";
+const DESKTOP_PRODUCTION_SCHEME = "t4code";
+const DESKTOP_DEVELOPMENT_SCHEME = "t4code-dev";
 
 export function getDesktopScheme(isDevelopment: boolean): string {
   return isDevelopment ? DESKTOP_DEVELOPMENT_SCHEME : DESKTOP_PRODUCTION_SCHEME;

@@ -6,7 +6,7 @@ import * as Path from "effect/Path";
 
 import { resolveUserDataPath } from "./DesktopUserData.ts";
 
-it.effect.each(["vorynixal-t4code", "Vorynixal T4 Code"])(
+it.effect.each(["t4code", "Vorynixal T4 Code"])(
   "preserves Windows credential keys from %s without copying browser databases",
   (sourceName) =>
     Effect.gen(function* () {

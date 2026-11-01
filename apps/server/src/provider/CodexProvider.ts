@@ -44,7 +44,6 @@ import {
 import {
   buildServerProvider,
   COMPACT_SLASH_COMMAND,
-  DEFAULT_TIMEOUT_MS,
   providerModelsFromSettings,
   spawnAndCollect,
   type ServerProviderDraft,
@@ -642,7 +641,7 @@ const probeCodexCliVersion = Effect.fn("probeCodexCliVersion")(
     if (result.code !== 0) return null;
     return CODEX_CLI_VERSION_PATTERN.exec(result.stdout)?.[1] ?? null;
   },
-  Effect.timeoutOption(Duration.millis(DEFAULT_TIMEOUT_MS)),
+  Effect.timeoutOption(Duration.millis(CODEX_CONFIG_PROBE_TIMEOUT_MS)),
   Effect.map(Option.getOrNull),
   Effect.catch((cause) =>
     Effect.logDebug("Codex --version fallback failed.", { cause }).pipe(Effect.as(null)),

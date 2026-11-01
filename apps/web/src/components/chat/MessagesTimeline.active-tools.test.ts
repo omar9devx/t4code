@@ -31,6 +31,7 @@ describe("long active tool groups", () => {
         turnDiffSummaries: [],
         supportsConversationRollback: false,
         expandedWorkGroupIds: new Set(expanded ? ["work-group:work-entry-0"] : []),
+        collapsedWorkGroupIds: new Set(expanded ? [] : ["work-group:work-entry-0"]),
       });
       const live = rows.find((row) => row.kind === "work-live");
       expect(live).toBeDefined();

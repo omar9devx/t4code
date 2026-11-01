@@ -10,8 +10,8 @@ describe("resolveClerkSignInProps", () => {
         true,
       ),
     ).toEqual({
-      forceRedirectUrl: "T4CODE://app/#/settings/connections",
-      signUpForceRedirectUrl: "T4CODE://app/#/settings/connections",
+      forceRedirectUrl: "t4code://app/#/settings/connections",
+      signUpForceRedirectUrl: "t4code://app/#/settings/connections",
     });
   });
 });

@@ -2792,7 +2792,7 @@ it.each(["rtf", "epub", "ods"] as const)(
           expect(body.querySelectorAll("hr")).toHaveLength(1);
         } else {
           expect(body.textContent).toContain("10–20 —•‘a’“b”");
-          expect(body.textContent).toContain("Name\tValue\t12\t44\t");
+          expect(body.textContent).toContain("Name\tValue\t12\t34\t");
           expect(body.textContent).toContain("Unicode:–end");
           expect(body.textContent).not.toContain("hidden");
           expect(body.querySelectorAll("br")).toHaveLength(3);

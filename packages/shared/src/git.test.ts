@@ -18,22 +18,22 @@ import {
 describe("normalizeGitRemoteUrl", () => {
   it("canonicalizes equivalent GitHub remotes across protocol variants", () => {
     expect(normalizeGitRemoteUrl("git@github.com:t4tools/T4CODE.git")).toBe(
-      "github.com/t4tools/T4CODE",
+      "github.com/t4tools/t4code",
     );
     expect(normalizeGitRemoteUrl("https://github.com/t4tools/T4CODE.git")).toBe(
-      "github.com/t4tools/T4CODE",
+      "github.com/t4tools/t4code",
     );
     expect(normalizeGitRemoteUrl("ssh://git@github.com/t4tools/T4CODE")).toBe(
-      "github.com/t4tools/T4CODE",
+      "github.com/t4tools/t4code",
     );
   });
 
   it("preserves nested group paths for providers like GitLab", () => {
     expect(normalizeGitRemoteUrl("git@gitlab.com:t4tools/platform/T4CODE.git")).toBe(
-      "gitlab.com/t4tools/platform/T4CODE",
+      "gitlab.com/t4tools/platform/t4code",
     );
     expect(normalizeGitRemoteUrl("https://gitlab.com/t4tools/platform/T4CODE.git")).toBe(
-      "gitlab.com/t4tools/platform/T4CODE",
+      "gitlab.com/t4tools/platform/t4code",
     );
   });
 

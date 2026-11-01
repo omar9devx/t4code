@@ -140,7 +140,7 @@ describe("DesktopClerk", () => {
       name: "development",
       isDevelopment: true,
       platform: "win32" as const,
-      userData: "/tmp/app-data/T4CODE-dev",
+      userData: "/tmp/app-data/vorynixal-t4code-dev",
     },
   ])(
     "creates the bridge before startup can yield to the event loop ($name)",
@@ -317,19 +317,19 @@ it.effect(
       const clerk = yield* DesktopClerk.DesktopClerk;
       yield* clerk.configure;
       const event = { preventDefault: vi.fn() };
-      listeners.get("open-url")!(event, "T4CODE-dev://app/auth/callback?code=clerk-code");
-      listeners.get("open-url")!(event, "T4CODE://app/welcome");
+      listeners.get("open-url")!(event, "t4code-dev://app/auth/callback?code=clerk-code");
+      listeners.get("open-url")!(event, "t4code://app/welcome");
       assert.equal(loadURL.mock.calls.length, 0);
       assert.equal(event.preventDefault.mock.calls.length, 0);
       listeners.get("second-instance")!({}, [
         "t4",
-        "T4CODE-dev://app/settings/providers?instanceId=work&code=never-forward",
+        "t4code-dev://app/settings/providers?instanceId=work&code=never-forward",
       ]);
       yield* Effect.promise(() => revealed.promise);
       assert.deepEqual(loadURL.mock.calls, [
-        ["T4CODE-dev://app/settings/providers?instanceId=work"],
+        ["t4code-dev://app/settings/providers?instanceId=work"],
       ]);
-      listeners.get("open-url")!(event, "T4CODE-dev://app/welcome#agents:machine-id");
+      listeners.get("open-url")!(event, "t4code-dev://app/welcome#agents:machine-id");
       assert.equal(event.preventDefault.mock.calls.length, 1);
     }).pipe(
       Effect.scoped,

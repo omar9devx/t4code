@@ -155,7 +155,7 @@ describe("linkCreatedPullRequest", () => {
           commandId: "server:pr-created-link:test",
           threadId: THREAD_ID,
           host: "github.com",
-          repository: "t4tools/T4CODE",
+          repository: "t4tools/t4code",
           number: 42,
           url: "https://github.com/t4tools/T4CODE/pull/42",
           source: "created",
