@@ -14,7 +14,7 @@ describe("Azure DevOps change request URLs", () => {
   it("reads both hosted URL forms", () => {
     expect(parse("https://dev.azure.com/acme/platform/_git/T4CODE/pullrequest/17")).toEqual({
       host: "dev.azure.com",
-      repository: "acme/platform/_git/T4CODE",
+      repository: "acme/platform/_git/t4code",
       number: 17,
       repositoryUrl: "https://dev.azure.com/acme/platform/_git/T4CODE",
     });
@@ -22,7 +22,7 @@ describe("Azure DevOps change request URLs", () => {
       parse("https://acme.visualstudio.com/platform/_git/T4CODE/pullrequest/17"),
     ).toMatchObject({
       host: "acme.visualstudio.com",
-      repository: "platform/_git/T4CODE",
+      repository: "platform/_git/t4code",
       number: 17,
     });
   });
@@ -132,7 +132,7 @@ describe("Azure DevOps repository keys", () => {
       "https://t4tools@dev.azure.com/t4tools/Platform/_git/T4CODE",
     ]) {
       expect(registry.repositoryKeyFromRemote(remote), remote).toBe(
-        "dev.azure.com/t4tools/platform/_git/T4CODE",
+        "dev.azure.com/t4tools/platform/_git/t4code",
       );
     }
   });
@@ -143,7 +143,7 @@ describe("Azure DevOps repository keys", () => {
       "https://t4tools.visualstudio.com/Platform/_git/T4CODE",
     ]) {
       expect(registry.repositoryKeyFromRemote(remote), remote).toBe(
-        "t4tools.visualstudio.com/platform/_git/T4CODE",
+        "t4tools.visualstudio.com/platform/_git/t4code",
       );
     }
   });
