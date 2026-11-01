@@ -2858,10 +2858,12 @@ export const layerWsRpc = (
                   commandId: mutation.commandId,
                   message:
                     cause._tag === "ProjectNotEmptyError"
-                      ? cause.message
+                      ? "This project still contains threads. Move or delete them before deleting the project."
                       : cause._tag === "ProjectConflictError"
                         ? "This workspace is already added to another project. Open that project or choose a different workspace."
-                        : "Failed to mutate project.",
+                        : cause._tag === "ProjectNotFoundError"
+                          ? "This project no longer exists. Refresh the project list and try again."
+                          : "Failed to mutate project.",
                   cause,
                 }),
             ),
