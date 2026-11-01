@@ -1,5 +1,5 @@
 import { assert, it } from "@effect/vitest";
-import { ProviderDriverKind, ProviderInstanceId } from "@t3tools/contracts";
+import { ProviderDriverKind, ProviderInstanceId } from "@t4tools/contracts";
 
 import { decideProviderSessionTransition } from "./ProviderSessionTransitionPolicy.ts";
 

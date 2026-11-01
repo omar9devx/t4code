@@ -5,9 +5,9 @@ import {
   normalizeDevinToolCall,
   extractDevinSubagentUpdate,
   makeAcpRegistryAdapterV2,
-} from "@t3tools/provider-acp-registry/testing";
-import { AcpRegistrySettings } from "@t3tools/provider-acp-registry/settings";
-import { AcpRegistryCatalog } from "@t3tools/provider-acp-registry/server/AcpRegistrySupport";
+} from "@t4tools/provider-acp-registry/testing";
+import { AcpRegistrySettings } from "@t4tools/provider-acp-registry/settings";
+import { AcpRegistryCatalog } from "@t4tools/provider-acp-registry/server/AcpRegistrySupport";
 import { decodeAcpReplayTranscript, makeAcpReplayRuntime } from "./AcpAdapterV2.testkit.ts";
 // @effect-diagnostics nodeBuiltinImport:off
 import * as NodeFS from "node:fs";
@@ -28,11 +28,11 @@ import {
   type OrchestrationV2TurnItem,
   type ProviderOptionDescriptor,
   type ProviderUserInputAnswers,
-} from "@t3tools/contracts";
-import { GrokSettings } from "@t3tools/provider-grok/settings";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { deriveBlockedOnThreadWait } from "@t3tools/shared/orchestrationV2PendingBackgroundWork";
-import { resolveSelfInvocation } from "@t3tools/shared/nodeRuntime";
+} from "@t4tools/contracts";
+import { GrokSettings } from "@t4tools/provider-grok/settings";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { deriveBlockedOnThreadWait } from "@t4tools/shared/orchestrationV2PendingBackgroundWork";
+import { resolveSelfInvocation } from "@t4tools/shared/nodeRuntime";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";
 import type * as Duration from "effect/Duration";
@@ -55,26 +55,26 @@ import * as EffectAcpErrors from "effect-acp/errors";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
 import type * as EffectAcpSchema from "effect-acp/compat";
 
-import { writeFakeCli } from "@t3tools/provider-testing/fakeCli";
-import * as TestProviderHost from "@t3tools/provider-testing/TestProviderHost";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
-import * as AcpSessionRuntime from "@t3tools/provider-acp/server/AcpSessionRuntime";
+import { writeFakeCli } from "@t4tools/provider-testing/fakeCli";
+import * as TestProviderHost from "@t4tools/provider-testing/TestProviderHost";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
+import * as AcpSessionRuntime from "@t4tools/provider-acp/server/AcpSessionRuntime";
 import {
   ACP_EMPTY_OPTION_VALUE,
   ACP_SESSION_MODE_OPTION_ID,
   acpProviderOptionDescriptors,
-} from "@t3tools/provider-acp/server/sessionConfig";
+} from "@t4tools/provider-acp/server/sessionConfig";
 import {
   extractXAiAcpSubagentUpdate,
   makeGrokAdapterV2,
   makeXAiPromptCompletionRuntime,
   normalizeXAiAcpToolCallState,
   registerXAiBackgroundTaskTracking,
-} from "@t3tools/provider-grok/testing";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
-import * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
+} from "@t4tools/provider-grok/testing";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
+import * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
 import { makeTurnInput } from "./AcpAdapterV2.testkit.ts";
-import type * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
+import type * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
 import {
   AcpProviderCapabilitiesV2,
   acpPerTurnPromptUsage,
@@ -87,15 +87,15 @@ import {
   type AcpAdapterV2Flavor,
   type AcpAdapterV2RuntimeInput,
   type AcpAdapterV2SubagentUpdate,
-} from "@t3tools/provider-acp/server/adapter";
+} from "@t4tools/provider-acp/server/adapter";
 
 import { appendUserInputAttachmentPaths } from "../../provider/userInputAttachments.ts";
 
-import { makeGrokAcpAdapterFlavor } from "@t3tools/provider-grok/testing";
+import { makeGrokAcpAdapterFlavor } from "@t4tools/provider-grok/testing";
 import {
   acpRegistryPromptFailure,
   registerMistralVibeAcpExtensions,
-} from "@t3tools/provider-acp-registry/testing";
+} from "@t4tools/provider-acp-registry/testing";
 
 const DEFAULT_GROK_SETTINGS = Schema.decodeSync(GrokSettings)({});
 const DROID_SETTINGS = Schema.decodeSync(AcpRegistrySettings)({ agentId: "factory-droid" });
@@ -348,7 +348,7 @@ function makeMockRuntime(input: {
             args: [input.mockAgentPath],
             cwd: runtimeInput.cwd,
             env: {
-              T3_ACP_SESSION_LIFECYCLE: "1",
+              T4_ACP_SESSION_LIFECYCLE: "1",
               ...(typeof input.environment === "function"
                 ? input.environment(runtimeOrdinal)
                 : input.environment),
@@ -1265,7 +1265,7 @@ describe("AcpAdapterV2", () => {
               mockAgentPath: yield* path.fromFileUrl(
                 new URL("../../../scripts/acp-mock-agent.ts", import.meta.url),
               ),
-              environment: { T3_ACP_IDLE_ERROR: details },
+              environment: { T4_ACP_IDLE_ERROR: details },
             }),
           },
         });
@@ -1454,7 +1454,7 @@ describe("AcpAdapterV2", () => {
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      const directory = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-droid-form-" });
+      const directory = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-droid-form-" });
       const statusPath = path.join(directory, "status.json");
       const expectedResult = typeof result === "function" ? result(directory) : result;
       let preparedAnswers: ProviderUserInputAnswers | undefined = answers;
@@ -1645,7 +1645,7 @@ describe("AcpAdapterV2", () => {
               mockAgentPath: yield* path.fromFileUrl(
                 new URL("../../../scripts/acp-mock-agent.ts", import.meta.url),
               ),
-              environment: { T3_ACP_VIBE_RETRY_OUTCOME: outcome },
+              environment: { T4_ACP_VIBE_RETRY_OUTCOME: outcome },
             }),
           },
         });
@@ -1716,14 +1716,14 @@ describe("AcpAdapterV2", () => {
     { modeIds: "plain", environment: {}, planModeId: "architect", buildModeId: "ask" },
     {
       modeIds: "Copilot URL",
-      environment: { T3_ACP_COPILOT_MODES: "1" },
+      environment: { T4_ACP_COPILOT_MODES: "1" },
       planModeId: "https://agentclientprotocol.com/protocol/session-modes#plan",
       buildModeId: "https://agentclientprotocol.com/protocol/session-modes#agent",
     },
     {
-      // Without a `mode` category, T3 derives no mode state and only the config option switches.
+      // Without a `mode` category, T4 derives no mode state and only the config option switches.
       modeIds: "Copilot URL collaboration_mode",
-      environment: { T3_ACP_COPILOT_MODES: "1", T3_ACP_MODE_OPTION_CATEGORY: "collaboration_mode" },
+      environment: { T4_ACP_COPILOT_MODES: "1", T4_ACP_MODE_OPTION_CATEGORY: "collaboration_mode" },
       planModeId: "https://agentclientprotocol.com/protocol/session-modes#plan",
       buildModeId: "https://agentclientprotocol.com/protocol/session-modes#agent",
     },
@@ -1831,12 +1831,12 @@ describe("AcpAdapterV2", () => {
 
         const command = yield* runTurn(0, defaultPolicy, "/compact");
         assert.isTrue(command.prompt.startsWith("/compact"));
-        assert.notInclude(command.prompt, "<t4_code_instructions>");
+        assert.notInclude(command.prompt, "<T4_code_instructions>");
         assert.equal(command.textBlockCount, 1);
         const whitespaceCommand = yield* runTurn(1, defaultPolicy, "  /repro-skill");
         assert.equal(whitespaceCommand.prompt, "  /repro-skill");
         assert.equal(whitespaceCommand.textBlockCount, 1);
-        assert.notInclude(whitespaceCommand.prompt, "<t4_code_instructions>");
+        assert.notInclude(whitespaceCommand.prompt, "<T4_code_instructions>");
         const firstDefault = yield* runTurn(2, defaultPolicy, "First default request.");
         assert.equal(firstDefault.textBlockCount, 2);
         assert.include(firstDefault.prompt, "T4 Code interaction mode: Default");
@@ -1881,7 +1881,7 @@ describe("AcpAdapterV2", () => {
     () =>
       Effect.gen(function* () {
         const runTurn = yield* makeInstructionCompactionHarness({
-          T3_ACP_COMPACTION_PROMPT_ORDINALS: "2,4",
+          T4_ACP_COMPACTION_PROMPT_ORDINALS: "2,4",
         });
         yield* runTurn("Start work.");
         yield* runTurn("Continue until context compacts.");
@@ -1905,7 +1905,7 @@ describe("AcpAdapterV2", () => {
     () =>
       Effect.gen(function* () {
         const runTurn = yield* makeInstructionCompactionHarness({
-          T3_ACP_FAIL_PROMPT_ORDINAL: "2",
+          T4_ACP_FAIL_PROMPT_ORDINAL: "2",
         });
         yield* runTurn("Start work.");
         assert.deepEqual(yield* runTurn("/compact", "failed"), [
@@ -1941,7 +1941,7 @@ describe("AcpAdapterV2", () => {
             childProcessSpawner,
             mockAgentPath,
             protocolEvents,
-            environment: { T3_ACP_FAIL_SET_MODE_CONFIG_OPTION: "1" },
+            environment: { T4_ACP_FAIL_SET_MODE_CONFIG_OPTION: "1" },
           }),
         },
         selfInvocation: yield* resolveSelfInvocation(),
@@ -2051,8 +2051,8 @@ describe("AcpAdapterV2", () => {
                         title: "Wait for the child",
                         status: "in_progress",
                         rawInput: {
-                          server: "t3-code",
-                          tool: "t3_thread_wait",
+                          server: "t4-code",
+                          tool: "T4_thread_wait",
                           arguments: { threadId: "child" },
                         },
                         _meta: { is_mcp_tool_call: true },
@@ -2670,7 +2670,7 @@ describe("AcpAdapterV2", () => {
           (item) =>
             item.threadId === task?.childThreadId &&
             item.type === "dynamic_tool" &&
-            item.toolName === "t3-code.task_status",
+            item.toolName === "t4-code.task_status",
         ),
       );
       const childMcp = items.find(
@@ -2941,7 +2941,7 @@ describe("AcpAdapterV2", () => {
             childProcessSpawner,
             mockAgentPath,
             protocolEvents,
-            environment: { T3_ACP_EMIT_NOTICE: "1" },
+            environment: { T4_ACP_EMIT_NOTICE: "1" },
           }),
         },
         selfInvocation,
@@ -3023,7 +3023,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_V2_FIDELITY: "1" },
+            environment: { T4_ACP_EMIT_V2_FIDELITY: "1" },
             wrapRuntime: (runtime) => ({
               ...runtime,
               handleSessionUpdate: (handler) =>
@@ -3164,7 +3164,7 @@ describe("AcpAdapterV2", () => {
       assert.deepEqual(webItem("grok-web-search", "completed"), {
         title: "Web search: T4 Code",
         patterns: ["T4 Code"],
-        results: [{ url: "https://t3.codes" }, { url: "https://github.com/pingdotgg/t3code" }],
+        results: [{ url: "https://t3.codes" }, { url: "https://github.com/omar9devx/t4code" }],
       });
       assert.deepEqual(webItem("grok-web-fetch", "completed")?.results, [
         { url: "https://t3.codes", snippet: "T4 Code page" },
@@ -3218,7 +3218,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_TERMINAL_OUTPUT_BYTES: String(1024 * 1024) },
+            environment: { T4_ACP_EMIT_TERMINAL_OUTPUT_BYTES: String(1024 * 1024) },
           }),
         },
         selfInvocation: yield* resolveSelfInvocation(),
@@ -3461,7 +3461,7 @@ describe("AcpAdapterV2", () => {
             mockAgentPath,
             protocolEvents,
             environment: (runtimeOrdinal) =>
-              runtimeOrdinal === 1 ? { T3_ACP_FAIL_LOAD_SESSION: "1" } : {},
+              runtimeOrdinal === 1 ? { T4_ACP_FAIL_LOAD_SESSION: "1" } : {},
           }),
         },
         selfInvocation,
@@ -3834,16 +3834,16 @@ describe("AcpAdapterV2", () => {
         mcpServers: [
           {
             type: "stdio",
-            name: "t3-code",
+            name: "t4-code",
             command: process.execPath,
             args: [
-              process.argv[1] === undefined ? "t3" : NodePath.resolve(process.argv[1]),
+              process.argv[1] === undefined ? "t4" : NodePath.resolve(process.argv[1]),
               "acp-mcp-bridge",
             ],
             env: [
               { name: "ELECTRON_RUN_AS_NODE", value: "1" },
-              { name: "T3_ACP_MCP_ENDPOINT", value: "http://127.0.0.1:43123/mcp" },
-              { name: "T3_ACP_MCP_AUTHORIZATION", value: "Bearer target-thread-token" },
+              { name: "T4_ACP_MCP_ENDPOINT", value: "http://127.0.0.1:43123/mcp" },
+              { name: "T4_ACP_MCP_AUTHORIZATION", value: "Bearer target-thread-token" },
             ],
           },
         ],
@@ -3864,7 +3864,7 @@ describe("AcpAdapterV2", () => {
         {
           sessionId: "mock-child-session-without-credential-scope",
           command: process.execPath,
-          args: ["-e", "process.stdout.write(process.env.T3_ACP_MCP_AUTHORIZATION ?? '')"],
+          args: ["-e", "process.stdout.write(process.env.T4_ACP_MCP_AUTHORIZATION ?? '')"],
         },
         { requestId: "test-unknown-terminal-create", method: "terminal/create" },
       );
@@ -3888,7 +3888,7 @@ describe("AcpAdapterV2", () => {
         {
           sessionId: "mock-session-1-fork",
           command: process.execPath,
-          args: ["-e", "process.stdout.write(process.env.T3_ACP_MCP_AUTHORIZATION ?? '')"],
+          args: ["-e", "process.stdout.write(process.env.T4_ACP_MCP_AUTHORIZATION ?? '')"],
         },
         { requestId: "test-terminal-create", method: "terminal/create" },
       );
@@ -3922,7 +3922,7 @@ describe("AcpAdapterV2", () => {
           new URL("../../../scripts/acp-mock-agent.ts", import.meta.url),
         );
         const workspace = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-acp-no-client-fs-",
+          prefix: "t4-acp-no-client-fs-",
         });
         const probePath = path.join(workspace, "planted.txt");
         const probeLogPath = path.join(workspace, "fs-probe.jsonl");
@@ -3938,8 +3938,8 @@ describe("AcpAdapterV2", () => {
               mockAgentPath,
               protocolEvents,
               environment: {
-                T3_ACP_CLIENT_FS_PROBE_PATH: probePath,
-                T3_ACP_CLIENT_FS_PROBE_LOG_PATH: probeLogPath,
+                T4_ACP_CLIENT_FS_PROBE_PATH: probePath,
+                T4_ACP_CLIENT_FS_PROBE_LOG_PATH: probeLogPath,
               },
             }),
           },
@@ -4018,7 +4018,7 @@ describe("AcpAdapterV2", () => {
       const makeRuntime = makeMockRuntime({
         childProcessSpawner,
         mockAgentPath,
-        environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+        environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
         wrapRuntime: (runtime) => ({
           ...runtime,
           handleRequestPermission: (handler) =>
@@ -4159,7 +4159,7 @@ describe("AcpAdapterV2", () => {
       const makeRuntime = makeMockRuntime({
         childProcessSpawner,
         mockAgentPath,
-        environment: { T3_ACP_EMIT_TRACKED_TOOL_CALL_KIND_THEN_HANG: kind },
+        environment: { T4_ACP_EMIT_TRACKED_TOOL_CALL_KIND_THEN_HANG: kind },
         wrapRuntime: (runtime) => ({
           ...runtime,
           handleRequestPermission: (handler) =>
@@ -4306,7 +4306,7 @@ describe("AcpAdapterV2", () => {
       const makeRuntime = makeMockRuntime({
         childProcessSpawner,
         mockAgentPath,
-        environment: { T3_ACP_PROMPT_DELAY_MS: "100" },
+        environment: { T4_ACP_PROMPT_DELAY_MS: "100" },
       });
       const adapter = yield* makeAcpAdapterV2({
         instanceId,
@@ -4391,7 +4391,7 @@ describe("AcpAdapterV2", () => {
       assert.isString(rolledBack.providerThread.nativeThreadRef?.nativeId);
       assert.deepEqual(rolledBack.providerTurns, []);
       assert.equal(
-        runtimeInputs[1]?.processEnvironment?.T3_ACP_MCP_AUTHORIZATION,
+        runtimeInputs[1]?.processEnvironment?.T4_ACP_MCP_AUTHORIZATION,
         "Bearer rollback-target-token",
       );
       const replacementMcpServer = runtimeInputs[1]?.mcpServers[0];
@@ -4402,7 +4402,7 @@ describe("AcpAdapterV2", () => {
           ? replacementMcpServer.env
           : undefined;
       assert.equal(
-        replacementMcpEnvironment?.find((variable) => variable.name === "T3_ACP_MCP_AUTHORIZATION")
+        replacementMcpEnvironment?.find((variable) => variable.name === "T4_ACP_MCP_AUTHORIZATION")
           ?.value,
         "Bearer rollback-target-token",
       );
@@ -4610,7 +4610,7 @@ describe("AcpAdapterV2", () => {
           makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_IDLE_ERROR: "grok-background" },
+            environment: { T4_ACP_IDLE_ERROR: "grok-background" },
           })(input).pipe(Effect.flatMap(makeXAiPromptCompletionRuntime)),
       });
       const threadId = ThreadId.make("grok-idle-error-background");
@@ -4680,7 +4680,7 @@ describe("AcpAdapterV2", () => {
             makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_GROK_BACKGROUND_TASK_COMPLETION: "poll" },
+              environment: { T4_ACP_GROK_BACKGROUND_TASK_COMPLETION: "poll" },
             })(input).pipe(Effect.flatMap(makeXAiPromptCompletionRuntime)),
         });
         const threadId = ThreadId.make("grok-background-completion");
@@ -4863,7 +4863,7 @@ describe("AcpAdapterV2", () => {
             makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_GROK_KILL_TASK_SHAPE: shape },
+              environment: { T4_ACP_GROK_KILL_TASK_SHAPE: shape },
             })(input).pipe(Effect.flatMap(makeXAiPromptCompletionRuntime)),
         });
         const threadId = ThreadId.make("grok-kill-completion");
@@ -4947,7 +4947,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_EMPTY_DEFAULT_AGENT_OPTION: "1" },
+            environment: { T4_ACP_EMIT_EMPTY_DEFAULT_AGENT_OPTION: "1" },
             protocolEvents,
           }),
           onSessionConfigurationUpdate: (configOptions, modeState) =>
@@ -5047,7 +5047,7 @@ describe("AcpAdapterV2", () => {
             childProcessSpawner,
             mockAgentPath,
             environment: (runtimeOrdinal) =>
-              runtimeOrdinal === 1 ? { T3_ACP_EMIT_EMPTY_SUCCESSFUL_BASH_THEN_HANG: "1" } : {},
+              runtimeOrdinal === 1 ? { T4_ACP_EMIT_EMPTY_SUCCESSFUL_BASH_THEN_HANG: "1" } : {},
             ownDetachedProcessGroup: true,
             protocolEvents,
           }),
@@ -5186,7 +5186,7 @@ describe("AcpAdapterV2", () => {
             mockAgentPath: yield* path.fromFileUrl(
               new URL("../../../scripts/acp-mock-agent.ts", import.meta.url),
             ),
-            environment: { T3_ACP_COMPLETE_FIRST_PROMPT_ON_CANCEL: "1" },
+            environment: { T4_ACP_COMPLETE_FIRST_PROMPT_ON_CANCEL: "1" },
             protocolEvents,
             cancelBehavior: "wait-for-prompt",
             wrapRuntime: (runtime) => {
@@ -5293,7 +5293,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_TOOL_CALLS: "1" },
+            environment: { T4_ACP_EMIT_TOOL_CALLS: "1" },
             wrapCancel: (cancel) => Deferred.await(releaseCancel).pipe(Effect.andThen(cancel)),
           }),
         },
@@ -5388,7 +5388,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_TOOL_CALLS: "1" },
+            environment: { T4_ACP_EMIT_TOOL_CALLS: "1" },
             wrapOutgoingResponse: (onOutgoingResponse) => (requestId) =>
               Deferred.succeed(responseEnqueued, undefined).pipe(
                 Effect.andThen(Deferred.await(releaseResponseAcknowledgement)),
@@ -5478,7 +5478,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_MCP_TOOL_APPROVAL_ELICITATION: "1" },
+            environment: { T4_ACP_EMIT_MCP_TOOL_APPROVAL_ELICITATION: "1" },
           }),
         },
         selfInvocation,
@@ -5543,7 +5543,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_TOOL_CALLS: "1" },
+            environment: { T4_ACP_EMIT_TOOL_CALLS: "1" },
             wrapOutgoingResponse: (onOutgoingResponse) => (requestId) =>
               Deferred.succeed(responseWritten, undefined).pipe(
                 Effect.andThen(Deferred.await(releaseResponseAcknowledgement)),
@@ -5646,7 +5646,7 @@ describe("AcpAdapterV2", () => {
             childProcessSpawner,
             mockAgentPath,
             ownDetachedProcessGroup: true,
-            environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+            environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
             protocolEvents,
           }),
         },
@@ -5750,7 +5750,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+            environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
           }),
         },
         selfInvocation,
@@ -5850,7 +5850,7 @@ describe("AcpAdapterV2", () => {
             makeRuntime: makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+              environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
             }),
           },
           selfInvocation,
@@ -6018,7 +6018,7 @@ describe("AcpAdapterV2", () => {
               makeRuntime: makeMockRuntime({
                 childProcessSpawner,
                 mockAgentPath,
-                environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+                environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
                 wrapRuntime: (runtime) => ({
                   ...runtime,
                   handleSessionUpdate: (handler) =>
@@ -6203,7 +6203,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+            environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
             protocolEvents,
             wrapRuntime: (runtime) => ({
               ...runtime,
@@ -6449,7 +6449,7 @@ describe("AcpAdapterV2", () => {
             makeRuntime: makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+              environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
               wrapRuntime: (runtime) => ({
                 ...runtime,
                 handleSessionUpdate: (handler) =>
@@ -6745,7 +6745,7 @@ describe("AcpAdapterV2", () => {
               mockAgentPath,
               environment: (runtimeOrdinal) => {
                 runtimeOrdinalSeen = Math.max(runtimeOrdinalSeen, runtimeOrdinal);
-                return { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" };
+                return { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" };
               },
               wrapCancel: (cancel) =>
                 Effect.sync(() => {
@@ -6872,7 +6872,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+            environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
             protocolEvents,
           }),
         },
@@ -6961,7 +6961,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+            environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
             ownDetachedProcessGroup: true,
             protocolEvents,
           }),
@@ -7097,7 +7097,7 @@ describe("AcpAdapterV2", () => {
               childProcessSpawner,
               mockAgentPath,
               environment: {
-                T3_ACP_EMIT_IN_TURN_TASKOUTPUT_THEN_LATE_DUPLICATE: "1",
+                T4_ACP_EMIT_IN_TURN_TASKOUTPUT_THEN_LATE_DUPLICATE: "1",
               },
               protocolEvents,
             }),
@@ -7441,7 +7441,7 @@ describe("AcpAdapterV2", () => {
             makeRuntime: makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+              environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
               protocolEvents,
               wrapRuntime: (runtime) => ({
                 ...runtime,
@@ -7670,7 +7670,7 @@ describe("AcpAdapterV2", () => {
             makeRuntime: makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+              environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
               protocolEvents,
               wrapRuntime: (runtime) => ({
                 ...runtime,
@@ -7988,7 +7988,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+            environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
             wrapRuntime: (runtime) => ({
               ...runtime,
               handleSessionUpdate: (handler) =>
@@ -8347,7 +8347,7 @@ describe("AcpAdapterV2", () => {
           makeRuntime: makeMockRuntime({
             childProcessSpawner,
             mockAgentPath,
-            environment: { T3_ACP_HANG_PROMPT_FOREVER: "1" },
+            environment: { T4_ACP_HANG_PROMPT_FOREVER: "1" },
             protocolEvents,
           }),
         },
@@ -8442,7 +8442,7 @@ describe("AcpAdapterV2", () => {
               ),
             environment: (runtimeOrdinal) => {
               runtimeOrdinalSeen = runtimeOrdinal;
-              return runtimeOrdinal === 1 ? { T3_ACP_HANG_PROMPT_FOREVER: "1" } : {};
+              return runtimeOrdinal === 1 ? { T4_ACP_HANG_PROMPT_FOREVER: "1" } : {};
             },
             protocolEvents,
           }),
@@ -8549,7 +8549,7 @@ describe("AcpAdapterV2", () => {
               ),
             environment: (runtimeOrdinal) => {
               runtimeOrdinalSeen = runtimeOrdinal;
-              return runtimeOrdinal === 1 ? { T3_ACP_HANG_PROMPT_FOREVER: "1" } : {};
+              return runtimeOrdinal === 1 ? { T4_ACP_HANG_PROMPT_FOREVER: "1" } : {};
             },
             protocolEvents,
           }),
@@ -8656,7 +8656,7 @@ describe("AcpAdapterV2", () => {
             makeRuntime: makeMockRuntime({
               childProcessSpawner,
               mockAgentPath,
-              environment: { T3_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
+              environment: { T4_ACP_EMIT_GENERIC_TOOL_PLACEHOLDERS: "1" },
             }),
           },
           selfInvocation,

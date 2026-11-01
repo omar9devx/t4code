@@ -2,7 +2,7 @@ import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import { McpSchema } from "effect/ai";
-import { ComputerUseError } from "@t3tools/contracts";
+import { ComputerUseError } from "@t4tools/contracts";
 
 import * as ServerSettings from "../../../serverSettings.ts";
 import { authorizeComputerUseAction, authorizeComputerUseScreenshot } from "./handlers.ts";

@@ -17,8 +17,8 @@ import * as Stream from "effect/Stream";
 import * as TestClock from "effect/testing/TestClock";
 import { ChildProcess, ChildProcessSpawner } from "effect/process";
 import { HttpClient } from "effect/http";
-import type { RelayManagedEndpointRuntimeConfig } from "@t3tools/contracts/relay";
-import * as RelayClient from "@t3tools/shared/relayClient";
+import type { RelayManagedEndpointRuntimeConfig } from "@t4tools/contracts/relay";
+import * as RelayClient from "@t4tools/shared/relayClient";
 
 import * as ServerSecretStore from "../auth/ServerSecretStore.ts";
 import * as ServerConfig from "../config.ts";
@@ -417,7 +417,7 @@ describe("CloudManagedEndpointRuntime", () => {
       Effect.gen(function* () {
         const context = yield* Layer.build(
           ServerSecretStore.layer.pipe(
-            Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "t3-transport-test-" })),
+            Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "t4-transport-test-" })),
             Layer.provide(NodeServices.layer),
           ),
         );
@@ -694,19 +694,19 @@ describe("CloudManagedEndpointRuntime", () => {
         providerKind: "cloudflare_tunnel",
         connectorToken: "token-1",
         tunnelId: "tunnel-1",
-        tunnelName: "t3-code-env-1",
+        tunnelName: "t4-code-env-1",
       });
       yield* runtime.applyConfig({
         providerKind: "cloudflare_tunnel",
         connectorToken: "token-1",
         tunnelId: "tunnel-1",
-        tunnelName: "t3-code-env-1",
+        tunnelName: "t4-code-env-1",
       });
       yield* runtime.applyConfig({
         providerKind: "cloudflare_tunnel",
         connectorToken: "token-2",
         tunnelId: "tunnel-1",
-        tunnelName: "t3-code-env-1",
+        tunnelName: "t4-code-env-1",
       });
       const stopped = yield* runtime.applyConfig(null);
 

@@ -4,16 +4,16 @@ import {
   CodexSettings,
   isProviderDriverKind,
   ProviderDriverKind,
-} from "@t3tools/contracts";
-import { acpRegistryClient } from "@t3tools/provider-acp-registry/client";
-import { makeProviderClientRegistry } from "@t3tools/provider-core/client";
-import { modelShortName } from "@t3tools/provider-core/modelShortName";
-import { cursorClient } from "@t3tools/provider-cursor/client";
-import { fxClient } from "@t3tools/provider-fx/client";
-import { grokClient } from "@t3tools/provider-grok/client";
-import { museClient } from "@t3tools/provider-muse/client";
-import { openCodeClient } from "@t3tools/provider-opencode/client";
-import { piClient } from "@t3tools/provider-pi/client";
+} from "@t4tools/contracts";
+import { acpRegistryClient } from "@t4tools/provider-acp-registry/client";
+import { makeProviderClientRegistry } from "@t4tools/provider-core/client";
+import { modelShortName } from "@t4tools/provider-core/modelShortName";
+import { cursorClient } from "@t4tools/provider-cursor/client";
+import { fxClient } from "@t4tools/provider-fx/client";
+import { grokClient } from "@t4tools/provider-grok/client";
+import { museClient } from "@t4tools/provider-muse/client";
+import { openCodeClient } from "@t4tools/provider-opencode/client";
+import { piClient } from "@t4tools/provider-pi/client";
 
 export const providerClients = makeProviderClientRegistry([
   {

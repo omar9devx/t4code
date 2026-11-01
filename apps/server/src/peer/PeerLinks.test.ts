@@ -1,5 +1,5 @@
 import { NodeHttpServer } from "@effect/platform-node";
-import { type ExecutionEnvironmentDescriptor, OrchestratorMcpFailure } from "@t3tools/contracts";
+import { type ExecutionEnvironmentDescriptor, OrchestratorMcpFailure } from "@t4tools/contracts";
 import { expect, it } from "@effect/vitest";
 import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
@@ -291,7 +291,7 @@ it.effect("never follows a peer's redirect with the pairing code", () =>
       );
       // Answers as B, then sends every linking request on to another address.
       const front = yield* serveRaw((request) =>
-        request.url.startsWith("/.well-known/t3/environment")
+        request.url.startsWith("/.well-known/t4/environment")
           ? HttpClient.get(`${b.url}${request.url}`).pipe(
               Effect.flatMap((response) => response.text),
               Effect.map((body) =>

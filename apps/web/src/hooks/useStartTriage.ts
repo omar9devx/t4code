@@ -1,10 +1,10 @@
-import { scopeProjectRef } from "@t3tools/client-runtime/environment";
+import { scopeProjectRef } from "@t4tools/client-runtime/environment";
 import {
   type AtomCommandResult,
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import { type EnvironmentId, TRIAGE_PROMPT_FILE_NAME } from "@t3tools/contracts";
+} from "@t4tools/client-runtime/state/runtime";
+import { type EnvironmentId, TRIAGE_PROMPT_FILE_NAME } from "@t4tools/contracts";
 import { useRouter } from "@tanstack/react-router";
 
 import { stackedThreadToast, toastManager } from "~/components/ui/toast";
@@ -16,7 +16,7 @@ import { writeTextToClipboard } from "./useCopyToClipboard";
 import { useNewThreadHandler } from "./useHandleNewThread";
 import { useScratchProject } from "./useScratchProject";
 
-export const TRIAGE_CLI_COMMAND = "npx t3 triage";
+export const TRIAGE_CLI_COMMAND = "npx t4 triage";
 
 const copyTriageCliCommand = () =>
   writeTextToClipboard(TRIAGE_CLI_COMMAND, "command").catch(() =>
@@ -30,7 +30,7 @@ const copyTriageCliCommand = () =>
 export const isTriagePrompt = (prompt: string) => prompt.includes(`[${TRIAGE_PROMPT_FILE_NAME}](`);
 
 /**
- * In-app `t3 triage`: the server writes the session files and starts cloning
+ * In-app `t4 triage`: the server writes the session files and starts cloning
  * the matching source, then a No project draft opens with the playbook linked.
  * The draft hero explains the rest; the user picks a provider and describes
  * the problem.

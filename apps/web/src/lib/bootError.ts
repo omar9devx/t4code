@@ -1,9 +1,9 @@
-import type { DesktopBridge, DesktopUpdateState } from "@t3tools/contracts";
+import type { DesktopBridge, DesktopUpdateState } from "@t4tools/contracts";
 
-const FALLBACK_TRIAGE_COMMAND = "npx t3 triage";
-const DOWNLOAD_URL = "https://t3.codes/download";
-const ISSUE_URL = "https://github.com/pingdotgg/t3code/issues/new";
-const LAST_FAILURE_KEY = "t3code:boot-failed-at";
+const FALLBACK_TRIAGE_COMMAND = "npx t4 triage";
+const DOWNLOAD_URL = "https://github.com/omar9devx/t4code/releases";
+const ISSUE_URL = "https://github.com/omar9devx/t4code/issues/new";
+const LAST_FAILURE_KEY = "T4CODE:boot-failed-at";
 const REPEAT_FAILURE_MS = 5 * 60_000;
 const MAX_CAUSES = 3;
 const MAX_ERROR_CHARS = 6_000;
@@ -29,7 +29,7 @@ export async function resolveTriageCommand(bridge: DesktopBridge | undefined) {
     const state = await bridge?.cliCommand.getState();
     // Windows reports onPath from its PATH entry alone; only an existing launcher proves it runs.
     if (state?.launcherPath) {
-      return state.onPath ? "t3 triage" : `${launcherCommand(state.launcherPath)} triage`;
+      return state.onPath ? "t4 triage" : `${launcherCommand(state.launcherPath)} triage`;
     }
   } catch (error) {
     console.warn("Could not read the desktop CLI state.", error);

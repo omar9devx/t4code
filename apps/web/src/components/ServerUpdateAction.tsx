@@ -3,7 +3,7 @@ import {
   AuthEnvironmentMaintainScope,
   type AuthSessionState,
   sessionGrantsScope,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import type { AsyncResult } from "effect/reactivity";
 import { environmentSession } from "~/state/session";
 import type {
@@ -11,13 +11,13 @@ import type {
   EnvironmentId,
   ServerInstallation,
   ServerSelfUpdateCapability,
-} from "@t3tools/contracts";
-import type { ServerUpdateStage, ServerUpdateState } from "@t3tools/client-runtime/state/server";
+} from "@t4tools/contracts";
+import type { ServerUpdateStage, ServerUpdateState } from "@t4tools/client-runtime/state/server";
 import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@t4tools/client-runtime/state/runtime";
 import { CircleArrowUpIcon } from "lucide-react";
 import { type ComponentProps, useRef, useState } from "react";
 
@@ -28,7 +28,7 @@ import { appAtomRegistry } from "~/rpc/atomRegistry";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { manualServerUpdateCommand } from "~/versionSkew";
 import { useServerConfigs } from "~/state/entities";
-import { crossesReleaseTrack } from "@t3tools/shared/cliRelease";
+import { crossesReleaseTrack } from "@t4tools/shared/cliRelease";
 import { Button } from "./ui/button";
 import { toastManager } from "./ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
@@ -139,7 +139,7 @@ export function useServerUpdate() {
         description:
           selfUpdate === "desktop-managed"
             ? `Desktop app relaunched on ${result.value.targetVersion}.`
-            : `Reconnected on t3@${result.value.targetVersion}.`,
+            : `Reconnected on t4@${result.value.targetVersion}.`,
       });
     }
     return { status: "updated" };
@@ -259,8 +259,8 @@ export function ServerUpdateAction({
           installation?.kind === "npm-global" ? "Update command copied" : "Relaunch command copied",
         description:
           installation?.kind === "npm-global"
-            ? `Run \`${command}\` on ${serverLabel}, then restart t3 with your usual options.`
-            : `Stop t3 on ${serverLabel}, then relaunch with \`${command}\` using the same subcommand and options. This does not update an installed t3 command.`,
+            ? `Run \`${command}\` on ${serverLabel}, then restart t4 with your usual options.`
+            : `Stop t4 on ${serverLabel}, then relaunch with \`${command}\` using the same subcommand and options. This does not update an installed t4 command.`,
       });
     },
     onError: (error) => {
@@ -394,7 +394,7 @@ export function OutdatedServerUpdateAction({
     toastManager.add({
       type: "success",
       title: `${serverLabel} updated`,
-      description: `Reconnected on t3@${result.value.targetVersion}.`,
+      description: `Reconnected on t4@${result.value.targetVersion}.`,
     });
   };
   if (fromVersion !== undefined && crossesReleaseTrack(fromVersion, targetVersion)) {

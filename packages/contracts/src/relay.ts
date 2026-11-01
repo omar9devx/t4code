@@ -155,7 +155,7 @@ export type RelayAgentActivityAggregateState = typeof RelayAgentActivityAggregat
 export const RelayManagedEndpointProviderKind = Schema.Literals([
   "manual",
   "cloudflare_tunnel",
-  "t3_relay",
+  "t4_relay",
 ]);
 export type RelayManagedEndpointProviderKind = typeof RelayManagedEndpointProviderKind.Type;
 
@@ -657,7 +657,7 @@ export class RelayClientPrincipal extends Context.Service<
     readonly proofKeyThumbprint?: string;
     readonly dpopScopes?: ReadonlyArray<RelayDpopAccessTokenScope>;
   }
->()("@t3tools/contracts/relay/RelayClientPrincipal") {}
+>()("@t4tools/contracts/relay/RelayClientPrincipal") {}
 
 export class RelayEnvironmentPrincipal extends Context.Service<
   RelayEnvironmentPrincipal,
@@ -665,12 +665,12 @@ export class RelayEnvironmentPrincipal extends Context.Service<
     readonly environmentId: string;
     readonly environmentPublicKey: string;
   }
->()("@t3tools/contracts/relay/RelayEnvironmentPrincipal") {}
+>()("@t4tools/contracts/relay/RelayEnvironmentPrincipal") {}
 
 const RelayClientBearerAuthorization = HttpApiSecurity.http({ scheme: "bearer" }).pipe(
   HttpApiSecurity.annotate(
     OpenApi.Description,
-    "Clerk session or OAuth bearer token for the signed-in T3 Connect user.",
+    "Clerk session or OAuth bearer token for the signed-in T4 Connect user.",
   ),
 );
 
@@ -758,10 +758,10 @@ export const RelayDpopTokenExchangeGrantType =
   "urn:ietf:params:oauth:grant-type:token-exchange" as const;
 export const RelayJwtSubjectTokenType = "urn:ietf:params:oauth:token-type:jwt" as const;
 export const RelayAccessTokenType = "urn:ietf:params:oauth:token-type:access_token" as const;
-export const RelayPublicClientId = Schema.Literals(["t3-mobile", "t3-web"]);
+export const RelayPublicClientId = Schema.Literals(["t4-mobile", "t4-web"]);
 export type RelayPublicClientId = typeof RelayPublicClientId.Type;
-export const RelayMobileClientId = "t3-mobile" as const;
-export const RelayWebClientId = "t3-web" as const;
+export const RelayMobileClientId = "t4-mobile" as const;
+export const RelayWebClientId = "t4-web" as const;
 
 export const RelayDpopAccessTokenRequest = Schema.Struct({
   grant_type: Schema.Literal(RelayDpopTokenExchangeGrantType),
@@ -884,7 +884,7 @@ export const RelayCloudEnvironmentHealthProofPayload = Schema.Struct({
 export type RelayCloudEnvironmentHealthProofPayload =
   typeof RelayCloudEnvironmentHealthProofPayload.Type;
 
-/** Verify x-t3-relay-delivery with the relay mint key before trusting delivery id, time, or trace context. */
+/** Verify x-t4-relay-delivery with the relay mint key before trusting delivery id, time, or trace context. */
 export const RelayHookDeliveryProofPayload = Schema.Struct({
   ...RelaySignedJwtRegisteredClaims,
   environmentId: EnvironmentId,
@@ -963,33 +963,33 @@ export const RelayOkResponse = Schema.Struct({
 });
 export type RelayOkResponse = typeof RelayOkResponse.Type;
 
-export const RelayT3ChatPlan = Schema.Literals(["free", "pro", "premier"]);
-export type RelayT3ChatPlan = typeof RelayT3ChatPlan.Type;
+export const RelayT4ChatPlan = Schema.Literals(["free", "pro", "premier"]);
+export type RelayT4ChatPlan = typeof RelayT4ChatPlan.Type;
 
 export const DEFAULT_MANAGED_TUNNEL_LIMIT = 3;
 
-// A linked paid T3 Chat plan raises the default managed tunnel cap.
-export const T3CHAT_PLAN_TUNNEL_LIMITS = { pro: 10, premier: 100 } as const;
+// A linked paid T4 Chat plan raises the default managed tunnel cap.
+export const T4CHAT_PLAN_TUNNEL_LIMITS = { pro: 10, premier: 100 } as const;
 
-export const RelayT3ChatLink = Schema.Struct({
+export const RelayT4ChatLink = Schema.Struct({
   email: Schema.String,
-  plan: RelayT3ChatPlan,
+  plan: RelayT4ChatPlan,
 });
-export type RelayT3ChatLink = typeof RelayT3ChatLink.Type;
+export type RelayT4ChatLink = typeof RelayT4ChatLink.Type;
 
-export const RelayT3ChatLinkResponse = Schema.Struct({
-  // False when this relay has no T3 Chat secret, so clients hide the feature.
+export const RelayT4ChatLinkResponse = Schema.Struct({
+  // False when this relay has no T4 Chat secret, so clients hide the feature.
   available: Schema.Boolean,
-  link: Schema.NullOr(RelayT3ChatLink),
-  // A manual cap that replaces the plan's; T3 Chat upgrades do not raise it.
+  link: Schema.NullOr(RelayT4ChatLink),
+  // A manual cap that replaces the plan's; T4 Chat upgrades do not raise it.
   maxTunnelsOverride: Schema.optionalKey(Schema.Number),
 });
-export type RelayT3ChatLinkResponse = typeof RelayT3ChatLinkResponse.Type;
+export type RelayT4ChatLinkResponse = typeof RelayT4ChatLinkResponse.Type;
 
-export const RelayT3ChatLinkRequestResponse = Schema.Struct({
+export const RelayT4ChatLinkRequestResponse = Schema.Struct({
   url: TrimmedNonEmptyString,
 });
-export type RelayT3ChatLinkRequestResponse = typeof RelayT3ChatLinkRequestResponse.Type;
+export type RelayT4ChatLinkRequestResponse = typeof RelayT4ChatLinkRequestResponse.Type;
 
 export const RelayPublishResponse = Schema.Struct({
   ok: Schema.Boolean,
@@ -1135,21 +1135,21 @@ const RelayClientGroup = HttpApiGroup.make("client")
         OpenApi.Description,
         "Deletes the provisioned Cloudflare tunnel while keeping the environment link and its hostname reservation, so a later link re-provisions the tunnel under the same URL. Environments call this when they shut down; Cloudflare bills per provisioned tunnel, so idle tunnels should not outlive their environment.",
       ),
-    HttpApiEndpoint.get("getT3ChatLink", "/v1/client/t3chat-link", {
+    HttpApiEndpoint.get("getT4ChatLink", "/v1/client/t4chat-link", {
       headers: RelayBearerRequestHeaders,
-      success: RelayT3ChatLinkResponse,
+      success: RelayT4ChatLinkResponse,
       error: RelayAuthAndInternalErrors,
-    }).annotate(OpenApi.Summary, "Get the linked T3 Chat account"),
-    HttpApiEndpoint.post("createT3ChatLinkRequest", "/v1/client/t3chat-link-requests", {
+    }).annotate(OpenApi.Summary, "Get the linked T4 Chat account"),
+    HttpApiEndpoint.post("createT4ChatLinkRequest", "/v1/client/t4chat-link-requests", {
       headers: RelayBearerRequestHeaders,
-      success: RelayT3ChatLinkRequestResponse,
+      success: RelayT4ChatLinkRequestResponse,
       error: RelayAuthAndInternalErrors,
-    }).annotate(OpenApi.Summary, "Start linking a T3 Chat account"),
-    HttpApiEndpoint.delete("unlinkT3Chat", "/v1/client/t3chat-link", {
+    }).annotate(OpenApi.Summary, "Start linking a T4 Chat account"),
+    HttpApiEndpoint.delete("unlinkT4Chat", "/v1/client/t4chat-link", {
       headers: RelayBearerRequestHeaders,
       success: RelayOkResponse,
       error: RelayAuthAndInternalErrors,
-    }).annotate(OpenApi.Summary, "Unlink the T3 Chat account"),
+    }).annotate(OpenApi.Summary, "Unlink the T4 Chat account"),
   )
   .annotate(OpenApi.Description, "Cloud-user environment links and registered devices.")
   .middleware(RelayClientAuth);

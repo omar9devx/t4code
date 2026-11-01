@@ -68,16 +68,16 @@ jobs:
           cache: true
           run-install: |
             args:
-              - --filter=t3code-relay...
+              - --filter=T4CODE-relay...
 
       - name: Deploy preview stage
-        run: vp run --filter t3code-relay deploy --stage "$STAGE" --yes --no-input
+        run: vp run --filter T4CODE-relay deploy --stage "$STAGE" --yes --no-input
         env:
-          T3CODE_RELAY_CLIENT_CONFIG_ENV: ${{ runner.temp }}/relay-client-config.env
+          T4CODE_RELAY_CLIENT_CONFIG_ENV: ${{ runner.temp }}/relay-client-config.env
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           PLANETSCALE_API_TOKEN_ID: ${{ secrets.PLANETSCALE_API_TOKEN_ID }}
           PLANETSCALE_API_TOKEN: ${{ secrets.PLANETSCALE_API_TOKEN }}
           AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          # Unset by default, so previews keep the T3 Chat link off.
-          T3CHAT_LINK_SECRET: ${{ secrets.T3CHAT_LINK_SECRET }}
+          # Unset by default, so previews keep the T4 Chat link off.
+          T4CHAT_LINK_SECRET: ${{ secrets.T4CHAT_LINK_SECRET }}

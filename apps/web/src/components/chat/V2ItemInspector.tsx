@@ -1,14 +1,14 @@
 import type { ToolCallDiffTarget } from "../../diffPanelStore";
-import type { EnvironmentId, OrchestrationV2ProjectedTurnItem } from "@t3tools/contracts";
+import type { EnvironmentId, OrchestrationV2ProjectedTurnItem } from "@t4tools/contracts";
 import {
   toolCallLines,
   turnItemDetailRevision,
   turnItemNeedsDetailFetch,
   turnItemOutputImages,
   turnItemOutputText,
-} from "@t3tools/client-runtime/work-log/item-detail";
-import { formatDiffCount } from "@t3tools/client-runtime/diff-count";
-import { isJavaScriptReplTool } from "@t3tools/shared/toolActivity";
+} from "@t4tools/client-runtime/work-log/item-detail";
+import { formatDiffCount } from "@t4tools/client-runtime/diff-count";
+import { isJavaScriptReplTool } from "@t4tools/shared/toolActivity";
 import { ExternalLinkIcon } from "lucide-react";
 import { memo, type ReactNode, Suspense, use } from "react";
 

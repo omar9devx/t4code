@@ -27,11 +27,11 @@ import * as EffectAcpClient from "effect-acp/client";
 import * as EffectAcpErrors from "effect-acp/errors";
 import type * as EffectAcpSchema from "effect-acp/compat";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
-import { resolveSpawnCommand } from "@t3tools/shared/shell";
-import { AgentScope, AgentScopeThreadId, RAISE_OOM_SCORE_LINE } from "@t3tools/shared/AgentScope";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { resolveSpawnCommand } from "@t4tools/shared/shell";
+import { AgentScope, AgentScopeThreadId, RAISE_OOM_SCORE_LINE } from "@t4tools/shared/AgentScope";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 
-import { signalProcessGroup } from "@t3tools/provider-core/server/processGroup";
+import { signalProcessGroup } from "@t4tools/provider-core/server/processGroup";
 import { appendAcpStderrTail, sanitizeAcpStderrExcerpt } from "./stderr.ts";
 import {
   collectSessionConfigOptionValues,
@@ -266,13 +266,13 @@ export function wrapCommandForLinuxCgroup(
         '  case "$line" in 0::*) [ -z "$actual" ] || exit 126; actual=${line#0::};; esac',
         "done < /proc/self/cgroup || exit 125",
         '[ "$actual" = "$expected" ] || exit 126',
-        "unset ELECTRON_RUN_AS_NODE T3_ACP_CGROUP_WRAPPER",
+        "unset ELECTRON_RUN_AS_NODE T4_ACP_CGROUP_WRAPPER",
         "trap 'exit 125' 0",
         // Bash can skip EXIT traps on failed exec; reject invalid targets with path and exit 125.
         '[ -f "$1" ] && [ -x "$1" ] || { printf "%s: %s: not an executable file\\n" "$0" "$1" >&2; exit 125; }',
         'exec "$@"',
       ].join("\n"),
-      "t3-acp-cgroup-wrapper",
+      "t4-acp-cgroup-wrapper",
       lease.path,
       lease.relativePath,
       command,
@@ -312,7 +312,7 @@ export function resolveLinuxCgroupTargetCommand(
   return undefined;
 }
 
-const STALE_ACP_CGROUP_SIBLING = /^t3-acp-(\d+)-/;
+const STALE_ACP_CGROUP_SIBLING = /^t4-acp-(\d+)-/;
 
 export interface SweepStaleLinuxCgroupSiblingsOptions {
   readonly currentPid?: number;
@@ -386,7 +386,7 @@ function tryCreateLinuxCgroupLease(
     return undefined;
   }
   sweepStaleLinuxCgroupSiblings(currentPath);
-  const childName = `t3-acp-${process.pid}-${NodeCrypto.randomUUID().replaceAll("-", "")}`;
+  const childName = `t4-acp-${process.pid}-${NodeCrypto.randomUUID().replaceAll("-", "")}`;
   const childPath = NodePath.join(currentPath, childName);
   const childRelative = NodePath.posix.join(currentRelative, childName);
   if (NodePath.dirname(childPath) !== currentPath) return undefined;
@@ -1188,7 +1188,7 @@ export class AcpSessionRuntime extends Context.Service<
       payload: unknown,
     ) => Effect.Effect<void, EffectAcpErrors.AcpError>;
   }
->()("@t3tools/provider-acp/server/AcpSessionRuntime") {}
+>()("@t4tools/provider-acp/server/AcpSessionRuntime") {}
 
 interface AcpStartedState extends AcpSessionRuntimeStartResult {}
 
@@ -1436,7 +1436,7 @@ export const make = Effect.fn("AcpSessionRuntime.make")(function* (
       : {
           ...options.spawn.env,
           ELECTRON_RUN_AS_NODE: "1",
-          T3_ACP_CGROUP_WRAPPER: "1",
+          T4_ACP_CGROUP_WRAPPER: "1",
         };
   const child = yield* spawner
     .spawn(
@@ -1890,7 +1890,7 @@ export const make = Effect.fn("AcpSessionRuntime.make")(function* (
       meta !== null &&
       typeof meta === "object" &&
       !Array.isArray(meta) &&
-      (meta as { readonly t3SessionLoadReady?: unknown }).t3SessionLoadReady === "replay_idle";
+      (meta as { readonly t4SessionLoadReady?: unknown }).t4SessionLoadReady === "replay_idle";
     const extractedModelConfigId = extractModelConfigId(sessionSetupResult);
     const nextModelConfigId =
       extractedModelConfigId ?? (syntheticReplayIdle ? current.modelConfigId : undefined);

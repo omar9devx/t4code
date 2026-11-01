@@ -1,5 +1,5 @@
-import { presentThreadShell } from "@t3tools/client-runtime/state/models";
-import { isThreadWorking as isSidebarThreadWorking } from "@t3tools/client-runtime/state/thread-inbox";
+import { presentThreadShell } from "@t4tools/client-runtime/state/models";
+import { isThreadWorking as isSidebarThreadWorking } from "@t4tools/client-runtime/state/thread-inbox";
 import * as DateTime from "effect/DateTime";
 import { deriveActiveWorkStartedAt } from "../session-logic.ts";
 import { describe, expect, it, vi } from "vite-plus/test";
@@ -40,14 +40,14 @@ import {
   resolveSidebarFolderDot,
   sidebarFolderExpansionKeys,
 } from "./Sidebar.logic";
-import { scopeThreadRef, scopedThreadKey } from "@t3tools/client-runtime/environment";
+import { scopeThreadRef, scopedThreadKey } from "@t4tools/client-runtime/environment";
 import {
   sortActiveThreadsByOrderKey,
   sortPinnedThreadsByOrderKey,
-} from "@t3tools/client-runtime/state/thread-sort";
+} from "@t4tools/client-runtime/state/thread-sort";
 import { resolveProjectExpanded } from "../uiStateStore";
-import { threadSearchMatchKey } from "@t3tools/client-runtime/state/thread-search";
-import { EnvironmentId, ProjectId, ProviderInstanceId, RunId, ThreadId } from "@t3tools/contracts";
+import { threadSearchMatchKey } from "@t4tools/client-runtime/state/thread-search";
+import { EnvironmentId, ProjectId, ProviderInstanceId, RunId, ThreadId } from "@t4tools/contracts";
 
 import {
   DEFAULT_INTERACTION_MODE,
@@ -1631,8 +1631,8 @@ describe("resolveSidebarRouteReveal", () => {
 describe("sidebarFolderExpansionKeys", () => {
   it("honors a collapse the legacy sidebar saved under a member's cwd", () => {
     const keys = sidebarFolderExpansionKeys({
-      projectKey: "github.com/pingdotgg/t3code",
-      memberProjects: [{ physicalProjectKey: "local:/code/t3code", workspaceRoot: "/code/t3code" }],
+      projectKey: "github.com/omar9devx/t4code",
+      memberProjects: [{ physicalProjectKey: "local:/code/T4CODE", workspaceRoot: "/code/T4CODE" }],
     });
     const cwdKey = keys.at(-1)!;
 
@@ -1645,8 +1645,8 @@ describe("sidebarFolderExpansionKeys", () => {
 describe("groupSidebarThreadsByProject", () => {
   it("puts each thread in its project's folder and drops empty projects unless kept", () => {
     const remoteEnvironmentId = EnvironmentId.make("environment-remote");
-    const t3code = ProjectId.make("t3code");
-    const t3codeRemote = ProjectId.make("t3code-remote");
+    const T4CODE = ProjectId.make("T4CODE");
+    const T4CODERemote = ProjectId.make("T4CODE-remote");
     const fleet = ProjectId.make("fleet");
     const thread = (id: string, environmentId: EnvironmentId, projectId: ProjectId) => ({
       id,
@@ -1655,10 +1655,10 @@ describe("groupSidebarThreadsByProject", () => {
     });
     const groups = [
       {
-        projectKey: "t3code",
+        projectKey: "T4CODE",
         memberProjectRefs: [
-          { environmentId: localEnvironmentId, projectId: t3code },
-          { environmentId: remoteEnvironmentId, projectId: t3codeRemote },
+          { environmentId: localEnvironmentId, projectId: T4CODE },
+          { environmentId: remoteEnvironmentId, projectId: T4CODERemote },
         ],
       },
       {
@@ -1674,9 +1674,9 @@ describe("groupSidebarThreadsByProject", () => {
     ];
 
     const threads = [
-      thread("a", localEnvironmentId, t3code),
+      thread("a", localEnvironmentId, T4CODE),
       thread("orphan", localEnvironmentId, ProjectId.make("deleted")),
-      thread("b", remoteEnvironmentId, t3codeRemote),
+      thread("b", remoteEnvironmentId, T4CODERemote),
     ];
     const summarize = (keepEmpty: (group: (typeof groups)[number]) => boolean) =>
       groupSidebarThreadsByProject(groups, threads, keepEmpty).map((folder) => ({
@@ -1685,14 +1685,14 @@ describe("groupSidebarThreadsByProject", () => {
       }));
 
     expect(summarize(() => true)).toEqual([
-      { projectKey: "t3code", threads: ["a", "b"] },
+      { projectKey: "T4CODE", threads: ["a", "b"] },
       { projectKey: "fleet", threads: [] },
       { projectKey: "notes", threads: [] },
     ]);
-    expect(summarize(() => false)).toEqual([{ projectKey: "t3code", threads: ["a", "b"] }]);
+    expect(summarize(() => false)).toEqual([{ projectKey: "T4CODE", threads: ["a", "b"] }]);
     // A pinned project keeps its empty folder while other empty projects drop out.
     expect(summarize((group) => group.projectKey === "fleet")).toEqual([
-      { projectKey: "t3code", threads: ["a", "b"] },
+      { projectKey: "T4CODE", threads: ["a", "b"] },
       { projectKey: "fleet", threads: [] },
     ]);
   });

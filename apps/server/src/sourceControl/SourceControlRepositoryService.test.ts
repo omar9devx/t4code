@@ -1,4 +1,4 @@
-import { SourceControlProviderKind } from "@t3tools/contracts";
+import { SourceControlProviderKind } from "@t4tools/contracts";
 import * as NodePath from "@effect/platform-node/NodePath";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, it } from "@effect/vitest";
@@ -13,18 +13,18 @@ import {
   GitCommandError,
   SourceControlProviderError,
   type SourceControlCloneRepositoryInput,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 
 import * as ServerConfig from "../config.ts";
 import * as GitVcsDriver from "../vcs/GitVcsDriver.ts";
-import type * as SourceControlProvider from "@t3tools/source-control-core/server/SourceControlProvider";
+import type * as SourceControlProvider from "@t4tools/source-control-core/server/SourceControlProvider";
 import * as SourceControlProviderRegistry from "./SourceControlProviderRegistry.ts";
 import * as SourceControlRepositoryService from "./SourceControlRepositoryService.ts";
 
 const CLONE_URLS = {
-  nameWithOwner: "octocat/t3code",
-  url: "https://github.com/octocat/t3code",
-  sshUrl: "git@github.com:octocat/t3code.git",
+  nameWithOwner: "octocat/T4CODE",
+  url: "https://github.com/octocat/T4CODE",
+  sshUrl: "git@github.com:octocat/T4CODE.git",
 };
 
 function makeProvider(
@@ -88,7 +88,7 @@ function layer(input: {
     Layer.provide(
       ServerConfig.layerTest(
         process.cwd(),
-        input.fileSystem ? "/tmp/t3-source-control-repos" : { prefix: "t3-source-control-repos-" },
+        input.fileSystem ? "/tmp/t4-source-control-repos" : { prefix: "t4-source-control-repos-" },
       ),
     ),
   );
@@ -151,17 +151,17 @@ it.effect("clones a looked-up repository after creating missing parent directori
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const temporaryDirectory = yield* fs.makeTempDirectoryScoped({
-      prefix: "t3-source-control-clone-parent-",
+      prefix: "t4-source-control-clone-parent-",
     });
     const parent = path.join(temporaryDirectory, "missing", "nested");
-    const destinationPath = path.join(parent, "t3code");
+    const destinationPath = path.join(parent, "T4CODE");
     const cloneCalls: Array<{ cwd: string; args: ReadonlyArray<string> }> = [];
 
     yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
       const result = yield* service.cloneRepository({
         provider: SourceControlProviderKind.make("github"),
-        repository: "octocat/t3code",
+        repository: "octocat/T4CODE",
         destinationPath,
         protocol: "https",
       });
@@ -174,7 +174,7 @@ it.effect("clones a looked-up repository after creating missing parent directori
       assert.deepStrictEqual(cloneCalls, [
         {
           cwd: parent,
-          args: ["clone", "--progress", "--", CLONE_URLS.url, "t3code"],
+          args: ["clone", "--progress", "--", CLONE_URLS.url, "T4CODE"],
         },
       ]);
     }).pipe(
@@ -201,7 +201,7 @@ it.effect.each(["--bare", "source.git"])(
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const git = yield* GitVcsDriver.GitVcsDriver;
-      const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t3-clone-options-" });
+      const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t4-clone-options-" });
       yield* git.execute({
         operation: "test.init",
         cwd: parent,
@@ -222,7 +222,7 @@ it.effect.each(["--bare", "source.git"])(
         GitVcsDriver.layer.pipe(
           Layer.provide(
             ServerConfig.layerTest(process.cwd(), {
-              prefix: "t3-clone-options-config-",
+              prefix: "t4-clone-options-config-",
             }),
           ),
           Layer.provideMerge(NodeServices.layer),
@@ -236,18 +236,18 @@ it.effect("reports clone progress from git's stderr and keeps its error text on 
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const parent = yield* fs.makeTempDirectoryScoped({
-      prefix: "t3-source-control-clone-progress-",
+      prefix: "t4-source-control-clone-progress-",
     });
-    const destinationPath = path.join(parent, "t3code");
+    const destinationPath = path.join(parent, "T4CODE");
     const progress: Array<{ stage: string; percent: number | null; detail: string | null }> = [];
 
     const stderrLines = [
-      "Cloning into 't3code'...",
+      "Cloning into 'T4CODE'...",
       "remote: Enumerating objects: 10, done.",
       "Receiving objects:  40% (4/10), 1.00 MiB | 2.00 MiB/s",
       "Receiving objects: 100% (10/10), 2.50 MiB | 2.00 MiB/s, done.",
       "fatal: early EOF",
-      "fatal: unable to access 'https://user:s3c@ret@github.com/octocat/t3code.git/': could not resolve host",
+      "fatal: unable to access 'https://user:s3c@ret@github.com/octocat/T4CODE.git/': could not resolve host",
     ];
     const error = yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
@@ -286,7 +286,7 @@ it.effect("reports clone progress from git's stderr and keeps its error text on 
     ]);
     assert.strictEqual(
       error.detail,
-      "fatal: early EOF fatal: unable to access 'https://github.com/octocat/t3code.git/': could not resolve host",
+      "fatal: early EOF fatal: unable to access 'https://github.com/octocat/T4CODE.git/': could not resolve host",
     );
   }).pipe(Effect.provide(NodeServices.layer)),
 );
@@ -328,13 +328,13 @@ const cloneInTemporaryDirectory = (
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const parent = yield* fs
-      .makeTempDirectoryScoped({ prefix: "t3-clone-fallback-" })
+      .makeTempDirectoryScoped({ prefix: "t4-clone-fallback-" })
       .pipe(Effect.orDie);
     return yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
       return yield* service.cloneRepository({
         ...input,
-        destinationPath: path.join(parent, "t3code"),
+        destinationPath: path.join(parent, "T4CODE"),
       });
     }).pipe(Effect.provide(layer({ git }).pipe(Layer.orDie)));
   }).pipe(Effect.provide(NodeServices.layer));
@@ -346,8 +346,8 @@ it.effect("retries a clone over HTTPS when the SSH login is refused", () =>
       remoteUrl: CLONE_URLS.sshUrl,
     });
 
-    assert.deepStrictEqual(urls, [CLONE_URLS.sshUrl, "https://github.com/octocat/t3code.git"]);
-    assert.strictEqual(result.remoteUrl, "https://github.com/octocat/t3code.git");
+    assert.deepStrictEqual(urls, [CLONE_URLS.sshUrl, "https://github.com/octocat/T4CODE.git"]);
+    assert.strictEqual(result.remoteUrl, "https://github.com/octocat/T4CODE.git");
   }),
 );
 
@@ -397,8 +397,8 @@ it.effect.each([
       token === "abc@secret"
         ? "https://github.com"
         : token === "path-token"
-          ? "https://github.com/octocat/t3code's.git"
-          : "https://github.com/octocat/t3code.git";
+          ? "https://github.com/octocat/T4CODE's.git"
+          : "https://github.com/octocat/T4CODE.git";
     const error = yield* Effect.flip(
       cloneInTemporaryDirectory(
         {
@@ -443,13 +443,13 @@ it.effect("strips embedded credentials from the remote URL it reports", () =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t3-source-control-redact-" });
-    const destinationPath = path.join(parent, "t3code");
+    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t4-source-control-redact-" });
+    const destinationPath = path.join(parent, "T4CODE");
     const cloneArgs: Array<ReadonlyArray<string>> = [];
     const result = yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
       return yield* service.prepareClone({
-        remoteUrl: "https://user:s3cret@github.com/octocat/t3code.git",
+        remoteUrl: "https://user:s3cret@github.com/octocat/T4CODE.git",
         destinationPath,
       });
     }).pipe(
@@ -465,8 +465,8 @@ it.effect("strips embedded credentials from the remote URL it reports", () =>
         }),
       ),
     );
-    assert.equal(result.remoteUrl, "https://github.com/octocat/t3code.git");
-    assert.equal(result.cloneUrl, "https://user:s3cret@github.com/octocat/t3code.git");
+    assert.equal(result.remoteUrl, "https://github.com/octocat/T4CODE.git");
+    assert.equal(result.cloneUrl, "https://user:s3cret@github.com/octocat/T4CODE.git");
   }).pipe(Effect.provide(NodeServices.layer)),
 );
 
@@ -474,7 +474,7 @@ it.effect("discards only a directory git wrote to", () =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t3-source-control-discard-" });
+    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t4-source-control-discard-" });
     const partial = path.join(parent, "partial");
     yield* fs.makeDirectory(path.join(partial, ".git"), { recursive: true });
     yield* fs.writeFileString(path.join(partial, "README.md"), "half");
@@ -505,19 +505,19 @@ it.effect("redacts query tokens and userinfo containing '@' from reported URLs",
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t3-source-control-redact2-" });
+    const parent = yield* fs.makeTempDirectoryScoped({ prefix: "t4-source-control-redact2-" });
     yield* Effect.gen(function* () {
       const service = yield* SourceControlRepositoryService.SourceControlRepositoryService;
       const query = yield* service.prepareClone({
-        remoteUrl: "https://github.com/octocat/t3code.git?access_token=s3cret",
+        remoteUrl: "https://github.com/octocat/T4CODE.git?access_token=s3cret",
         destinationPath: path.join(parent, "a"),
       });
-      assert.equal(query.remoteUrl, "https://github.com/octocat/t3code.git");
+      assert.equal(query.remoteUrl, "https://github.com/octocat/T4CODE.git");
       const nested = yield* service.prepareClone({
-        remoteUrl: "https://user:pa@rt@github.com/octocat/t3code.git",
+        remoteUrl: "https://user:pa@rt@github.com/octocat/T4CODE.git",
         destinationPath: path.join(parent, "b"),
       });
-      assert.equal(nested.remoteUrl, "https://github.com/octocat/t3code.git");
+      assert.equal(nested.remoteUrl, "https://github.com/octocat/T4CODE.git");
     }).pipe(Effect.provide(layer({})));
   }).pipe(Effect.provide(NodeServices.layer)),
 );
@@ -527,7 +527,7 @@ it.effect("preserves destination probe failures instead of treating them as miss
     _tag: "PermissionDenied",
     module: "FileSystem",
     method: "exists",
-    pathOrDescriptor: "/restricted/t3code",
+    pathOrDescriptor: "/restricted/T4CODE",
   });
 
   return Effect.gen(function* () {
@@ -535,7 +535,7 @@ it.effect("preserves destination probe failures instead of treating them as miss
     const error = yield* Effect.flip(
       service.cloneRepository({
         remoteUrl: CLONE_URLS.sshUrl,
-        destinationPath: "/restricted/t3code",
+        destinationPath: "/restricted/T4CODE",
       }),
     );
 
@@ -562,7 +562,7 @@ it.effect("publishes to the remote name returned by ensureRemote", () => {
     const result = yield* service.publishRepository({
       cwd: "/workspace",
       provider: SourceControlProviderKind.make("github"),
-      repository: "octocat/t3code",
+      repository: "octocat/T4CODE",
       visibility: "private",
       remoteName: "origin",
       protocol: "ssh",
@@ -613,7 +613,7 @@ it.effect("explains a rejected SSH push after creating the repository", () =>
       service.publishRepository({
         cwd: "/workspace",
         provider: SourceControlProviderKind.make("github"),
-        repository: "octocat/t3code",
+        repository: "octocat/T4CODE",
         visibility: "private",
         protocol: "ssh",
       }),
@@ -622,7 +622,7 @@ it.effect("explains a rejected SSH push after creating the repository", () =>
     assert.strictEqual(error.operation, "publishRepository");
     assert.strictEqual(
       error.detail,
-      'Created octocat/t3code and added it as remote "origin", but the push failed because SSH authentication was rejected. Add an SSH key to your account, or switch the remote to HTTPS with "git remote set-url origin https://github.com/octocat/t3code", then push again.',
+      'Created octocat/T4CODE and added it as remote "origin", but the push failed because SSH authentication was rejected. Add an SSH key to your account, or switch the remote to HTTPS with "git remote set-url origin https://github.com/octocat/T4CODE", then push again.',
     );
     assert.instanceOf(error.cause, GitCommandError);
   }).pipe(Effect.provide(layer({ git: failingPush("authentication_failed") }))),
@@ -636,7 +636,7 @@ it.effect("says the repository exists when an unclassified publish push fails", 
       service.publishRepository({
         cwd: "/workspace",
         provider: SourceControlProviderKind.make("github"),
-        repository: "octocat/t3code",
+        repository: "octocat/T4CODE",
         visibility: "private",
         protocol: "https",
       }),
@@ -644,7 +644,7 @@ it.effect("says the repository exists when an unclassified publish push fails", 
 
     assert.strictEqual(
       error.detail,
-      'Created octocat/t3code and added it as remote "origin", but the push failed. Fix the problem, then push again.',
+      'Created octocat/T4CODE and added it as remote "origin", but the push failed. Fix the problem, then push again.',
     );
   }).pipe(Effect.provide(layer({ git: failingPush() }))),
 );
@@ -656,7 +656,7 @@ it.effect("publish succeeds with status remote_added when the local repo has no 
     const result = yield* service.publishRepository({
       cwd: "/workspace",
       provider: SourceControlProviderKind.make("github"),
-      repository: "octocat/t3code",
+      repository: "octocat/T4CODE",
       visibility: "private",
       remoteName: "origin",
       protocol: "ssh",

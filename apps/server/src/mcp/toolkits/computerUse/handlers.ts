@@ -1,6 +1,6 @@
 import * as Effect from "effect/Effect";
 import { McpSchema } from "effect/ai";
-import { ComputerUseError } from "@t3tools/contracts";
+import { ComputerUseError } from "@t4tools/contracts";
 import * as McpInvocationContext from "../../McpInvocationContext.ts";
 import * as McpToolAccess from "../../McpToolAccess.ts";
 import * as ComputerUseService from "../../../computerUse/ComputerUseService.ts";

@@ -14,15 +14,15 @@ import {
   EnvironmentHttpUnauthorizedError,
   EnvironmentId,
   WS_METHODS,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import {
   type RelayEnvironmentLinkResponse,
   type RelayManagedEndpointProviderKind,
-} from "@t3tools/contracts/relay";
-import { EnvironmentRegistry } from "@t3tools/client-runtime/connection";
-import { request, runStream } from "@t3tools/client-runtime/rpc";
-import { makeEnvironmentHttpApiClient } from "@t3tools/client-runtime/rpc";
-import { ManagedRelay, relayRequestFailureDetail } from "@t3tools/client-runtime/relay";
+} from "@t4tools/contracts/relay";
+import { EnvironmentRegistry } from "@t4tools/client-runtime/connection";
+import { request, runStream } from "@t4tools/client-runtime/rpc";
+import { makeEnvironmentHttpApiClient } from "@t4tools/client-runtime/rpc";
+import { ManagedRelay, relayRequestFailureDetail } from "@t4tools/client-runtime/relay";
 
 import * as PrimaryEnvironmentHttpLayer from "../environments/primary/httpLayer";
 import { resolveCloudPublicConfig } from "./publicConfig";
@@ -271,7 +271,7 @@ export const linkPrimaryEnvironmentToCloud: (input: {
   const configuredRelayUrl = relayUrl();
   if (!configuredRelayUrl) {
     return yield* new CloudEnvironmentLinkError({
-      message: "T3CODE_RELAY_URL is not configured.",
+      message: "T4CODE_RELAY_URL is not configured.",
     });
   }
   const managedTunnelsEnabled = (input.mode ?? "managed") === "managed";

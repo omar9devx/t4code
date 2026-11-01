@@ -1,10 +1,10 @@
-import { formatFilePathForClipboard } from "@t3tools/client-runtime/media-actions";
+import { formatFilePathForClipboard } from "@t4tools/client-runtime/media-actions";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
   type AtomCommandResult,
-} from "@t3tools/client-runtime/state/runtime";
-import type { EnvironmentId, ScopedThreadRef } from "@t3tools/contracts";
+} from "@t4tools/client-runtime/state/runtime";
+import type { EnvironmentId, ScopedThreadRef } from "@t4tools/contracts";
 import { memo, type MouseEvent as ReactMouseEvent } from "react";
 
 import { readLocalApi } from "../../localApi";

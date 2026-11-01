@@ -42,11 +42,11 @@ describe("buildRuntimeInstructions", () => {
     assert.include(instructions, "call unwatch_pull_request");
   });
 
-  it("identifies T4 Code as the host when internal protocol names retain t3", () => {
+  it("identifies T4 Code as the host when internal protocol names retain t4", () => {
     const instructions = buildRuntimeInstructions({ harness: "Codex" });
 
     assert.include(instructions, "T4 Code is the host product.");
-    assert.include(instructions, "Legacy t3 identifiers in MCP tools or runtime interfaces");
+    assert.include(instructions, "Legacy t4 identifiers in MCP tools or runtime interfaces");
     assert.include(instructions, "not the product identity.");
   });
 });

@@ -20,7 +20,7 @@ import {
   type SnapShotShortcut,
   type DesktopSnapShotEvent,
   type DesktopSnapShotId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -91,8 +91,8 @@ import {
   snapShotShortcutRegistrationFailureMessage,
   snapShotShortcutSystemConflict,
 } from "./snapShot.ts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { readImageDimensions } from "@t3tools/shared/imageDimensions";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { readImageDimensions } from "@t4tools/shared/imageDimensions";
 
 const MAX_CAPTURE_WIDTH = 2_560;
 const MAX_CAPTURE_HEIGHT = 1_600;
@@ -209,7 +209,7 @@ export class DesktopSnapShot extends Context.Service<
     readonly dismissAnimation: (id: string) => Effect.Effect<void>;
     readonly acknowledge: (id: string) => Effect.Effect<void, DesktopSnapShotError>;
   }
->()("@t3tools/desktop/snapShot/DesktopSnapShot") {}
+>()("@t4tools/desktop/snapShot/DesktopSnapShot") {}
 
 export class DesktopSnapShotSetupError extends Schema.TaggedError<DesktopSnapShotSetupError>()(
   "DesktopSnapShotSetupError",
@@ -1366,7 +1366,7 @@ export const make = Effect.gen(function* () {
       yield* Effect.scoped(
         Effect.gen(function* () {
           const directory = yield* fileSystem
-            .makeTempDirectoryScoped({ prefix: "t3-snapshot-test-" })
+            .makeTempDirectoryScoped({ prefix: "t4-snapshot-test-" })
             .pipe(
               Effect.mapError(
                 (cause) => new DesktopSnapShotSetupError({ action, reason: "setup-failed", cause }),

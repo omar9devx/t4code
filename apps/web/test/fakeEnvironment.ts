@@ -25,15 +25,15 @@ import {
   type OrchestrationV2ThreadShell,
   type OrchestrationV2ThreadStreamItem,
   type OrchestrationV2TurnItem,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import type {
   ConnectionAttemptError,
   ConnectionCatalogEntry,
   EnvironmentConnectionLease,
   RouteCheck,
-} from "@t3tools/client-runtime/connection";
-import type { WsRpcProtocolClient } from "@t3tools/client-runtime/rpc";
-import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t3tools/shared/keybindings";
+} from "@t4tools/client-runtime/connection";
+import type { WsRpcProtocolClient } from "@t4tools/client-runtime/rpc";
+import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t4tools/shared/keybindings";
 import { APP_VERSION } from "~/branding";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -62,7 +62,7 @@ const auth = {
   policy: "loopback-browser",
   bootstrapMethods: ["one-time-token"],
   sessionMethods: ["browser-session-cookie"],
-  sessionCookieName: "t3_session",
+  sessionCookieName: "t4_session",
 };
 
 const serverConfig: ServerConfig = {
@@ -70,7 +70,7 @@ const serverConfig: ServerConfig = {
     environment: descriptor,
     auth,
     cwd: "/workspace/render",
-    keybindingsConfigPath: "/workspace/.t3/keybindings.json",
+    keybindingsConfigPath: "/workspace/.t4/keybindings.json",
     keybindings: [],
     issues: [],
     providers: [
@@ -88,7 +88,7 @@ const serverConfig: ServerConfig = {
     ],
     availableEditors: [],
     observability: {
-      logsDirectoryPath: "/workspace/.t3/logs",
+      logsDirectoryPath: "/workspace/.t4/logs",
       localTracingEnabled: false,
       otlpTracesEnabled: false,
       otlpMetricsEnabled: false,
@@ -413,7 +413,7 @@ export function installFakeEnvironment(fixtures: ReadonlyArray<FakeThread>): Dis
   globalThis.fetch = async (input, init) => {
     const url = new URL(input instanceof Request ? input.url : String(input), window.location.href);
     if (url.origin !== window.location.origin) return realFetch(input, init);
-    if (url.pathname === "/.well-known/t3/environment") return json(encodedDescriptor);
+    if (url.pathname === "/.well-known/t4/environment") return json(encodedDescriptor);
     if (url.pathname === "/api/auth/session") {
       return json({
         authenticated: true,

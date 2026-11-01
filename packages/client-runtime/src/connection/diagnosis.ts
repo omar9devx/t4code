@@ -1,8 +1,8 @@
 import {
-  t3ConnectTroubleshootingUrl,
-  type T3ConnectTroubleshootingSection,
-} from "@t3tools/contracts";
-import type { RelayEnvironmentStatusResponse } from "@t3tools/contracts/relay";
+  t4ConnectTroubleshootingUrl,
+  type T4ConnectTroubleshootingSection,
+} from "@t4tools/contracts";
+import type { RelayEnvironmentStatusResponse } from "@t4tools/contracts/relay";
 import * as DateTime from "effect/DateTime";
 
 import type {
@@ -89,13 +89,13 @@ function headline(host: string, located: Located, failure: ConnectionAttemptErro
     case "clock_skew":
       return "This device's clock is off";
     case "not_linked":
-      return `${host} is not linked to your T3 Connect account`;
+      return `${host} is not linked to your T4 Connect account`;
     case "relay_error":
-      return "T3 Connect returned an error";
+      return "T4 Connect returned an error";
     case "tunnel_pending":
       return `${host}'s tunnel is still being set up`;
     case "tunnel_not_enabled":
-      return `T3 Connect is not turned on for ${host}`;
+      return `T4 Connect is not turned on for ${host}`;
     case "released":
     case "tunnel_down":
       return `${host}'s tunnel is offline`;
@@ -120,15 +120,15 @@ function headline(host: string, located: Located, failure: ConnectionAttemptErro
       return "This device could not prepare the connection";
     case "relay":
       return failure?.reason === "authentication"
-        ? "T3 Connect did not accept this device's sign-in"
-        : "This device can't reach T3 Connect";
+        ? "T4 Connect did not accept this device's sign-in"
+        : "This device can't reach T4 Connect";
     case "tunnel":
       // The relay already reached the host when this device fails on its own.
       return failure?.reason === "network" ||
         failure?.reason === "transport" ||
         failure?.reason === "timeout"
         ? `This device can't reach ${host}'s tunnel`
-        : `T3 Connect could not reach ${host}'s tunnel`;
+        : `T4 Connect could not reach ${host}'s tunnel`;
     case "server":
       return failure?.reason === "authentication" || failure?.reason === "permission"
         ? `T4 Code on ${host} did not accept this device`
@@ -137,7 +137,7 @@ function headline(host: string, located: Located, failure: ConnectionAttemptErro
 }
 
 function steps(host: string, located: Located, failure: ConnectionAttemptError | null): string[] {
-  const checkHost = `On ${host}, check Settings > Sharing & access or run \`t3 connect status\`.`;
+  const checkHost = `On ${host}, check Settings > Sharing & access or run \`t4 connect status\`.`;
   switch (located.cause) {
     case "offline":
       return ["Connect this device to the internet. T4 Code reconnects on its own."];
@@ -147,8 +147,8 @@ function steps(host: string, located: Located, failure: ConnectionAttemptError |
       return [`Turn on automatic date and time on this device and on ${host}, then retry.`];
     case "not_linked":
       return [
-        "Check that this device is signed in to the same T3 Connect account as the host.",
-        `On ${host}, open Settings > Sharing & access and turn T3 Connect on.`,
+        "Check that this device is signed in to the same T4 Connect account as the host.",
+        `On ${host}, open Settings > Sharing & access and turn T4 Connect on.`,
       ];
     case "tunnel_pending":
       return ["Wait a minute. T4 Code retries on its own.", checkHost];
@@ -158,7 +158,7 @@ function steps(host: string, located: Located, failure: ConnectionAttemptError |
         "If it keeps failing, copy the diagnostics and report it.",
       ];
     case "tunnel_not_enabled":
-      return [`On ${host}, open Settings > Sharing & access and turn T3 Connect on.`];
+      return [`On ${host}, open Settings > Sharing & access and turn T4 Connect on.`];
     case "released":
     case "tunnel_down":
       return [
@@ -187,10 +187,10 @@ function steps(host: string, located: Located, failure: ConnectionAttemptError |
       ];
     case "relay":
       return failure?.reason === "authentication"
-        ? ["Sign out of T3 Connect and sign in again."]
+        ? ["Sign out of T4 Connect and sign in again."]
         : [
             "Check this device's internet connection.",
-            "A VPN, firewall, or ad blocker on this device can block T3 Connect.",
+            "A VPN, firewall, or ad blocker on this device can block T4 Connect.",
           ];
     case "tunnel":
       return failure?.reason === "network" ||
@@ -212,32 +212,32 @@ function steps(host: string, located: Located, failure: ConnectionAttemptError |
 function helpSection(
   located: Located,
   failure: ConnectionAttemptError | null,
-): T3ConnectTroubleshootingSection {
+): T4ConnectTroubleshootingSection {
   switch (located.cause) {
     case "offline":
-      return "this-device-cant-reach-t3-connect";
+      return "this-device-cant-reach-t4-connect";
     case "outdated":
-      return "the-host-runs-an-older-t3-code";
+      return "the-host-runs-an-older-t4-code";
     case "clock_skew":
       return "the-clock-is-off";
     case "not_linked":
     case "tunnel_not_enabled":
       return "sign-in-account-or-link-problems";
     case "relay_error":
-      return "t3-connect-returned-an-error";
+      return "t4-connect-returned-an-error";
     case "released":
     case "tunnel_down":
     case "tunnel_pending":
       return "the-hosts-tunnel-is-offline";
     case "origin_unreachable":
     case "invalid_response":
-      return "the-tunnel-works-but-t3-code-does-not-answer";
+      return "the-tunnel-works-but-t4-code-does-not-answer";
     case "dns":
     case "tls":
     case "refused":
     case "timeout":
     case "unknown":
-      return "the-t3-connect-address-does-not-resolve-or-answer";
+      return "the-t4-connect-address-does-not-resolve-or-answer";
     case null:
       break;
   }
@@ -247,17 +247,17 @@ function helpSection(
     failure?.reason === "timeout";
   switch (located.hop) {
     case "device":
-      return "this-device-cant-reach-t3-connect";
+      return "this-device-cant-reach-t4-connect";
     case "relay":
       return failure?.reason === "authentication"
         ? "sign-in-account-or-link-problems"
-        : "this-device-cant-reach-t3-connect";
+        : "this-device-cant-reach-t4-connect";
     case "tunnel":
-      return onThisDevice ? "this-device-cant-reach-t3-connect" : "the-hosts-tunnel-is-offline";
+      return onThisDevice ? "this-device-cant-reach-t4-connect" : "the-hosts-tunnel-is-offline";
     case "server":
       return failure?.reason === "authentication" || failure?.reason === "permission"
         ? "sign-in-account-or-link-problems"
-        : "the-tunnel-works-but-t3-code-does-not-answer";
+        : "the-tunnel-works-but-t4-code-does-not-answer";
   }
 }
 
@@ -271,7 +271,7 @@ function hopLabel(hop: ConnectionHop, host: string): string {
     case "device":
       return "This device";
     case "relay":
-      return "T3 Connect";
+      return "T4 Connect";
     case "tunnel":
       return `${host} tunnel`;
     case "server":
@@ -318,7 +318,7 @@ export function presentConnectionDiagnosis(
       ? null
       : DateTime.formatIso(DateTime.makeUnsafe(input.state.retryAt)),
   );
-  add("Route", relayPath ? "T3 Connect" : "Direct");
+  add("Route", relayPath ? "T4 Connect" : "Direct");
   add("App version", input.clientVersion);
   add("Host version", input.serverVersion);
   add("Error", failure?.detail);
@@ -329,7 +329,7 @@ export function presentConnectionDiagnosis(
     hops,
     steps: steps(host, located, failure),
     facts,
-    moreInfoUrl: relayPath ? t3ConnectTroubleshootingUrl(helpSection(located, failure)) : null,
+    moreInfoUrl: relayPath ? t4ConnectTroubleshootingUrl(helpSection(located, failure)) : null,
   };
 }
 

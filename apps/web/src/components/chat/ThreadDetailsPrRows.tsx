@@ -1,17 +1,17 @@
 import { pipe } from "effect/Function";
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
-import type { EnvironmentId, ScopedThreadRef, ThreadPullRequestLink } from "@t3tools/contracts";
+import type { EnvironmentId, ScopedThreadRef, ThreadPullRequestLink } from "@t4tools/contracts";
 import {
   pullRequestListLines,
   resolveThreadPullRequestChains,
   threadPullRequestKeyOf,
   visibleThreadPullRequests,
-} from "@t3tools/client-runtime/thread-pull-requests";
+} from "@t4tools/client-runtime/thread-pull-requests";
 import { ChevronDown, ChevronUp } from "lucide";
 import { useState, type ComponentProps, type MouseEvent as ReactMouseEvent } from "react";
 
-import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
-import { findProjectOnChangeRequestHost } from "@t3tools/client-runtime/change-request-links";
+import { sourceControlClients } from "@t4tools/client-runtime/source-control-clients";
+import { findProjectOnChangeRequestHost } from "@t4tools/client-runtime/change-request-links";
 
 import { useProjects } from "~/state/entities";
 import { threadEnvironment } from "~/state/threads";

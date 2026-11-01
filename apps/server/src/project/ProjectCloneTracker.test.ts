@@ -1,11 +1,11 @@
-import { SourceControlProviderKind } from "@t3tools/contracts";
+import { SourceControlProviderKind } from "@t4tools/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import {
   OrchestrationDispatchCommandError,
   ProjectId,
   projectCloneProgressSummary,
   SourceControlRepositoryError,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -20,10 +20,10 @@ import { parseGitCloneProgressLine } from "./gitCloneProgress.ts";
 const projectId = ProjectId.make("project-1");
 const startInput = {
   projectId,
-  title: "t3code",
+  title: "T4CODE",
   createdAt: "2026-01-01T00:00:00.000Z",
-  remoteUrl: "git@github.com:octocat/t3code.git",
-  destinationPath: "/workspace/t3code",
+  remoteUrl: "git@github.com:octocat/T4CODE.git",
+  destinationPath: "/workspace/T4CODE",
 };
 
 function makeHarness(options?: {
@@ -88,8 +88,8 @@ describe("ProjectCloneTracker", () => {
       yield* Effect.yieldNow;
 
       const result = yield* tracker.start(startInput, harness.hooks);
-      expect(result.cwd).toBe("/workspace/t3code");
-      expect(harness.created).toEqual([{ projectId, workspaceRoot: "/workspace/t3code" }]);
+      expect(result.cwd).toBe("/workspace/T4CODE");
+      expect(harness.created).toEqual([{ projectId, workspaceRoot: "/workspace/T4CODE" }]);
 
       yield* Effect.yieldNow;
       const running = yield* tracker.get(projectId);
@@ -174,7 +174,7 @@ describe("ProjectCloneTracker", () => {
       expect(failed).toMatchObject({ phase: "failed", error: "fatal: repository not found" });
 
       expect(yield* tracker.retry(projectId)).toBe(true);
-      expect(harness.discarded).toEqual(["/workspace/t3code"]);
+      expect(harness.discarded).toEqual(["/workspace/T4CODE"]);
       yield* Effect.yieldNow;
       expect((yield* tracker.get(projectId))?.phase).toBe("done");
       expect(attempts).toBe(2);
@@ -190,7 +190,7 @@ describe("ProjectCloneTracker", () => {
 
       expect(yield* tracker.cancel(projectId)).toBe(true);
       expect((yield* tracker.get(projectId))?.phase).toBe("cancelled");
-      expect(harness.discarded).toEqual(["/workspace/t3code"]);
+      expect(harness.discarded).toEqual(["/workspace/T4CODE"]);
       expect(yield* tracker.cancel(projectId)).toBe(false);
       expect(yield* tracker.retry(projectId)).toBe(true);
     }).pipe(Effect.provide(harness.layer));
@@ -229,8 +229,8 @@ describe("ProjectCloneTracker", () => {
           prepareClone: (input) =>
             Effect.succeed({
               destinationPath: input.destinationPath,
-              remoteUrl: "https://github.com/octocat/t3code.git",
-              cloneUrl: "https://user:s3cret@github.com/octocat/t3code.git",
+              remoteUrl: "https://github.com/octocat/T4CODE.git",
+              cloneUrl: "https://user:s3cret@github.com/octocat/T4CODE.git",
               repository: null,
             }),
           cloneRepository: (input) =>
@@ -246,8 +246,8 @@ describe("ProjectCloneTracker", () => {
       const tracker = yield* ProjectCloneTracker.ProjectCloneTracker;
       const result = yield* tracker.start(startInput, harness.hooks);
       yield* Effect.yieldNow;
-      expect(result.remoteUrl).toBe("https://github.com/octocat/t3code.git");
-      expect(cloneUrls).toEqual(["https://user:s3cret@github.com/octocat/t3code.git"]);
+      expect(result.remoteUrl).toBe("https://github.com/octocat/T4CODE.git");
+      expect(cloneUrls).toEqual(["https://user:s3cret@github.com/octocat/T4CODE.git"]);
     }).pipe(Effect.provide(layer));
   });
 
@@ -259,7 +259,7 @@ describe("ProjectCloneTracker", () => {
       yield* Effect.yieldNow;
       yield* tracker.discard(projectId);
       expect(yield* tracker.get(projectId)).toBeNull();
-      expect(harness.discarded).toEqual(["/workspace/t3code"]);
+      expect(harness.discarded).toEqual(["/workspace/T4CODE"]);
     }).pipe(Effect.provide(harness.layer));
   });
 
@@ -332,7 +332,7 @@ describe("parseGitCloneProgressLine", () => {
       percent: null,
       detail: null,
     });
-    expect(parseGitCloneProgressLine("Cloning into 't3code'...")).toBeNull();
+    expect(parseGitCloneProgressLine("Cloning into 'T4CODE'...")).toBeNull();
     expect(parseGitCloneProgressLine("fatal: repository not found")).toBeNull();
   });
 });

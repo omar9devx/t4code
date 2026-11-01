@@ -1,4 +1,4 @@
-/** Worktrees use isolated .t3 state; ambient T3CODE_HOME could otherwise select the live userdata database. */
+/** Worktrees use isolated .t4 state; ambient T4CODE_HOME could otherwise select the live userdata database. */
 
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -54,7 +54,7 @@ export const resolveGitWorktreePath = Effect.fn("devHome.resolveGitWorktreePath"
  * Deliberately does not require the directory to exist yet: falling back
  * because it is missing would send callers at the shared home.
  */
-export const resolveWorktreeT3Home = Effect.fn("devHome.resolveWorktreeT3Home")(function* (
+export const resolveWorktreeT4Home = Effect.fn("devHome.resolveWorktreeT4Home")(function* (
   cwd: string,
 ): Effect.fn.Return<string | undefined, never, FileSystem.FileSystem | Path.Path> {
   const worktreePath = yield* resolveGitWorktreePath(cwd);
@@ -62,5 +62,11 @@ export const resolveWorktreeT3Home = Effect.fn("devHome.resolveWorktreeT3Home")(
     return undefined;
   }
   const path = yield* Path.Path;
-  return path.join(worktreePath, ".t3");
+  const t4Home = path.join(worktreePath, ".t4");
+  const fileSystem = yield* FileSystem.FileSystem;
+  if (yield* fileSystem.exists(t4Home).pipe(Effect.orElseSucceed(() => false))) return t4Home;
+  const legacyT3Home = path.join(worktreePath, ".t3");
+  return (yield* fileSystem.exists(legacyT3Home).pipe(Effect.orElseSucceed(() => false)))
+    ? legacyT3Home
+    : t4Home;
 });

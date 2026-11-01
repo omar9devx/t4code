@@ -1,7 +1,7 @@
 import type {
   OrchestrationV2ThreadProjection,
   OrchestrationV2ThreadShell,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { selectThreadRelationshipShells } from "./entities";

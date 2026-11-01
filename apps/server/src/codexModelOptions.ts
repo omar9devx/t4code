@@ -1,8 +1,8 @@
-import type { ModelSelection } from "@t3tools/contracts";
+import type { ModelSelection } from "@t4tools/contracts";
 import {
   getModelSelectionBooleanOptionValue,
   getModelSelectionStringOptionValue,
-} from "@t3tools/shared/model";
+} from "@t4tools/shared/model";
 
 export function getCodexServiceTierOptionValue(
   modelSelection: ModelSelection | null | undefined,

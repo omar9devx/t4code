@@ -845,7 +845,7 @@ export type OrchestrationV2SubagentWorkflow = typeof OrchestrationV2SubagentWork
 /**
  * Wire-only, for clients that opted in with `acceptDedupedBodies` or `dedupeBodies=1`: the field
  * was blanked because an earlier record on the same response or stream holds the same value.
- * Restore with `@t3tools/shared/orchestrationV2DedupedBodies`; never store or forward a marked
+ * Restore with `@t4tools/shared/orchestrationV2DedupedBodies`; never store or forward a marked
  * value. Clients restore only these fields, so blanking another field needs a new opt-in.
  */
 const DedupedBodyMarker = Schema.optionalKey(Schema.Literal(true));
@@ -3349,7 +3349,7 @@ export type OrchestrationV2Command = typeof OrchestrationV2Command.Type;
 
 // Excluded from dispatchCommand so only the server can send these.
 const OrchestrationV2InternalCommand = Schema.Union([
-  // Guest share commands the server issues after checking T3 Connect and the guest token.
+  // Guest share commands the server issues after checking T4 Connect and the guest token.
   Schema.Struct({
     type: Schema.Literal("thread.guest-share.open"),
     commandId: CommandId,
@@ -3576,7 +3576,7 @@ export type OrchestrationV2SubscribeCommandOutputInput =
   typeof OrchestrationV2SubscribeCommandOutputInput.Type;
 
 /** Unpersisted stream for expanded rows: replace resets the bounded tail, append extends it, and running:false ends it.
- * Feed both through @t3tools/shared/terminalOutput appendTerminalOutput to preserve cursor and style escapes. */
+ * Feed both through @t4tools/shared/terminalOutput appendTerminalOutput to preserve cursor and style escapes. */
 export const OrchestrationV2CommandOutputFrame = Schema.Struct({
   kind: Schema.Literals(["replace", "append"]),
   text: Schema.String,

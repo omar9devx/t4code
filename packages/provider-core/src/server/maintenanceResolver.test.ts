@@ -4,8 +4,8 @@ import * as NodeFS from "node:fs";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
-import { ProviderDriverKind, ProviderInstanceId, type ServerProvider } from "@t3tools/contracts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { ProviderDriverKind, ProviderInstanceId, type ServerProvider } from "@t4tools/contracts";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Crypto from "effect/Crypto";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -38,7 +38,7 @@ import {
   type PackageManagedProviderMaintenanceDefinition,
   type ProviderMaintenanceCapabilities,
 } from "./maintenanceResolver.ts";
-import { symlinksSupported } from "@t3tools/shared/testing/symlinks";
+import { symlinksSupported } from "@t4tools/shared/testing/symlinks";
 
 const driver = (value: string) => ProviderDriverKind.make(value);
 // Shell stubs use POSIX paths; Windows temp paths cannot split on colon.
@@ -218,7 +218,7 @@ it.layer(
     "uses npm's registry for $install installs (exit $exitCode, output $stdout)",
     (fixture) =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-registry-version");
+        const tempDir = yield* makeTempDir("t4-registry-version");
         const npmBinDir = NodePath.join(tempDir, "npm-bin");
         writeExecutable(NodePath.join(npmBinDir, "npm"));
         const binaryPath =
@@ -419,7 +419,7 @@ it.layer(
     "pins npm updates to the global prefix that owns the package and the provider's PATH",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-npm-capabilities");
+        const tempDir = yield* makeTempDir("t4-npm-capabilities");
         const link = linkIntoPackage(tempDir, "package-tool", [
           "lib",
           "node_modules",
@@ -841,7 +841,7 @@ it.layer(
 
   it.effect("proves Windows npm ownership from the package manifest beside the shim", () =>
     Effect.gen(function* () {
-      const tempDir = yield* makeTempDir("t3-npm-windows-capabilities");
+      const tempDir = yield* makeTempDir("t4-npm-windows-capabilities");
       const shim = NodePath.join(tempDir, "package-tool.cmd");
       NodeFS.mkdirSync(tempDir, { recursive: true });
       NodeFS.writeFileSync(shim, "@echo off\r\n");
@@ -883,7 +883,7 @@ it.layer(
     "switches to pnpm updates when the real path lives in pnpm's global store",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-pnpm-capabilities");
+        const tempDir = yield* makeTempDir("t4-pnpm-capabilities");
         const link = linkIntoPackage(tempDir, "package-tool", [
           ".local",
           "share",
@@ -963,7 +963,7 @@ it.layer(
     "advertises $case for pnpm-global installs",
     (fixture) =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-pnpm-latest");
+        const tempDir = yield* makeTempDir("t4-pnpm-latest");
         const pnpmBinDir = NodePath.join(tempDir, "pnpm-bin");
         writeExecutable(NodePath.join(pnpmBinDir, "pnpm"));
         if (fixture.npmOutput !== undefined) writeExecutable(NodePath.join(pnpmBinDir, "npm"));
@@ -1037,7 +1037,7 @@ it.layer(
     "switches to bun updates when the resolved binary lives in bun's global bin",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-bun-capabilities");
+        const tempDir = yield* makeTempDir("t4-bun-capabilities");
         const bunBinDir = NodePath.join(tempDir, ".bun", "bin");
         writeExecutable(NodePath.join(bunBinDir, "package-tool"));
 
@@ -1061,7 +1061,7 @@ it.layer(
 
   it.effect.skipIf(windowsHost)("switches to native updates and runs the resolved executable", () =>
     Effect.gen(function* () {
-      const tempDir = yield* makeTempDir("t3-native-capabilities");
+      const tempDir = yield* makeTempDir("t4-native-capabilities");
       const nativeBinDir = NodePath.join(tempDir, ".local", "bin");
       const nativePath = NodePath.join(nativeBinDir, "native-package-tool");
       writeExecutable(nativePath);
@@ -1095,7 +1095,7 @@ it.layer(
     (launcher, { skip }) => {
       if (windowsHost || (launcher === "symlink" && !symlinksSupported)) skip();
       return Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-native-mise");
+        const tempDir = yield* makeTempDir("t4-native-mise");
         const nativePath = NodePath.join(tempDir, ".local", "bin", "native-package-tool");
         if (launcher === "wrapper") {
           writeExecutable(nativePath);
@@ -1131,7 +1131,7 @@ it.layer(
     "prefers npm ownership over the Node keg the package lives under",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-homebrew-node-capabilities");
+        const tempDir = yield* makeTempDir("t4-homebrew-node-capabilities");
         const keg = NodePath.join(tempDir, "Cellar", "node", "22.1.0");
         const target = NodePath.join(
           keg,
@@ -1194,7 +1194,7 @@ it.layer(
 
   it.effect.skipIf(windowsHost)("carries the native updater's environment into the action", () =>
     Effect.gen(function* () {
-      const tempDir = yield* makeTempDir("t3-native-env");
+      const tempDir = yield* makeTempDir("t4-native-env");
       const nativePath = NodePath.join(tempDir, ".local", "bin", "native-package-tool");
       writeExecutable(nativePath);
       const resolver = makePackageManagedProviderMaintenanceResolver({
@@ -1330,7 +1330,7 @@ it.layer(
     "stays manual-only when the keg is not under the resolved brew's prefix",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-homebrew-foreign-prefix");
+        const tempDir = yield* makeTempDir("t4-homebrew-foreign-prefix");
         const brewBinDir = NodePath.join(tempDir, "brew-bin");
         writeExecutable(NodePath.join(brewBinDir, "brew"));
         const kegBinary = NodePath.join(
@@ -1382,7 +1382,7 @@ it.layer(
     "disables one-click updates for explicit custom binary paths it cannot safely map",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-custom-capabilities");
+        const tempDir = yield* makeTempDir("t4-custom-capabilities");
         const customPath = NodePath.join(tempDir, "tools", "package-tool");
         writeExecutable(customPath);
 
@@ -1405,7 +1405,7 @@ it.layer(
     "falls back to the provider's own updater when no installer is proven",
     () =>
       Effect.gen(function* () {
-        const tempDir = yield* makeTempDir("t3-self-update-fallback");
+        const tempDir = yield* makeTempDir("t4-self-update-fallback");
         const customPath = NodePath.join(tempDir, "tools", "package-tool");
         writeExecutable(customPath);
         const selfUpdating = makePackageManagedProviderMaintenanceResolver({
@@ -1436,7 +1436,7 @@ it.layer(
 
   it.effect.skipIf(!symlinksSupported)("updates Yarn global installs with yarn", () =>
     Effect.gen(function* () {
-      const tempDir = yield* makeTempDir("t3-yarn-capabilities");
+      const tempDir = yield* makeTempDir("t4-yarn-capabilities");
       const link = linkIntoPackage(tempDir, "package-tool", [
         ".config",
         "yarn",
@@ -1467,7 +1467,7 @@ it.layer(
     "updates Volta installs only when Volta has the package",
     () =>
       Effect.gen(function* () {
-        const voltaHome = NodePath.join(yield* makeTempDir("t3-volta-capabilities"), ".volta");
+        const voltaHome = NodePath.join(yield* makeTempDir("t4-volta-capabilities"), ".volta");
         const shim = NodePath.join(voltaHome, "bin", "volta-shim");
         writeExecutable(shim);
         const link = NodePath.join(voltaHome, "bin", "package-tool");
@@ -1491,7 +1491,7 @@ it.layer(
 
   it.effect.skipIf(windowsHost)("upgrades with the keg's own brew when brew is not on PATH", () =>
     Effect.gen(function* () {
-      const tempDir = yield* makeTempDir("t3-homebrew-keg-brew");
+      const tempDir = yield* makeTempDir("t4-homebrew-keg-brew");
       const brewPath = NodePath.join(tempDir, "bin", "brew");
       writeExecutable(brewPath);
       const kegBinary = NodePath.join(tempDir, "Cellar", "package-tool", "1.0.0", "bin", "tool");

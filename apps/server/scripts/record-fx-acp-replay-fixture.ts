@@ -1,15 +1,15 @@
 /**
  * Records an fx ACP replay transcript through the real orchestrator and
  * FxAdapterV2, teeing only the protocol logger. Run from apps/server with
- * fx 0.0.13 on PATH (or T3_FX_BIN); HOME stays the user's real login:
+ * fx 0.0.13 on PATH (or T4_FX_BIN); HOME stays the user's real login:
  *   node scripts/record-fx-acp-replay-fixture.ts --scenario simple
  */
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import { ProviderInstanceId, type ProviderReplayEntry } from "@t3tools/contracts";
-import { FxSettings } from "@t3tools/provider-fx/settings";
-import { FX_DRIVER_KIND, makeFxAcpRuntime, makeFxAdapterV2 } from "@t3tools/provider-fx/testing";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { resolveSelfInvocation } from "@t3tools/shared/nodeRuntime";
+import { ProviderInstanceId, type ProviderReplayEntry } from "@t4tools/contracts";
+import { FxSettings } from "@t4tools/provider-fx/settings";
+import { FX_DRIVER_KIND, makeFxAcpRuntime, makeFxAdapterV2 } from "@t4tools/provider-fx/testing";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { resolveSelfInvocation } from "@t4tools/shared/nodeRuntime";
 import * as Clock from "effect/Clock";
 import * as Console from "effect/Console";
 import * as Effect from "effect/Effect";
@@ -19,12 +19,12 @@ import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
 
-import { ACP_PROTOCOL } from "@t3tools/provider-acp/server/adapter";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
-import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
-import { buildRuntimeInstructions } from "@t3tools/provider-core/server/runtimeInstructions";
-import * as TestProviderHost from "@t3tools/provider-testing/TestProviderHost";
-import { checkpointWorkspace } from "@t3tools/provider-testing/replayWorkspace";
+import { ACP_PROTOCOL } from "@t4tools/provider-acp/server/adapter";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
+import type * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
+import { buildRuntimeInstructions } from "@t4tools/provider-core/server/runtimeInstructions";
+import * as TestProviderHost from "@t4tools/provider-testing/TestProviderHost";
+import { checkpointWorkspace } from "@t4tools/provider-testing/replayWorkspace";
 import * as ProviderAdapterRegistry from "../src/orchestration-v2/ProviderAdapterRegistry.ts";
 import { provideDeterministicTestRuntime } from "../src/orchestration-v2/testkit/DeterministicRuntime.ts";
 import { ORCHESTRATOR_REPLAY_FIXTURES } from "../src/orchestration-v2/testkit/fixtures/index.ts";
@@ -37,7 +37,7 @@ const encodeJson = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
 const decodeJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown));
 const HOME_PLACEHOLDER = "/home/fx-replay";
 const FX_INSTANCE_ID = ProviderInstanceId.make("fx");
-const T3_INSTRUCTIONS_BODY = /<t[34]_code_instructions>\n[\s\S]*?\n<\/t[34]_code_instructions>/u;
+const T4_INSTRUCTIONS_BODY = /<t[34]_code_instructions>\n[\s\S]*?\n<\/t[34]_code_instructions>/u;
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/giu;
 const TOKEN = /\b(?:sk-|gho_|ghp_|xai-|vercel_)[A-Za-z0-9_-]{8,}\b/gu;
 
@@ -128,7 +128,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
   readonly droppedFrames: number;
 } {
   const entries: Array<ProviderReplayEntry> = [];
-  const t3Requests = new Map<string, string>();
+  const t4Requests = new Map<string, string>();
   const agentRequests = new Map<string, string>();
   let droppedFrames = 0;
   for (const { direction, message } of wire) {
@@ -136,7 +136,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
     if (typeof message.method === "string") {
       const isRequest = message.id !== undefined && message.id !== null;
       if (isRequest) {
-        (direction === "outgoing" ? t3Requests : agentRequests).set(
+        (direction === "outgoing" ? t4Requests : agentRequests).set(
           String(message.id),
           message.method,
         );
@@ -153,7 +153,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
       });
       continue;
     }
-    const pending = direction === "outgoing" ? agentRequests : t3Requests;
+    const pending = direction === "outgoing" ? agentRequests : t4Requests;
     const method = pending.get(String(message.id));
     if (method === undefined) {
       droppedFrames += 1;
@@ -209,8 +209,8 @@ function normalizeOutboundFrame(frame: Record<string, unknown>, runtimeInstructi
               ? {
                   ...part,
                   text: part.text.replace(
-                    T3_INSTRUCTIONS_BODY,
-                    "<t4_code_instructions>\n<any>\n</t4_code_instructions>",
+                    T4_INSTRUCTIONS_BODY,
+                    "<T4_code_instructions>\n<any>\n</T4_code_instructions>",
                   ),
                 }
               : part,
@@ -358,7 +358,7 @@ const recordScenario = Effect.fn("recordFxScenario")(function* (fixtureName: str
   };
 
   const tee = makeWireTee();
-  const settings = { ...DEFAULT_FX_SETTINGS, binaryPath: process.env.T3_FX_BIN ?? "fx" };
+  const settings = { ...DEFAULT_FX_SETTINGS, binaryPath: process.env.T4_FX_BIN ?? "fx" };
   const layerRegistry = ProviderAdapterRegistry.layerFromAdaptersEffect(
     Effect.gen(function* () {
       const environment = yield* HostProcess.Environment;

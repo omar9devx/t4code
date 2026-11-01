@@ -5,26 +5,26 @@ import {
   type PartialState,
   type StackActionType,
 } from "@react-navigation/native";
-import { availableScratchWorkspaceRoot } from "@t3tools/client-runtime/operations/projects";
+import { availableScratchWorkspaceRoot } from "@t4tools/client-runtime/operations/projects";
 import {
   findPromptLinkProjects,
   findPromptLinkPullRequestThread,
   resolvePromptLinkModelSelection,
-} from "@t3tools/client-runtime/prompt-links";
+} from "@t4tools/client-runtime/prompt-links";
 import {
   executeAtomQuery,
   isAtomCommandInterrupted,
   runAtomCommand,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import type { EnvironmentProject } from "@t3tools/client-runtime/state/shell";
-import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
+} from "@t4tools/client-runtime/state/runtime";
+import type { EnvironmentProject } from "@t4tools/client-runtime/state/shell";
+import type { EnvironmentId, ThreadId } from "@t4tools/contracts";
 import {
   parseNewThreadLink,
   type LinkedPrompt,
   type PromptLinkPullRequest,
   type PromptLinkRepository,
-} from "@t3tools/shared/promptLinks";
+} from "@t4tools/shared/promptLinks";
 import { Atom, type AsyncResult } from "effect/reactivity";
 
 import { findLinkedRoute, findStackRoute, updateLinkedRoute } from "../../lib/appLinking";

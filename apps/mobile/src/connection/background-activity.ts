@@ -1,11 +1,11 @@
-import { EnvironmentRegistry } from "@t3tools/client-runtime/connection";
-import { EnvironmentRpcSubscriptionObserver, request } from "@t3tools/client-runtime/rpc";
+import { EnvironmentRegistry } from "@t4tools/client-runtime/connection";
+import { EnvironmentRpcSubscriptionObserver, request } from "@t4tools/client-runtime/rpc";
 import {
   type BackgroundScope,
   type ClientActivityReportInput,
   type EnvironmentId,
   WS_METHODS,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Clock from "effect/Clock";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";

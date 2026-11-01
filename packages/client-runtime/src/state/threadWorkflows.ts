@@ -3,8 +3,8 @@ import {
   isCompactionCommandMessage,
   type OrchestrationV2ProjectedTurnItem,
   type OrchestrationV2ProviderCapabilities,
-} from "@t3tools/contracts";
-import { copySorted } from "@t3tools/shared/Array";
+} from "@t4tools/contracts";
+import { copySorted } from "@t4tools/shared/Array";
 
 import type { ThreadStructure } from "./models.ts";
 

@@ -66,7 +66,7 @@ A project on several machines must have every machine connected to pin or archiv
 
 In **Settings → Worktrees → Worktree branch naming**, choose a static prefix,
 a model-selected semantic prefix such as `feat/` or `fix/`, or custom instructions
-for the complete name. The static prefix defaults to `t3/`; a trailing slash is
+for the complete name. The static prefix defaults to `t4/`; a trailing slash is
 optional, and an empty prefix adds nothing. Invalid characters in a static prefix
 are replaced with hyphens. Custom instructions are appended to
 the naming prompt and can specify issue IDs, namespaces, and casing.
@@ -99,7 +99,7 @@ Leaving an edited form asks before discarding unsaved changes.
 In **Settings → Scheduled tasks**, choose **On webhook**
 as a task's schedule to run it whenever another service calls its URL, such as
 GitHub on a new pull request or a CI job that failed. A public URL needs a
-[T3 Connect](remote-access.md) managed tunnel; after you save the task, copy
+[T4 Connect](remote-access.md) managed tunnel; after you save the task, copy
 its URL from the editor. Without one, the editor shows only the URL's path.
 **Rotate** replaces the URL and the old one stops working.
 
@@ -155,9 +155,9 @@ requests and the prompt each one produced.
 
 If the environment is offline, the sender gets an error and nothing runs;
 redeliver from the sender, such as GitHub's **Recent Deliveries**, once it is
-back. To have T3 Connect keep requests instead, turn on **Hold webhooks while
-offline** in **Settings → Sharing & access**. T3 Connect then stores requests to a
-T3 Connect URL for up to 24 hours and delivers them when the environment
+back. To have T4 Connect keep requests instead, turn on **Hold webhooks while
+offline** in **Settings → Sharing & access**. T4 Connect then stores requests to a
+T4 Connect URL for up to 24 hours and delivers them when the environment
 returns. Leave it off if you don't want request bodies stored outside your
 machine. To skip requests that waited too long, set **Skip requests older
 than** on the task.
@@ -172,10 +172,10 @@ project crumb.
 The Projects category, under Code, holds the project's name, icon, actions,
 checkouts and removal. Actions belong to a project: editing them creates the project's own list
 on each selected environment, and reset returns to the environment's shared list. A project's
-`t3.json` actions can be imported there.
+`t4.json` actions can be imported there.
 
-Settings a repository can also declare in `t3.json`, such as the workspace for new threads,
-resolve in one order: a project override, then the environment setting, then `t3.json`, then the
+Settings a repository can also declare in `t4.json`, such as the workspace for new threads,
+resolve in one order: a project override, then the environment setting, then `t4.json`, then the
 built-in default. Leave a setting on **Inherit** to let the next tier decide.
 Browser access changes apply when an agent session next starts.
 
@@ -183,12 +183,12 @@ New worktrees initialize git submodules recursively. If that step is slow becaus
 declares many nested submodules, set **Submodules** in **Settings → Worktrees** under Advanced (with the project
 selected to override it there) to **Top level only** to stop at the ones the repository declares
 itself, or **Skip** to leave them for a setup script. It resolves in the same order as the
-workspace default: a `"worktreeSubmodules"` value in the `t3.json` of the branch being checked out
+workspace default: a `"worktreeSubmodules"` value in the `t4.json` of the branch being checked out
 applies when the project and environment are both on **Inherit**.
 
 ## Worktree location
 
-New worktrees go in the `worktrees` folder of the T3 home directory. To put them somewhere else,
+New worktrees go in the `worktrees` folder of the T4 home directory. To put them somewhere else,
 such as another drive, set **Settings → Worktrees → Worktree location** to an absolute path like
 `D:\worktrees` or `~/worktrees`. The setting is per machine. Existing worktrees stay where they
 are, and cleanup covers both the default folder and the custom one.

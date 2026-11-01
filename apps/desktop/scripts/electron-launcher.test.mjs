@@ -19,9 +19,9 @@ describe("electron development launcher", () => {
   it("uses captured values only as fallbacks for a live runner environment", () => {
     const environmentScript = makeDevelopmentEnvironmentScript({
       VITE_DEV_SERVER_URL: "http://127.0.0.1:8526",
-      T3CODE_PORT: "16566",
-      T3CODE_HOME: "/tmp/t3",
-      T3CODE_OTLP_PROTOCOL: "http/protobuf",
+      T4CODE_PORT: "16566",
+      T4CODE_HOME: "/tmp/t4",
+      T4CODE_OTLP_PROTOCOL: "http/protobuf",
     });
 
     assert.include(
@@ -30,7 +30,7 @@ describe("electron development launcher", () => {
     );
     assert.include(
       environmentScript,
-      "if [ -z \"${T3CODE_OTLP_PROTOCOL:-}\" ]; then export T3CODE_OTLP_PROTOCOL='http/protobuf'; fi",
+      "if [ -z \"${T4CODE_OTLP_PROTOCOL:-}\" ]; then export T4CODE_OTLP_PROTOCOL='http/protobuf'; fi",
     );
     assert.notInclude(environmentScript, "\nexport VITE_DEV_SERVER_URL=");
   });
@@ -50,7 +50,7 @@ describe("electron development launcher", () => {
     assert.notInclude(script, "VITE_DEV_SERVER_URL");
     assert.include(
       script,
-      "exec '/repo/node_modules/electron/Electron' --t3code-dev-root='/repo/apps/desktop' '/repo/apps/desktop/dist-electron/main.cjs' \"$@\"",
+      "exec '/repo/node_modules/electron/Electron' --T4CODE-dev-root='/repo/apps/desktop' '/repo/apps/desktop/dist-electron/main.cjs' \"$@\"",
     );
   });
 
@@ -104,7 +104,7 @@ describe("electron development launcher", () => {
   });
 
   it("restores execute permissions on an unchanged launcher", () => {
-    const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t3-launcher-"));
+    const directory = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t4-launcher-"));
     const launcherPath = NodePath.join(directory, "launcher");
     try {
       writeDevelopmentLauncherScript(launcherPath, "/runtime/Electron");
@@ -152,21 +152,21 @@ async function startupCleanupPattern(desktopDir) {
 }
 
 it
-  // oxlint-disable-next-line t3code/no-global-process-runtime -- Native pgrep is unavailable on Windows.
+  // oxlint-disable-next-line T4CODE/no-global-process-runtime -- Native pgrep is unavailable on Windows.
   .skipIf(NodeOS.platform() === "win32")
   .each([
-    "/tmp/t3-feature.one/apps/desktop",
-    "/tmp/t3-feature.one [two](three)+?^${four}|back\\slash*/apps/desktop",
+    "/tmp/t4-feature.one/apps/desktop",
+    "/tmp/t4-feature.one [two](three)+?^${four}|back\\slash*/apps/desktop",
   ])("dev cleanup matches only the literal root argument: %s", async (desktopDir) => {
   const pattern = await startupCleanupPattern(desktopDir);
-  const flag = `--t3code-dev-root=${desktopDir}`;
+  const flag = `--T4CODE-dev-root=${desktopDir}`;
   const argvCases = [
     [flag],
     [flag, "main.cjs"],
     [flag.replace(".one", "Xone")],
     [`${flag}-two`],
     [`prefix${flag}`],
-    [`--t3code-dev-root=/other${desktopDir}`],
+    [`--T4CODE-dev-root=/other${desktopDir}`],
   ];
   const children = [];
   try {

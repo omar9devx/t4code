@@ -1,6 +1,6 @@
-import type { DesktopUpdateChannel, DesktopUpdateReleaseNote } from "@t3tools/contracts";
+import type { DesktopUpdateChannel, DesktopUpdateReleaseNote } from "@t4tools/contracts";
 
-import { desktopUpdateChannelOf } from "@t3tools/shared/cliRelease";
+import { desktopUpdateChannelOf } from "@t4tools/shared/cliRelease";
 
 interface ElectronReleaseNoteInfo {
   readonly version: string;

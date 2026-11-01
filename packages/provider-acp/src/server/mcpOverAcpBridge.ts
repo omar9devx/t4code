@@ -4,7 +4,7 @@ import * as Semaphore from "effect/Semaphore";
 import * as Stream from "effect/Stream";
 import type * as AcpSchema from "effect-acp/compat";
 
-import { responsePayloads } from "@t3tools/shared/mcpResponsePayloads";
+import { responsePayloads } from "@t4tools/shared/mcpResponsePayloads";
 
 const MAX_CONNECTIONS = 16;
 const MAX_MESSAGE_BYTES = 8 * 1024 * 1024;
@@ -184,7 +184,7 @@ export const makeAcpMcpOverAcpBridge = Effect.fn("AcpMcpOverAcpBridge.make")(fun
 
   return {
     connect: Effect.fn("mcpOverAcpBridge.connect")(function* (request) {
-      if (request.serverId !== "t3-code") {
+      if (request.serverId !== "t4-code") {
         return yield* Effect.fail(
           new AcpMcpOverAcpError(`Unknown ACP MCP server "${request.serverId}".`),
         );

@@ -4,18 +4,18 @@ import {
   ExecutionEnvironmentDescriptor,
   ORCHESTRATION_PROTOCOL_VERSION,
   PortSchema,
-} from "@t3tools/contracts";
-import { resolveWorktreeT3Home } from "@t3tools/shared/devHome";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { DEFAULT_SIGNAL_EXPORT } from "@t3tools/shared/observability";
-import { buildPairingAppLink } from "@t3tools/shared/remote";
-import * as OtelEnvironment from "@t3tools/shared/otelEnvironment";
+} from "@t4tools/contracts";
+import { resolveWorktreeT4Home } from "@t4tools/shared/devHome";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { DEFAULT_SIGNAL_EXPORT } from "@t4tools/shared/observability";
+import { buildPairingAppLink } from "@t4tools/shared/remote";
+import * as OtelEnvironment from "@t4tools/shared/otelEnvironment";
 import {
   buildTailscaleHttpsBaseUrl,
   DEFAULT_TAILSCALE_SERVE_PORT,
   ensureTailscaleServe,
   readTailscaleStatus,
-} from "@t3tools/tailscale";
+} from "@t4tools/tailscale";
 import * as Config from "effect/Config";
 import * as Console from "effect/Console";
 import * as DateTime from "effect/DateTime";
@@ -47,7 +47,7 @@ import {
 import { authScopesFlag } from "./authScopes.ts";
 import { baseDirFlag, DurationFromString } from "./config.ts";
 
-const WELL_KNOWN_ENVIRONMENT_PATH = "/.well-known/t3/environment";
+const WELL_KNOWN_ENVIRONMENT_PATH = "/.well-known/t4/environment";
 const PAIR_PROBE_TIMEOUT = Duration.millis(2_500);
 // Tailscale's first HTTPS request may take seconds to provision a certificate.
 const TAILSCALE_PROBE_ATTEMPTS = 5;
@@ -72,7 +72,7 @@ export class NoRunningServerError extends Schema.TaggedError<NoRunningServerErro
       ...(this.inLinkedWorktree
         ? ["In a linked worktree, pass --base-dir to pair with a server outside it."]
         : []),
-      "Start one with `npx t3 serve`, or connect this machine with T3 Connect: `npx t3 connect`.",
+      "Start one with `npx t4 serve`, or connect this machine with T4 Connect: `npx t4 connect`.",
     ].join("\n");
   }
 }
@@ -84,7 +84,7 @@ export class IncompatibleServerProtocolError extends Schema.TaggedError<Incompat
   override get message(): string {
     return [
       `The running T4 Code server (${this.serverVersion}) speaks orchestration protocol ${String(this.serverProtocolVersion)}, but this CLI speaks protocol ${String(ORCHESTRATION_PROTOCOL_VERSION)}.`,
-      `Pair with the matching CLI instead: \`npx t3@${this.serverVersion} pair\`.`,
+      `Pair with the matching CLI instead: \`npx t4@${this.serverVersion} pair\`.`,
     ].join("\n");
   }
 }
@@ -204,7 +204,7 @@ const formatPairOutput = (input: {
 type EnvironmentProbeResult =
   | { readonly _tag: "descriptor"; readonly descriptor: ExecutionEnvironmentDescriptor }
   | { readonly _tag: "unreachable" }
-  | { readonly _tag: "not-a-t3-server" };
+  | { readonly _tag: "not-a-t4-server" };
 
 const probeEnvironmentDescriptor: (
   baseUrl: string,
@@ -224,7 +224,7 @@ const probeEnvironmentDescriptor: (
     }
     const descriptor = yield* HttpClientResponse.filterStatusOk(response).pipe(
       Effect.flatMap(HttpClientResponse.schemaBodyJson(ExecutionEnvironmentDescriptor)),
-      Effect.mapError(() => ({ _tag: "not-a-t3-server" }) as const),
+      Effect.mapError(() => ({ _tag: "not-a-t4-server" }) as const),
     );
     return { _tag: "descriptor", descriptor } as const;
   },
@@ -247,15 +247,15 @@ const discoverPairTarget = Effect.fn("pair.discoverPairTarget")(function* (
     bases.push(yield* resolveBaseDir(explicitBaseDir));
   } else {
     // Same precedence as dev-runner: inside a linked worktree only its own
-    // `.t3` counts. Minting opens the target database with this checkout's
+    // The selected T4 home counts. Minting opens the target database with this checkout's
     // migrations, so falling back to the shared home could migrate the live
     // install with unreleased schema.
-    const worktreeHome = yield* resolveWorktreeT3Home(yield* HostProcess.WorkingDirectory);
+    const worktreeHome = yield* resolveWorktreeT4Home(yield* HostProcess.WorkingDirectory);
     if (worktreeHome !== undefined) {
       bases.push(worktreeHome);
       inLinkedWorktree = true;
     } else {
-      const envHome = yield* Config.String("T3CODE_HOME").pipe(Config.option);
+      const envHome = yield* Config.String("T4CODE_HOME").pipe(Config.option);
       bases.push(yield* resolveBaseDir(Option.getOrUndefined(envHome)));
     }
   }
@@ -386,7 +386,7 @@ const resolveTailscalePairingBase = Effect.fn("pair.resolveTailscalePairingBase"
         return { baseUrl, notes };
       }
     }
-    if (existing._tag === "not-a-t3-server") {
+    if (existing._tag === "not-a-t4-server") {
       return yield* new ServePortOccupiedError({ servePort: input.servePort });
     }
 
@@ -432,7 +432,7 @@ const mintPairingLink = Effect.fn("pair.mintPairingLink")(function* (input: {
     return yield* environmentAuth.createPairingLink({
       scopes: input.scopes,
       subject: "one-time-token",
-      label: Option.getOrElse(input.label, () => "t3 pair"),
+      label: Option.getOrElse(input.label, () => "t4 pair"),
       ...(Option.isSome(input.ttl) ? { ttl: input.ttl.value } : {}),
     });
   }).pipe(
@@ -512,11 +512,11 @@ export const pairCommand = Command.make("pair", {
         pairingBaseUrl = resolveDirectPairingBaseUrl(target.state);
         if (isLoopbackHost(new URL(pairingBaseUrl).hostname)) {
           notes.push(
-            "This URL is only reachable from this machine. To reach it from your other devices, run `t3 up`, or re-run with --tailscale.",
+            "This URL is only reachable from this machine. To reach it from your other devices, run `t4 up`, or re-run with --tailscale.",
           );
         } else if (target.state.privateNetworkOnly) {
           notes.push(
-            "This URL works only from this machine's local network. From elsewhere, re-run with --tailscale or use T3 Connect.",
+            "This URL works only from this machine's local network. From elsewhere, re-run with --tailscale or use T4 Connect.",
           );
         }
         if (target.variant === "dev" && target.state.devUrl === undefined) {

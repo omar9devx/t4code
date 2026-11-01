@@ -1,4 +1,4 @@
-import { fromLenientJson } from "@t3tools/shared/schemaJson";
+import { fromLenientJson } from "@t4tools/shared/schemaJson";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 
@@ -27,6 +27,7 @@ type EarlyLinuxElectronOptionsInput = EarlyDesktopSettingsInput;
 export interface EarlyLinuxElectronOptions {
   readonly isDevelopment: boolean;
   readonly linuxDesktopEntryName: string;
+  readonly linuxWmClass: string;
   readonly passwordStore: LinuxPasswordStoreSwitch | null;
 }
 
@@ -52,20 +53,41 @@ function resolveEarlyDesktopSettingsPath(input: {
   readonly env: NodeJS.ProcessEnv;
   readonly homeDirectory: string;
   readonly joinPath: JoinPath;
+  readonly readFileString: (path: string) => string;
 }): string {
-  const t3Home = Option.fromUndefinedOr(input.env.T3CODE_HOME);
+  const t4Home = Option.fromUndefinedOr(input.env.T4CODE_HOME);
   const baseDir = resolveDesktopBaseDir({
     homeDirectory: input.homeDirectory,
     joinPath: input.joinPath,
-    t3Home,
+    t4Home,
   });
   const stateDir = resolveDesktopStateDir({
     baseDir,
     isDevelopment: isDevelopmentEnvironment(input.env),
     joinPath: input.joinPath,
-    t3Home,
+    t4Home,
   });
-  return input.joinPath(stateDir, "desktop-settings.json");
+  const settingsPath = input.joinPath(stateDir, "desktop-settings.json");
+  if (Option.isSome(t4Home)) return settingsPath;
+  try {
+    input.readFileString(settingsPath);
+    return settingsPath;
+  } catch {
+    const legacyBaseDir = input.joinPath(input.homeDirectory, ".t3");
+    const legacyStateDir = resolveDesktopStateDir({
+      baseDir: legacyBaseDir,
+      isDevelopment: isDevelopmentEnvironment(input.env),
+      joinPath: input.joinPath,
+      t4Home: Option.none(),
+    });
+    const legacySettingsPath = input.joinPath(legacyStateDir, "desktop-settings.json");
+    try {
+      input.readFileString(legacySettingsPath);
+      return legacySettingsPath;
+    } catch {
+      return settingsPath;
+    }
+  }
 }
 
 export function resolveEarlyLinuxPasswordStorePreference(

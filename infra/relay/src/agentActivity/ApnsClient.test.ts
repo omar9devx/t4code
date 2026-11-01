@@ -1,8 +1,8 @@
 // @effect-diagnostics-next-line nodeBuiltinImport:off -- Effect's Crypto has no generateKeyPairSync.
 import * as NodeCrypto from "node:crypto";
 
-import { EnvironmentId, ThreadId } from "@t3tools/contracts";
-import type { RelayAgentActivityAggregateState } from "@t3tools/contracts/relay";
+import { EnvironmentId, ThreadId } from "@t4tools/contracts";
+import type { RelayAgentActivityAggregateState } from "@t4tools/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
@@ -258,7 +258,7 @@ describe("ApnsClient", () => {
       teamId: "team-jwt-cache",
       keyId: "key-jwt-cache",
       privateKey: Redacted.make(privateKey),
-      bundleId: "com.t3tools.test",
+      bundleId: "com.t4tools.test",
       environment: "sandbox",
     } satisfies ApnsCredentials;
     const authorizations: Array<string> = [];

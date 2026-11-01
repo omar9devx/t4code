@@ -1,8 +1,8 @@
-import { EnvironmentId } from "@t3tools/contracts";
+import { EnvironmentId } from "@t4tools/contracts";
 import {
   type RelayClientDeviceRecord,
   type RelayClientEnvironmentRecord,
-} from "@t3tools/contracts/relay";
+} from "@t4tools/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -66,9 +66,9 @@ function createClient(overrides?: Partial<ManagedRelay.ManagedRelayClient["Servi
     createEnvironmentLinkChallenge: () => Effect.die("unused"),
     linkEnvironment: () => Effect.die("unused"),
     unlinkEnvironment: () => Effect.die("unused"),
-    getT3ChatLink: () => Effect.die("unused"),
-    createT3ChatLinkRequest: () => Effect.die("unused"),
-    unlinkT3Chat: () => Effect.die("unused"),
+    getT4ChatLink: () => Effect.die("unused"),
+    createT4ChatLinkRequest: () => Effect.die("unused"),
+    unlinkT4Chat: () => Effect.die("unused"),
     getEnvironmentStatus: () =>
       Effect.succeed({
         environmentId: environment.environmentId,
@@ -141,7 +141,7 @@ describe("createManagedRelayQueryManager", () => {
       yield* Effect.promise(() => failed.promise);
       for (const unsubscribe of readers) unsubscribe();
 
-      expect(logs).toEqual([["[t3-cloud] Relay device listing failed"]]);
+      expect(logs).toEqual([["[t4-cloud] Relay device listing failed"]]);
     }),
   );
 

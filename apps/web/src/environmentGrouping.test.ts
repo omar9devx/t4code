@@ -1,10 +1,10 @@
-import { EnvironmentId, ProjectId, ProviderInstanceId } from "@t3tools/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId } from "@t4tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import {
   deriveLogicalProjectKeyFromSettings,
   pickableProjectGroups,
-} from "@t3tools/client-runtime/state/project-grouping";
+} from "@t4tools/client-runtime/state/project-grouping";
 import {
   buildSidebarProjectPickerEntries,
   buildSidebarProjectSnapshots,

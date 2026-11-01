@@ -1,5 +1,5 @@
-import type { EnvironmentId } from "@t3tools/contracts";
-import { decodeRelayJwt } from "@t3tools/shared/relayJwt";
+import type { EnvironmentId } from "@t4tools/contracts";
+import { decodeRelayJwt } from "@t4tools/shared/relayJwt";
 import * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";
 import * as Data from "effect/Data";
@@ -41,7 +41,7 @@ export interface ManagedRelaySnapshotState<A> {
 }
 
 export interface ManagedRelayQueryEvent {
-  readonly operation: "environments" | "devices" | "t3chat-link";
+  readonly operation: "environments" | "devices" | "t4chat-link";
   readonly stage: "clerk-token" | "relay-request";
   readonly phase: "start" | "success" | "failure";
   readonly accountId: string;
@@ -114,7 +114,7 @@ export function createManagedRelaySession(input: ManagedRelaySessionInput): Mana
         try: () => readCachedClerkToken(nowMillis),
         catch: (cause) =>
           new ManagedRelaySessionError({
-            message: "Could not obtain the T3 Connect session token.",
+            message: "Could not obtain the T4 Connect session token.",
             cause,
           }),
       });
@@ -171,7 +171,7 @@ function readSessionClerkToken(
       (token): token is string => Boolean(token),
       () =>
         new ManagedRelaySessionError({
-          message: "The T3 Connect session token is unavailable.",
+          message: "The T4 Connect session token is unavailable.",
         }),
     ),
   );
@@ -185,7 +185,7 @@ function requireSessionClerkToken(
   const session = registry.get(managedRelaySessionAtom);
   if (!session || session.accountId !== accountId) {
     return Effect.fail(
-      new ManagedRelaySessionError({ message: `Sign in to T3 Connect before ${action}.` }),
+      new ManagedRelaySessionError({ message: `Sign in to T4 Connect before ${action}.` }),
     );
   }
   return readSessionClerkToken(session);
@@ -206,24 +206,24 @@ export const deregisterManagedRelayEnvironment = Effect.fn(
   yield* relay.unlinkEnvironment({ clerkToken, environmentId: input.environmentId });
 });
 
-/** Returns the T3 Chat page URL where the signed-in user confirms the link. */
-export const createManagedRelayT3ChatLinkRequest = Effect.fn(
-  "clientRuntime.managedRelaySession.createT3ChatLinkRequest",
+/** Returns the T4 Chat page URL where the signed-in user confirms the link. */
+export const createManagedRelayT4ChatLinkRequest = Effect.fn(
+  "clientRuntime.managedRelaySession.createT4ChatLinkRequest",
 )(function* (registry: AtomRegistry.AtomRegistry, input: { readonly accountId: string }) {
-  const clerkToken = yield* requireSessionClerkToken(registry, input.accountId, "linking T3 Chat");
+  const clerkToken = yield* requireSessionClerkToken(registry, input.accountId, "linking T4 Chat");
   const relay = yield* ManagedRelay.ManagedRelayClient;
-  return (yield* relay.createT3ChatLinkRequest({ clerkToken })).url;
+  return (yield* relay.createT4ChatLinkRequest({ clerkToken })).url;
 });
 
-export const unlinkManagedRelayT3Chat = Effect.fn("clientRuntime.managedRelaySession.unlinkT3Chat")(
+export const unlinkManagedRelayT4Chat = Effect.fn("clientRuntime.managedRelaySession.unlinkT4Chat")(
   function* (registry: AtomRegistry.AtomRegistry, input: { readonly accountId: string }) {
     const clerkToken = yield* requireSessionClerkToken(
       registry,
       input.accountId,
-      "unlinking T3 Chat",
+      "unlinking T4 Chat",
     );
     const relay = yield* ManagedRelay.ManagedRelayClient;
-    yield* relay.unlinkT3Chat({ clerkToken });
+    yield* relay.unlinkT4Chat({ clerkToken });
   },
 );
 
@@ -235,7 +235,7 @@ function requireClerkToken(
   if (!session || session.accountId !== accountId) {
     return Effect.fail(
       new ManagedRelaySessionError({
-        message: "Sign in to T3 Connect before loading relay data.",
+        message: "Sign in to T4 Connect before loading relay data.",
       }),
     );
   }
@@ -253,7 +253,7 @@ function describeManagedRelayFailure(cause: Cause.Cause<unknown>): {
         ? relayProtectedErrorMessage(error.relayError)
         : error instanceof Error
           ? error.message
-          : "Could not load T3 Connect data.",
+          : "Could not load T4 Connect data.",
     traceId: findErrorTraceId(error),
   };
 }
@@ -279,7 +279,7 @@ const logListingFailure =
       Effect.tapCause((cause) => {
         if (Cause.hasInterruptsOnly(cause)) return Effect.void;
         const { message, traceId } = describeManagedRelayFailure(cause);
-        return Effect.logError(`[t3-cloud] Relay ${label} listing failed`).pipe(
+        return Effect.logError(`[t4-cloud] Relay ${label} listing failed`).pipe(
           Effect.annotateLogs({ message, traceId }),
         );
       }),
@@ -365,11 +365,11 @@ export function createManagedRelayQueryManager(
       ),
   );
 
-  const t3ChatLinkAtom = Atom.family((accountId: string) =>
+  const t4ChatLinkAtom = Atom.family((accountId: string) =>
     runtime
       .atom((get) =>
         Effect.gen(function* () {
-          const base = { operation: "t3chat-link" as const, accountId };
+          const base = { operation: "t4chat-link" as const, accountId };
           const clerkToken = yield* observe(
             { ...base, stage: "clerk-token" },
             requireClerkToken(get, accountId),
@@ -377,29 +377,29 @@ export function createManagedRelayQueryManager(
           const relay = yield* ManagedRelay.ManagedRelayClient;
           return yield* observe(
             { ...base, stage: "relay-request" },
-            relay.getT3ChatLink({ clerkToken }),
+            relay.getT4ChatLink({ clerkToken }),
           );
         }),
       )
       .pipe(
         Atom.swr({ staleTime, revalidateOnMount: true }),
         Atom.setIdleTTL(idleTtl),
-        Atom.withLabel(`managed-relay:t3chat-link:${accountId}`),
+        Atom.withLabel(`managed-relay:t4chat-link:${accountId}`),
       ),
   );
 
   return {
     environmentsAtom,
     devicesAtom,
-    t3ChatLinkAtom,
+    t4ChatLinkAtom,
     refreshEnvironments(registry: AtomRegistry.AtomRegistry, accountId: string): void {
       registry.refresh(environmentsAtom(accountId));
     },
     refreshDevices(registry: AtomRegistry.AtomRegistry, accountId: string): void {
       registry.refresh(devicesAtom(accountId));
     },
-    refreshT3ChatLink(registry: AtomRegistry.AtomRegistry, accountId: string): void {
-      registry.refresh(t3ChatLinkAtom(accountId));
+    refreshT4ChatLink(registry: AtomRegistry.AtomRegistry, accountId: string): void {
+      registry.refresh(t4ChatLinkAtom(accountId));
     },
   };
 }

@@ -20,8 +20,8 @@ import * as HttpServerResponse from "effect/http/HttpServerResponse";
 import * as HttpTraceContext from "effect/http/HttpTraceContext";
 import * as HttpApiBuilder from "effect/http-api/HttpApiBuilder";
 import * as HttpApiError from "effect/http-api/HttpApiError";
-import { encodeOAuthScope } from "@t3tools/shared/oauthScope";
-import * as HttpObservability from "@t3tools/shared/httpObservability";
+import { encodeOAuthScope } from "@t4tools/shared/oauthScope";
+import * as HttpObservability from "@t4tools/shared/httpObservability";
 
 import {
   RelayApi,
@@ -52,12 +52,12 @@ import {
   RelayManagedEndpointRecoveryProofPayload,
   type RelayDpopAccessTokenScope,
   RelayInternalError,
-} from "@t3tools/contracts/relay";
+} from "@t4tools/contracts/relay";
 import {
   normalizeRelayIssuer,
   RELAY_MANAGED_TUNNEL_RECOVERY_TYP,
   verifyRelayJwt,
-} from "@t3tools/shared/relayJwt";
+} from "@t4tools/shared/relayJwt";
 
 import * as DeliveryAttempts from "../agentActivity/DeliveryAttempts.ts";
 import * as AgentActivityRows from "../agentActivity/AgentActivityRows.ts";
@@ -78,7 +78,7 @@ import * as ManagedTunnelLimits from "../environments/ManagedTunnelLimits.ts";
 import * as ManagedEndpointAllocations from "../environments/ManagedEndpointAllocations.ts";
 import * as EnvironmentPublishSignatures from "../environments/EnvironmentPublishSignatures.ts";
 import * as MobileRegistrations from "../agentActivity/MobileRegistrations.ts";
-import * as T3ChatAccounts from "../t3chat/T3ChatAccounts.ts";
+import * as T4ChatAccounts from "../t4chat/T4ChatAccounts.ts";
 import { withSpanAttributes } from "../observability.ts";
 import { isRelayHookPath, redactRelayHookUrl } from "../hooks/HookForwarder.ts";
 import * as RelayDb from "../db.ts";
@@ -593,7 +593,7 @@ export const verifyEnvironmentTunnelRecoveryProof = Effect.fn(
     publicKey: input.environmentPublicKey,
     token: input.proof,
     typ: RELAY_MANAGED_TUNNEL_RECOVERY_TYP,
-    issuer: `t3-env:${input.environmentId}`,
+    issuer: `t4-env:${input.environmentId}`,
     audience: normalizeRelayIssuer(config.relayIssuer),
     nowEpochSeconds: Math.floor(now.epochMilliseconds / 1_000),
   }).pipe(
@@ -825,7 +825,7 @@ export const layerClientApi = HttpApiBuilder.group(
     const links = yield* EnvironmentLinks.EnvironmentLinks;
     const managedEndpointProvider = yield* ManagedEndpointProvider.ManagedEndpointProvider;
     const devices = yield* Devices.Devices;
-    const t3Chat = yield* T3ChatAccounts.T3ChatAccounts;
+    const t4Chat = yield* T4ChatAccounts.T4ChatAccounts;
     const tunnelLimits = yield* ManagedTunnelLimits.ManagedTunnelLimits;
     return handlers
       .handle(
@@ -995,12 +995,12 @@ export const layerClientApi = HttpApiBuilder.group(
         }, mapRelayCommonApiErrors("not_authorized")),
       )
       .handle(
-        "getT3ChatLink",
-        Effect.fn("relay.api.client.getT3ChatLink")(function* () {
+        "getT4ChatLink",
+        Effect.fn("relay.api.client.getT4ChatLink")(function* () {
           yield* appendRelayCredentialResponseHeaders;
           const { userId } = yield* RelayClientPrincipal;
-          const link = t3Chat.available
-            ? yield* t3Chat
+          const link = t4Chat.available
+            ? yield* t4Chat
                 .getLink({ userId })
                 .pipe(Effect.catch(() => relayInternalErrorResponse("upstream_unavailable")))
             : null;
@@ -1008,19 +1008,19 @@ export const layerClientApi = HttpApiBuilder.group(
             .getOverride({ userId })
             .pipe(Effect.catch(() => relayInternalErrorResponse("internal_error")));
           return {
-            available: t3Chat.available,
+            available: t4Chat.available,
             link,
             ...(maxTunnelsOverride === null ? {} : { maxTunnelsOverride }),
           };
         }, mapRelayCommonApiErrors("not_authorized")),
       )
       .handle(
-        "createT3ChatLinkRequest",
-        Effect.fn("relay.api.client.createT3ChatLinkRequest")(function* () {
+        "createT4ChatLinkRequest",
+        Effect.fn("relay.api.client.createT4ChatLinkRequest")(function* () {
           const { userId } = yield* RelayClientPrincipal;
-          const url = yield* t3Chat.createLinkUrl({ userId }).pipe(
+          const url = yield* t4Chat.createLinkUrl({ userId }).pipe(
             Effect.catchTags({
-              T3ChatNotConfigured: () => relayInternalErrorResponse("internal_error"),
+              T4ChatNotConfigured: () => relayInternalErrorResponse("internal_error"),
               ClerkUserLookupFailed: () => relayInternalErrorResponse("upstream_unavailable"),
             }),
           );
@@ -1028,10 +1028,10 @@ export const layerClientApi = HttpApiBuilder.group(
         }, mapRelayCommonApiErrors("not_authorized")),
       )
       .handle(
-        "unlinkT3Chat",
-        Effect.fn("relay.api.client.unlinkT3Chat")(function* () {
+        "unlinkT4Chat",
+        Effect.fn("relay.api.client.unlinkT4Chat")(function* () {
           const { userId } = yield* RelayClientPrincipal;
-          yield* t3Chat
+          yield* t4Chat
             .unlink({ userId })
             .pipe(Effect.catch(() => relayInternalErrorResponse("upstream_unavailable")));
           return { ok: true };

@@ -162,26 +162,26 @@ describe("scoreThreadSearch", () => {
   });
 
   it("finds a branch pasted with the app's worktree prefix", () => {
-    const subject = thread("Cmd+K search", { branch: "t3/cmdk-search-v2" });
-    expect(scoreThreadSearch(foldSearchQuery("t3/cmdk-search-v2"), subject, NOW)).not.toBeNull();
-    expect(scoreThreadSearch(foldSearchQuery("t3/cmdk"), subject, NOW)).not.toBeNull();
+    const subject = thread("Cmd+K search", { branch: "t4/cmdk-search-v2" });
+    expect(scoreThreadSearch(foldSearchQuery("t4/cmdk-search-v2"), subject, NOW)).not.toBeNull();
+    expect(scoreThreadSearch(foldSearchQuery("t4/cmdk"), subject, NOW)).not.toBeNull();
   });
 
   it("ranks a title holding the words above the app's own branch prefix and project name", () => {
     const busy = { activityAt: NOW, opens: { openedAt: NOW, score: 6, picks: [] } };
     expect(
-      rankTitles("t3 connect", [
+      rankTitles("t4 connect", [
         thread("Diagnose Connect provisioning failures", {
           ...busy,
-          branch: "t3/diagnose-connect",
-          projectTitle: "t3code",
+          branch: "t4/diagnose-connect",
+          projectTitle: "T4CODE",
         }),
-        thread("T3 Connect Tunnel Lifecycle Review", { projectTitle: "t3code" }),
+        thread("T4 Connect Tunnel Lifecycle Review", { projectTitle: "T4CODE" }),
       ])[0],
-    ).toBe("T3 Connect Tunnel Lifecycle Review");
+    ).toBe("T4 Connect Tunnel Lifecycle Review");
     expect(
-      rankTitles("t3code", [
-        thread("Fix sidebar lag", { ...busy, projectTitle: "t3code", branch: "t3code/sidebar" }),
+      rankTitles("T4CODE", [
+        thread("Fix sidebar lag", { ...busy, projectTitle: "T4CODE", branch: "T4CODE/sidebar" }),
         thread("T4 Code vs Gemini Token Volume", { projectTitle: "slophouse" }),
       ])[0],
     ).toBe("T4 Code vs Gemini Token Volume");
@@ -189,11 +189,11 @@ describe("scoreThreadSearch", () => {
 
   it("matches pull request numbers, branches, and projects with every token somewhere", () => {
     const subject = thread("Trim model lists", {
-      branch: "t3/trim-mcp-models",
-      projectTitle: "t3code",
+      branch: "t4/trim-mcp-models",
+      projectTitle: "T4CODE",
       pullRequests: [{ number: 22889, title: "Smaller MCP payloads" }],
     });
-    for (const query of ["#22889", "22889", "trim mcp", "payloads t3code", "models trim"]) {
+    for (const query of ["#22889", "22889", "trim mcp", "payloads T4CODE", "models trim"]) {
       expect(scoreThreadSearch(foldSearchQuery(query), subject, NOW), query).not.toBeNull();
     }
     expect(scoreThreadSearch("trim lakebed", subject, NOW)).toBeNull();
@@ -210,8 +210,8 @@ describe("scoreThreadSearch", () => {
       [],
     );
     // Words with digits still forgive one.
-    expect(rankTitles("t3coed", [thread("t3code perf audit"), thread("Other")])).toEqual([
-      "t3code perf audit",
+    expect(rankTitles("t4coed", [thread("T4CODE perf audit"), thread("Other")])).toEqual([
+      "T4CODE perf audit",
     ]);
     expect(rankTitles("oath2", [thread("Fix oauth2 redirect")])).toEqual(["Fix oauth2 redirect"]);
     // A typo beats a mid-word accident: "ilde" is "idle", not the middle of "Builder".
@@ -279,7 +279,7 @@ describe("scoreThreadSearch beyond Latin text and titles", () => {
 
   it("says which field matched when the title does not", () => {
     const subject = thread("Trim model lists", {
-      branch: "t3/cleanup-payloads",
+      branch: "t4/cleanup-payloads",
       pullRequests: [{ number: 22889, title: "Smaller MCP payloads" }],
     });
     for (const query of ["#22889", "pr 22889", "pr22889", "pull request #22889"]) {
@@ -323,7 +323,7 @@ describe("scoreThreadSearch beyond Latin text and titles", () => {
     // Short words before a mere prefix are a coincidence.
     expect(rankTitles("inth", [thread("Show skill names in thread overview")])).toEqual([]);
     expect(rankTitles("tos", [thread("Move Client State to Server")])).toEqual([]);
-    expect(rankTitles("t3co", [thread("T4 Code vs Gemini")])).toEqual(["T4 Code vs Gemini"]);
+    expect(rankTitles("t4co", [thread("T4 Code vs Gemini")])).toEqual(["T4 Code vs Gemini"]);
     expect(rankTitles('"sidebar lag"', [thread("Fix sidebar lag")])).toEqual(["Fix sidebar lag"]);
     // A pasted query with a separate accent mark matches the composed title.
     expect(rankTitles("cafe\u0301", [thread("Café menu")])).toEqual(["Café menu"]);
@@ -412,14 +412,14 @@ describe("scoreThreadSearch with heavy use and loose input", () => {
       pullRequests: [
         {
           number: 22889,
-          references: ["pingdotgg/t3code#22889", "https://github.com/pingdotgg/t3code/pull/22889"],
+          references: ["omar9devx/t4code#22889", "https://github.com/omar9devx/t4code/pull/22889"],
         },
       ],
     });
     for (const query of [
-      "t3code#22889",
-      "github.com/pingdotgg/t3code/pull/22889",
-      "https://github.com/pingdotgg/t3code/pull/22889/files",
+      "T4CODE#22889",
+      "github.com/omar9devx/t4code/pull/22889",
+      "https://github.com/omar9devx/t4code/pull/22889/files",
       "5fe6f59c",
       "beebox",
     ]) {
@@ -427,7 +427,7 @@ describe("scoreThreadSearch with heavy use and loose input", () => {
     }
     expect(scoreThreadSearch("github.com", subject, NOW)).toBeNull();
     // A number is never cut short.
-    for (const query of ["github.com/pingdotgg/t3code/pull/2288", "t3code#2288"]) {
+    for (const query of ["github.com/omar9devx/t4code/pull/2288", "T4CODE#2288"]) {
       expect(scoreThreadSearch(foldSearchQuery(query), subject, NOW), query).toBeNull();
     }
   });

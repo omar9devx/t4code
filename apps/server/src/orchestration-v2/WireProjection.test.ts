@@ -17,7 +17,7 @@ import {
   type OrchestrationV2ThreadStreamItem,
   OrchestrationV2TurnItem,
   OrchestrationV2TurnItemJson,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it } from "@effect/vitest";
 import * as DateTime from "effect/DateTime";
 import * as Schema from "effect/Schema";
@@ -30,7 +30,7 @@ import {
   projectDomainEventForWire,
 } from "./WireProjection.ts";
 import { threadShellFromProjection } from "./ProjectionStore.ts";
-import { MAX_TOOL_OUTPUT_IMAGES, toolOutputImages } from "@t3tools/shared/toolOutput";
+import { MAX_TOOL_OUTPUT_IMAGES, toolOutputImages } from "@t4tools/shared/toolOutput";
 
 const decodeTurnItem = Schema.decodeUnknownSync(OrchestrationV2TurnItem);
 const encodeTurnItemJson = Schema.encodeSync(OrchestrationV2TurnItemJson);
@@ -200,7 +200,7 @@ describe("orchestration V2 wire projection", () => {
     const item = {
       ...base,
       type: "dynamic_tool" as const,
-      toolName: "mcp__t3-code__device_screenshot",
+      toolName: "mcp__t4-code__device_screenshot",
       input: { deviceId: "phone" },
       output: {
         content: [{ type: "image", source: { type: "base64", media_type: "image/png", data } }],
@@ -419,7 +419,7 @@ describe("live body deduper", () => {
         parentCheckpointId: null,
         ordinalWithinScope: 1,
         appRunOrdinal: null,
-        ref: CheckpointRef.make("refs/t3/checkpoints/large"),
+        ref: CheckpointRef.make("refs/t4/checkpoints/large"),
         status: "ready",
         files,
         capturedAt: at,

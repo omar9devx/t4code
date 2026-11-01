@@ -11,7 +11,7 @@ import {
   PeerLinkError,
   type PeerLinkStatus,
   type PeerLinkSummary,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
@@ -28,14 +28,14 @@ import * as SqlClient from "effect/sql/SqlClient";
 import * as FetchHttpClient from "effect/http/FetchHttpClient";
 import * as HttpClient from "effect/http/HttpClient";
 import * as HttpApiClient from "effect/http-api/HttpApiClient";
-import { isLocalLoopbackHost, isTailnetHost } from "@t3tools/shared/hostClassification";
+import { isLocalLoopbackHost, isTailnetHost } from "@t4tools/shared/hostClassification";
 
 import * as ServerSecretStore from "../auth/ServerSecretStore.ts";
 import * as ServerEnvironment from "../environment/ServerEnvironment.ts";
 import * as ServerSettings from "../serverSettings.ts";
 
 /** The redirect registered for a link. Nothing ever listens there: the code comes back in the response. */
-const LINK_REDIRECT_URI = "http://127.0.0.1/t3code-peer-link";
+const LINK_REDIRECT_URI = "http://127.0.0.1/T4CODE-peer-link";
 /**
  * How long a peer's descriptor may take before a route counts as unreachable.
  * A tailnet or relayed route to a machine that is waking up takes longer.
@@ -92,7 +92,7 @@ export class PeerLinks extends Context.Service<
       outcome: { readonly error: string | null },
     ) => Effect.Effect<void>;
   }
->()("t3/peer/PeerLinks") {}
+>()("t4/peer/PeerLinks") {}
 
 interface PeerLinkRow {
   readonly environment_id: string;
@@ -392,7 +392,7 @@ const make = Effect.gen(function* () {
     const descriptor = yield* describe(primary);
     if (Option.isNone(descriptor)) {
       return yield* new PeerLinkError({
-        reason: "not_a_t3_environment",
+        reason: "not_a_t4_environment",
         message: `Nothing at ${primary} answered as a T4 Code environment.`,
       });
     }
@@ -540,7 +540,7 @@ const make = Effect.gen(function* () {
       if (Option.isNone(row)) {
         return yield* new PeerLinkError({
           reason: "unknown_link",
-          message: `This environment is not linked to ${environmentId}. t3_environment_links lists the linked ones.`,
+          message: `This environment is not linked to ${environmentId}. t4_environment_links lists the linked ones.`,
         });
       }
       const link = yield* toLink(row.value);

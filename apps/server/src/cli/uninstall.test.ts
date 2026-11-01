@@ -3,26 +3,26 @@ import { assert, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Path from "effect/Path";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 
 import { findOwnedLauncher, spawnWindowsRemoval } from "./uninstall.ts";
 
-it.layer(NodeServices.layer)("t3 uninstall launcher", (it) => {
+it.layer(NodeServices.layer)("t4 uninstall launcher", (it) => {
   it.effect("claims only a launcher that points into this home's runtime tree", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      const root = yield* fs.makeTempDirectoryScoped({ prefix: "t3-uninstall-" });
+      const root = yield* fs.makeTempDirectoryScoped({ prefix: "t4-uninstall-" });
       const versionsDir = path.join(root, "runtime/versions");
-      const exe = path.join(versionsDir, "1.0.0/t3");
-      const otherExe = path.join(root, "other/runtime/versions/1.0.0/t3");
-      const copy = path.join(root, "copy/t3");
+      const exe = path.join(versionsDir, "1.0.0/t4");
+      const otherExe = path.join(root, "other/runtime/versions/1.0.0/t4");
+      const copy = path.join(root, "copy/t4");
       for (const file of [exe, otherExe, copy]) {
         yield* fs.makeDirectory(path.dirname(file), { recursive: true });
         yield* fs.writeFileString(file, "");
       }
-      const ours = path.join(root, "bin/t3");
-      const theirs = path.join(root, "other/bin/t3");
+      const ours = path.join(root, "bin/t4");
+      const theirs = path.join(root, "other/bin/t4");
       yield* fs.makeDirectory(path.dirname(ours), { recursive: true });
       yield* fs.makeDirectory(path.dirname(theirs), { recursive: true });
       yield* fs.symlink(exe, ours);
@@ -37,15 +37,15 @@ it.layer(NodeServices.layer)("t3 uninstall launcher", (it) => {
 });
 
 it.live.runIf(HostProcess.Platform.defaultValue() === "win32")(
-  "t3 uninstall has cmd.exe remove the runtime directory, preserving spaces and literal environment-variable syntax",
+  "t4 uninstall has cmd.exe remove the runtime directory, preserving spaces and literal environment-variable syntax",
   () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      const root = yield* fs.makeTempDirectoryScoped({ prefix: "t3-uninstall-" });
-      const runtimeDir = path.join(root, "t3 home %COMSPEC% !COMSPEC! & data", "runtime");
+      const root = yield* fs.makeTempDirectoryScoped({ prefix: "t4-uninstall-" });
+      const runtimeDir = path.join(root, "t4 home %COMSPEC% !COMSPEC! & data", "runtime");
       yield* fs.makeDirectory(path.join(runtimeDir, "versions", "1.0.0"), { recursive: true });
-      yield* fs.writeFileString(path.join(runtimeDir, "versions", "1.0.0", "t3.exe"), "");
+      yield* fs.writeFileString(path.join(runtimeDir, "versions", "1.0.0", "t4.exe"), "");
 
       const child = spawnWindowsRemoval(process.env.ComSpec ?? "cmd.exe", runtimeDir);
       yield* Effect.callback<void, Error>((resume) => {

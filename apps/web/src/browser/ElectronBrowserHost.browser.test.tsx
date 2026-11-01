@@ -1,4 +1,4 @@
-import { scopeThreadRef } from "@t3tools/client-runtime/environment";
+import { scopeThreadRef } from "@t4tools/client-runtime/environment";
 import {
   DEFAULT_CLIENT_SETTINGS,
   EnvironmentId,
@@ -6,7 +6,7 @@ import {
   type ClientSettings,
   type DesktopPreviewBridge,
   type PreviewSessionSnapshot,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 
 import { act, fakeTimers, render } from "../../test/render";
@@ -81,7 +81,7 @@ function setup(): Disposable {
   mocks.closeTab.mockReset().mockResolvedValue(undefined);
   mocks.registerWebview.mockReset().mockResolvedValue(undefined);
   mocks.getPreviewConfig.mockReset().mockResolvedValue({
-    partition: "persist:t3-preview-default",
+    partition: "persist:t4-preview-default",
     webPreferences: "contextIsolation=yes",
     preloadUrl: null,
   });

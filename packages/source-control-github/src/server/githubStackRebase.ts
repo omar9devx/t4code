@@ -5,7 +5,7 @@ import * as Schema from "effect/Schema";
 import * as Base64 from "effect/encoding/Base64";
 
 import * as GitHubAppAccess from "./GitHubAppAccess.ts";
-import * as SourceControlHost from "@t3tools/source-control-core/server/SourceControlHost";
+import * as SourceControlHost from "@t4tools/source-control-core/server/SourceControlHost";
 
 export interface CascadeLayer {
   readonly number: number;
@@ -49,7 +49,7 @@ export const cascadeRebaseStack = Effect.fn("cascadeRebaseStack")(function* (inp
   const { token } = yield* appAccess.credentialFor(input.host, input.repository);
   const first = input.layers[0];
   if (first === undefined) return 0;
-  const directory = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-stack-rebase-" }).pipe(
+  const directory = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-stack-rebase-" }).pipe(
     Effect.mapError(
       (cause) =>
         new GitHubStackRebaseGitError({

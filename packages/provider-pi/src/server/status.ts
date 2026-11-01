@@ -2,11 +2,11 @@ import {
   type CustomModelSetting,
   type ServerProvider,
   type ServerProviderModel,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import type { PiSettings } from "../settings.ts";
-import { causeErrorTag } from "@t3tools/shared/observability";
-import { resolveSpawnCommand } from "@t3tools/shared/shell";
-import { compareSemverVersions } from "@t3tools/shared/semver";
+import { causeErrorTag } from "@t4tools/shared/observability";
+import { resolveSpawnCommand } from "@t4tools/shared/shell";
+import { compareSemverVersions } from "@t4tools/shared/semver";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Stream from "effect/Stream";
@@ -26,7 +26,7 @@ import {
   piRecordField as recordField,
   piRecordString as recordString,
 } from "./rpc.ts";
-import * as ProviderLatestVersions from "@t3tools/provider-core/server/ProviderLatestVersions";
+import * as ProviderLatestVersions from "@t4tools/provider-core/server/ProviderLatestVersions";
 import {
   buildServerProvider,
   isCommandMissingCause,
@@ -34,11 +34,11 @@ import {
   providerModelsFromSettings,
   spawnAndCollect,
   type ServerProviderDraft,
-} from "@t3tools/provider-core/server/snapshotProbe";
+} from "@t4tools/provider-core/server/snapshotProbe";
 import {
   enrichProviderSnapshotWithVersionAdvisory,
   type ProviderMaintenanceCapabilities,
-} from "@t3tools/provider-core/server/maintenanceResolver";
+} from "@t4tools/provider-core/server/maintenanceResolver";
 import {
   EMPTY_PI_MODEL_CAPABILITIES,
   thinkingCapabilitiesForPiModel,

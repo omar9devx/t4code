@@ -15,7 +15,7 @@ import {
   RunId,
   ThreadId,
   TurnItemId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { expect, it } from "@effect/vitest";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
@@ -40,9 +40,9 @@ import { CodexProviderCapabilitiesV2 } from "../orchestration-v2/Adapters/CodexA
 import * as EventSink from "../orchestration-v2/EventSink.ts";
 import * as Orchestrator from "../orchestration-v2/Orchestrator.ts";
 import * as ProjectionStore from "../orchestration-v2/ProjectionStore.ts";
-import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
+import type * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
 import * as ProviderAdapterRegistry from "../orchestration-v2/ProviderAdapterRegistry.ts";
-import * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
+import * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
 import * as ThreadManagement from "../orchestration-v2/ThreadManagementService.ts";
 import * as ProviderReplayHarness from "../orchestration-v2/testkit/ProviderReplayHarness.ts";
 import * as SqlitePersistence from "../persistence/Sqlite.ts";
@@ -167,7 +167,7 @@ const makeLaptop = Effect.gen(function* () {
     Layer.provide(Layer.mock(ThreadLaunch.ThreadLaunchService)({})),
     Layer.provide(Layer.mock(GitVcsDriver.GitVcsDriver)({})),
     Layer.provide(
-      ServerConfig.layerTest(process.cwd(), { prefix: "t3-peer-link-requests-" }).pipe(
+      ServerConfig.layerTest(process.cwd(), { prefix: "t4-peer-link-requests-" }).pipe(
         Layer.provide(NodeServices.layer),
       ),
     ),
@@ -186,7 +186,7 @@ const makeLaptop = Effect.gen(function* () {
     sql: Context.get(database, SqlClient.SqlClient),
     call: (args: Record<string, unknown>, callScope = scope) =>
       server
-        .callTool({ name: "t3_environment_link", arguments: args })
+        .callTool({ name: "t4_environment_link", arguments: args })
         .pipe(
           Effect.provideService(McpInvocationContext.McpInvocationContext, callScope),
           Effect.provideService(McpSchema.McpServerClient, mcpClient),

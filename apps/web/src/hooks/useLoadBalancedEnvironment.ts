@@ -1,6 +1,6 @@
 import { RegistryContext, useAtomValue } from "@effect/atom-react";
-import { chooseLoadBalancedEnvironment } from "@t3tools/client-runtime/load-balancing";
-import type { EnvironmentId } from "@t3tools/contracts";
+import { chooseLoadBalancedEnvironment } from "@t4tools/client-runtime/load-balancing";
+import type { EnvironmentId } from "@t4tools/contracts";
 import { Atom } from "effect/reactivity";
 import { useContext } from "react";
 

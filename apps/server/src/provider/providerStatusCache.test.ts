@@ -4,8 +4,8 @@ import {
   ProviderDriverKind,
   ProviderInstanceId,
   type ServerProvider,
-} from "@t3tools/contracts";
-import { createModelCapabilities } from "@t3tools/shared/model";
+} from "@t4tools/contracts";
+import { createModelCapabilities } from "@t4tools/shared/model";
 import { assert, it } from "@effect/vitest";
 
 import { hydrateCachedProvider, isCachedProviderCorrelated } from "./providerStatusCache.ts";

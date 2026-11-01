@@ -1,4 +1,4 @@
-import type { OrchestrationV2ThreadTranscript } from "@t3tools/contracts";
+import type { OrchestrationV2ThreadTranscript } from "@t4tools/contracts";
 
 function headingText(value: string): string {
   return value.replaceAll("\\", "\\\\").replaceAll("#", "\\#").replaceAll("\n", " ").trim();

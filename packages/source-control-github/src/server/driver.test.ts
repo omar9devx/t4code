@@ -9,7 +9,7 @@ import * as GitHubRest from "./GitHubRest.ts";
 describe("makeIsRepositoryStarred", () => {
   it.effect("is true only when GitHub answers 204 for the repository", () => {
     const paths: Array<string> = [];
-    const starred = new Set(["user/starred/pingdotgg/t3code"]);
+    const starred = new Set(["user/starred/omar9devx/t4code"]);
     const api = Layer.mock(GitHubRest.GitHubRest)({
       rest: (input) => {
         paths.push(input.path);
@@ -31,11 +31,11 @@ describe("makeIsRepositoryStarred", () => {
     });
     return Effect.gen(function* () {
       const isStarred = yield* makeIsRepositoryStarred;
-      assert.isTrue(yield* isStarred("github.com", "pingdotgg/t3code"));
+      assert.isTrue(yield* isStarred("github.com", "omar9devx/t4code"));
       assert.isFalse(yield* isStarred("github.com", "pingdotgg/uploadthing"));
-      assert.isFalse(yield* isStarred("github.com", "pingdotgg/t3code/../../user"));
+      assert.isFalse(yield* isStarred("github.com", "omar9devx/t4code/../../user"));
       assert.deepStrictEqual(paths, [
-        "user/starred/pingdotgg/t3code",
+        "user/starred/omar9devx/t4code",
         "user/starred/pingdotgg/uploadthing",
       ]);
     }).pipe(Effect.provide(api));

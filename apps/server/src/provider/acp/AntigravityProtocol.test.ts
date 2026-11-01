@@ -18,7 +18,7 @@ import {
 import {
   mergeToolCallState,
   parseSessionUpdateEvent,
-} from "@t3tools/provider-acp/server/runtimeModel";
+} from "@t4tools/provider-acp/server/runtimeModel";
 
 const isSessionNotification = Schema.is(AcpWireSchema.SessionNotification);
 

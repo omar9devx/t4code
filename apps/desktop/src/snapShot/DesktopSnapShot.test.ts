@@ -5,7 +5,7 @@ import {
   DesktopPendingSnapShot,
   type ClientSettings,
   type DesktopSnapShotEvent,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -1509,8 +1509,8 @@ it.each([
 );
 
 it.each([
-  { names: ["⠙ t3code"], expected: "Verified text" },
-  { names: ["⠋ t3code", "⠙ t3code"], expected: undefined },
+  { names: ["⠙ T4CODE"], expected: "Verified text" },
+  { names: ["⠋ T4CODE", "⠙ T4CODE"], expected: undefined },
 ])("reads a changing Wayland title only when unambiguous: $names", async ({ names, expected }) => {
   vi.stubEnv("XDG_SESSION_TYPE", "wayland");
   const tree = vi.fn(async () => ({ value: "Verified text", children: [] }));
@@ -1526,12 +1526,12 @@ it.each([
     assert.strictEqual(
       await readAccessibleWindowText(
         {
-          title: "⠋ t3code",
+          title: "⠋ T4CODE",
           bounds: { x: 479, y: 342, width: 700, height: 520 },
           owner: { processId: 123 },
         },
         "linux",
-        "⠋ t3code",
+        "⠋ T4CODE",
       ),
       expected,
     );
@@ -1546,7 +1546,7 @@ it.each([
   ["com.google.Chrome", "Google Chrome – Profile"],
   ["org.chromium.Chromium", "Chromium"],
 ])("reads macOS %s page context with an accessibility title suffix", async (bundleId, suffix) => {
-  const title = "Issues · pingdotgg/t3code";
+  const title = "Issues · omar9devx/t4code";
   const bounds = { x: 0, y: 33, width: 1470, height: 857 };
   const window = {
     role: "window",
@@ -1576,7 +1576,7 @@ it.each([
 });
 
 it("does not borrow another Chrome process context when the captured PID has no windows", async () => {
-  const title = "Issues · pingdotgg/t3code";
+  const title = "Issues · omar9devx/t4code";
   const bounds = { x: 0, y: 33, width: 1470, height: 857 };
   const otherWindow = {
     role: "window",

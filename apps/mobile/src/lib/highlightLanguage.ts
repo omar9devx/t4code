@@ -1,4 +1,4 @@
-import "@t3tools/client-runtime/assembly-highlighting";
+import "@t4tools/client-runtime/assembly-highlighting";
 import {
   getFiletypeFromFileName,
   setCustomExtension,

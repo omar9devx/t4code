@@ -8,12 +8,12 @@ import type {
   ScopedProjectRef,
   ServerConfig,
   ServerProvider,
-} from "@t3tools/contracts";
-import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
+} from "@t4tools/contracts";
+import { scopeProjectRef, scopeThreadRef } from "@t4tools/client-runtime/environment";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@t4tools/client-runtime/state/runtime";
 import {
   AgentSessionSource,
   AuthTerminalOperateScope,
@@ -22,7 +22,7 @@ import {
   AuthOrchestrationOperateScope,
   ProviderDriverKind,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Schema from "effect/Schema";
 import {
   ArrowRightIcon,
@@ -39,7 +39,7 @@ import { TYPOGRAPHY_ADVANCED_STORAGE_KEY } from "../../appearanceFonts";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { hasCloudPublicConfig } from "../../cloud/publicConfig";
 import { PRIVACY_POLICY_URL } from "../../legalLinks";
-import { useT3ConnectAuthPrompt } from "../clerk/useT3ConnectAuthPrompt";
+import { useT4ConnectAuthPrompt } from "../clerk/useT4ConnectAuthPrompt";
 import { completeOnboarding } from "../../onboarding/firstRun";
 import {
   groupOnboardingProjects,
@@ -85,7 +85,7 @@ import { TerminalViewport } from "../ThreadTerminalDrawer";
 import { CloudEnvironmentConnectRows } from "../cloud/CloudEnvironmentConnectList";
 import { presentSavedCloudEnvironmentConnection } from "../cloud/cloudEnvironmentConnectionPresentation";
 import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
-import { T3Wordmark } from "../T3Wordmark";
+import { T4Wordmark } from "../T4Wordmark";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import { CommandBlock } from "../CommandBlock";
@@ -129,7 +129,7 @@ export function WelcomeWizard({
   const finishingPromiseRef = useRef<Promise<boolean> | null>(null);
   const completionErrorToastIdRef = useRef<ReturnType<typeof toastManager.add> | null>(null);
   const primaryEnvironment = usePrimaryEnvironment();
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- marks newly listed computers in the shared auto-select registry once and selects the enabled ones
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- marks newly listed computers in the shared auto-select registry once and selects the enabled ones
   useEffect(() => {
     const newComputers = environments.filter(
       (environment) => !autoSelectedComputers.has(environment.environmentId),
@@ -235,7 +235,7 @@ export function WelcomeWizard({
           title="Set up T4 Code"
           identity={
             <div className="flex items-baseline gap-1.5" role="img" aria-label="T4 Code">
-              <T3Wordmark className="h-4 w-auto shrink-0" aria-hidden />
+              <T4Wordmark className="h-4 w-auto shrink-0" aria-hidden />
               <span className="text-2xl font-medium tracking-tight text-muted-foreground">
                 Code
               </span>
@@ -321,7 +321,7 @@ function ConnectionStep({
     .filter((environment) => skippedIds.includes(environment.environmentId))
     .map((environment) => environment.label);
   const continueRef = useRef<HTMLButtonElement>(null);
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- moves DOM focus to the Continue button once setup is ready and nothing else holds focus
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- moves DOM focus to the Continue button once setup is ready and nothing else holds focus
   useEffect(() => {
     if (
       ready &&
@@ -474,7 +474,7 @@ function ConnectAccountOption({
 }) {
   const { environments } = useEnvironments();
   const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
-  const { openAuthPrompt } = useT3ConnectAuthPrompt();
+  const { openAuthPrompt } = useT4ConnectAuthPrompt();
   const [expanded, setExpanded] = useState(true);
   const [discoveryReady, setDiscoveryReady] = useState(false);
   const onDiscoveryReady = () => setDiscoveryReady(true);
@@ -496,7 +496,7 @@ function ConnectAccountOption({
           }
         >
           <CloudIcon className="size-4 text-muted-foreground" />
-          <span className="flex-1 text-left">T3 Connect</span>
+          <span className="flex-1 text-left">T4 Connect</span>
           <span className="text-xs text-muted-foreground">
             {!isLoaded
               ? "Loading sign-in…"
@@ -530,7 +530,7 @@ function ConnectAccountOption({
             <p className="text-sm text-muted-foreground">
               Run this on each computer you want to connect.
             </p>
-            <CommandBlock command="npx t3 connect" className="mt-3" />
+            <CommandBlock command="npx t4 connect" className="mt-3" />
             <p className="mt-3 text-xs text-muted-foreground">
               Keep T4 Code running. Select the computers you want to set up above.
             </p>
@@ -555,7 +555,7 @@ function PairingForm({
   const [errorMessage, setErrorMessage] = useState("");
   const mountedRef = useRef(true);
 
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- tracks mount so a pairing request that settles after unmount does not set state
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- tracks mount so a pairing request that settles after unmount does not set state
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -639,11 +639,11 @@ function PairingForm({
           <CollapsiblePanel>
             <p className="pt-3 text-sm text-muted-foreground">
               On the computer with your code, start T4 Code or run{" "}
-              <code className="font-mono">npx t3 serve</code>, then run:
+              <code className="font-mono">npx t4 serve</code>, then run:
             </p>
-            <CommandBlock command="npx t3 pair" className="mt-2" />
+            <CommandBlock command="npx t4 pair" className="mt-2" />
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              On a tailnet, run <code className="font-mono">npx t3 pair --tailscale</code> instead.
+              On a tailnet, run <code className="font-mono">npx t4 pair --tailscale</code> instead.
             </p>
           </CollapsiblePanel>
         </Collapsible>
@@ -722,7 +722,7 @@ function ConnectedAgentsStep({
   } | null>(null);
   const canOperateTerminal = useEnvironmentScope(environmentId, AuthTerminalOperateScope);
 
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- asks the environment to refresh its provider list when the environment changes
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- asks the environment to refresh its provider list when the environment changes
   useEffect(() => {
     void refreshProviders({ environmentId, input: {} });
   }, [environmentId, refreshProviders]);
@@ -1040,7 +1040,7 @@ function AgentInstallTerminal({
 
   // StrictMode can finish a cancelled open after replacement setup; it must not close or pre-type into that
   // session.
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- opens the setup PTY, types the command into it, and closes it on cleanup
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- opens the setup PTY, types the command into it, and closes it on cleanup
   useEffect(() => {
     const generation = setupGenerationRef.current + 1;
     setupGenerationRef.current = generation;
@@ -1203,7 +1203,7 @@ function ImportStep({
   );
   const importGenerationRef = useRef(0);
 
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- bumps the import generation on mount and unmount so in-flight imports drop stale results
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- bumps the import generation on mount and unmount so in-flight imports drop stale results
   useEffect(() => {
     importGenerationRef.current += 1;
     return () => {

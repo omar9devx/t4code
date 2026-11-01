@@ -1,7 +1,7 @@
 // @effect-diagnostics nodeBuiltinImport:off -- The process fixture runs real shell commands with isolated config files.
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, describe, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Logger from "effect/Logger";
@@ -23,9 +23,9 @@ const textEncoder = new TextEncoder();
 function envOutput(values: Readonly<Record<string, string>>): string {
   return Object.entries(values)
     .flatMap(([name, value]) => [
-      `__T3CODE_ENV_${name}_START__`,
+      `__T4CODE_ENV_${name}_START__`,
       value,
-      `__T3CODE_ENV_${name}_END__`,
+      `__T4CODE_ENV_${name}_END__`,
     ])
     .join("\n");
 }

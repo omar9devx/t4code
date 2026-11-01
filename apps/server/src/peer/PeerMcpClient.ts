@@ -4,7 +4,7 @@ import {
   type PeerLinkError,
   type ProviderInteractionMode,
   type RuntimeMode,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -28,7 +28,7 @@ export interface PeerCallLimits {
 
 /**
  * Calls a linked environment's T4 Code MCP tools as this environment's outside
- * agent. Each call carries the calling agent's limits in `T3-Mode-Limit`, so
+ * agent. Each call carries the calling agent's limits in `T4-Mode-Limit`, so
  * the peer enforces the narrower of those and the link's own access.
  */
 export class PeerMcpClient extends Context.Service<
@@ -43,7 +43,7 @@ export class PeerMcpClient extends Context.Service<
       readonly success: S;
     }) => Effect.Effect<S["Type"], OrchestratorMcpFailure>;
   }
->()("t3/peer/PeerMcpClient") {}
+>()("t4/peer/PeerMcpClient") {}
 
 const ToolCallResponse = Schema.Struct({
   result: Schema.optional(
@@ -127,7 +127,7 @@ const make = Effect.gen(function* () {
         params: {
           protocolVersion: PROTOCOL_VERSION,
           capabilities: {},
-          clientInfo: { name: "t3code-peer", version: "1" },
+          clientInfo: { name: "T4CODE-peer", version: "1" },
         },
       },
       limitHeader,

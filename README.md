@@ -1,8 +1,12 @@
 # T4 Code
 
-T4 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t3tools.t3code)), [web app](https://app.t3.codes) and [Electron-based desktop app](https://t3.codes).
+T4 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t4-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t4tools.T4CODE)), [web app](https://app.t3.codes) and [Electron-based desktop app](https://t3.codes).
 
 Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCode, Google Antigravity, and fx. If they're set up on your computer, T4 Code can control them.
+
+## Vorynixal versioning
+
+Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is built from the latest available [T3 Code Nightly](https://github.com/pingdotgg/t3code/releases) source at the time of the build. T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
 
 ## "Wait, what are you selling me?"
 
@@ -21,49 +25,49 @@ We wanted something performant, remote-ready, and truly open. If we ever go the 
 > - Grok Build: install [Grok Build CLI](https://x.ai/cli) and run `grok login`
 > - OpenCode: install [OpenCode](https://opencode.ai) and run `opencode auth login`
 > - Antigravity: enable it in Settings, then use **Install Antigravity** and **Sign in with Google**. No CLI is required.
-> - fx: install [fx](https://fx.sh) and run `fx login` on the machine running the T3 Code server ([setup guide](./docs/user/providers-fx.md))
+> - fx: install [fx](https://fx.sh) and run `fx login` on the machine running the T4 Code server ([setup guide](./docs/user/providers-fx.md))
 
 ### Command line
 
 ```bash
-curl -fsSL https://t3.codes/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/omar9devx/t4code/main/scripts/install.sh | sh
 ```
 
 On Windows, in PowerShell:
 
 ```powershell
-irm https://t3.codes/install.ps1 | iex
+irm https://raw.githubusercontent.com/omar9devx/t4code/main/scripts/install.ps1 | iex
 ```
 
-Then run `t3` to start the server and open the local web app. `t3 service install` keeps it running in the background, `t3 update` moves to a newer release, and `t3 --help` has the full reference.
+Then run `t4` to start the server and open the local web app. `t4 service install` keeps it running in the background, `t4 update` moves to a newer release, and `t4 --help` has the full reference.
 
-To try it once without installing, run `npx t3@latest` instead.
+To try it once without installing, run `npx t4@latest` instead.
 
 ### Desktop app
 
-Install the latest version of the desktop app from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), or from your favorite package registry:
+Install the latest version of the desktop app from [GitHub Releases](https://github.com/omar9devx/t4code/releases), or from your favorite package registry:
 
 #### Windows (`winget`)
 
 ```bash
-winget install T3Tools.T3Code
+winget install t4tools.T4CODE
 ```
 
 #### Windows (`scoop`)
 
 ```bash
-scoop install extras/t3code
+scoop install extras/T4CODE
 ```
 
 #### macOS (Homebrew)
 
 ```bash
-brew install --cask t3-code
+brew install --cask t4-code
 ```
 
 #### Debian, Ubuntu (`.deb`)
 
-Download the `.deb` from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), then:
+Download the `.deb` from [GitHub Releases](https://github.com/omar9devx/t4code/releases), then:
 
 ```bash
 sudo apt install ./T4 Code-Code-*.deb
@@ -74,13 +78,13 @@ sudo apt install ./T4 Code-Code-*.deb
 Stable:
 
 ```bash
-yay -S t3code-bin
+yay -S T4CODE-bin
 ```
 
 Nightly:
 
 ```bash
-yay -S t3code-nightly-bin
+yay -S T4CODE-nightly-bin
 ```
 
 The AUR packaging is maintained in this repository under [`packaging/aur`](./packaging/aur).
@@ -88,11 +92,11 @@ The AUR packaging is maintained in this repository under [`packaging/aur`](./pac
 #### Nix (nixpkgs)
 
 ```bash
-nix profile add github:NixOS/nixpkgs/nixos-unstable#t3code
+nix profile add github:NixOS/nixpkgs/nixos-unstable#T4CODE
 ```
 
-The package is maintained in [nixpkgs](https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/by-name/t3/t3code)
-and includes the desktop app (`t3code-desktop`) and the `t3` command.
+The package is maintained in [nixpkgs](https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/by-name/t4/T4CODE)
+and includes the desktop app (`T4CODE-desktop`) and the `t4` command.
 See [Nix installation](./docs/user/install.md#nix-nixpkgs) for NixOS configuration and updates.
 
 ## Some notes
@@ -148,6 +152,6 @@ vp i
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before reporting a bug or opening a PR.
 
-Have a feature request? Start an [Ideas discussion](https://github.com/pingdotgg/t3code/discussions/categories/ideas).
+Have a feature request? Start an [Ideas discussion](https://github.com/omar9devx/t4code/discussions/categories/ideas).
 
 Need support? Join the [Discord](https://discord.gg/jn4EGJjrvv).

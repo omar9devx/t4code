@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from "react";
-import type { OrchestrationMessageContext } from "@t3tools/contracts";
+import type { OrchestrationMessageContext } from "@t4tools/contracts";
 import {
   collectComposerContextReferences,
   replaceComposerContextReferences,
-} from "@t3tools/shared/composerContextReferences";
+} from "@t4tools/shared/composerContextReferences";
 
 import type { ReviewRenderableLineRow } from "./reviewModel";
 

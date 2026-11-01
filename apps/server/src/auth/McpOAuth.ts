@@ -15,8 +15,8 @@ import {
   AuthOrchestrationReadScope,
   MCP_PEER_LINK_SOFTWARE_ID,
   mcpClientScopes,
-} from "@t3tools/contracts";
-import { encodeOAuthScope } from "@t3tools/shared/oauthScope";
+} from "@t4tools/contracts";
+import { encodeOAuthScope } from "@t4tools/shared/oauthScope";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -219,7 +219,7 @@ export class McpOAuth extends Context.Service<
       readonly token: AuthMcpTokenRequest;
     }) => Effect.Effect<AuthMcpTokenResult, AuthMcpTokenError>;
   }
->()("t3/auth/McpOAuth") {}
+>()("t4/auth/McpOAuth") {}
 
 const redirectWith = (
   redirectUri: string,

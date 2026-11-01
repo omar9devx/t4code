@@ -5,7 +5,7 @@ import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
 import * as Schema from "effect/Schema";
 
-import * as NetService from "@t3tools/shared/Net";
+import * as NetService from "@t4tools/shared/Net";
 import * as Crypto from "effect/Crypto";
 import * as ElectronApp from "../electron/ElectronApp.ts";
 import * as ElectronDialog from "../electron/ElectronDialog.ts";
@@ -36,7 +36,7 @@ import * as DesktopUpdates from "../updates/DesktopUpdates.ts";
 import * as DesktopSnapShot from "../snapShot/DesktopSnapShot.ts";
 import * as DesktopWslBackend from "../wsl/DesktopWslBackend.ts";
 import * as DesktopRendererHistory from "../telemetry/DesktopRendererHistory.ts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 
 const DEFAULT_DESKTOP_BACKEND_PORT = 3773;
 const MAX_TCP_PORT = 65_535;
@@ -65,7 +65,7 @@ export class DesktopDevelopmentBackendPortRequiredError extends Schema.TaggedErr
   {},
 ) {
   override get message(): string {
-    return "T3CODE_PORT is required in desktop development.";
+    return "T4CODE_PORT is required in desktop development.";
   }
 }
 

@@ -7,7 +7,7 @@ import {
   type PeerLinkSummary,
   resolveEnvironmentMachineKind,
   type ServerConfig,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Option from "effect/Option";
 
 import type { EnvironmentPresentation } from "./connection/presentation.ts";
@@ -60,13 +60,13 @@ export interface LinkableMachine {
   readonly label: string;
   readonly machine: EnvironmentMachineKind;
   readonly connected: boolean;
-  /** Found on the user's T3 Connect account rather than saved in this client. */
+  /** Found on the user's T4 Connect account rather than saved in this client. */
   readonly connectOnly: boolean;
   /** Whether the thread's environment already has a link to it. */
   readonly linked: boolean;
   /**
    * Where the client knows it answers, most preferred first: the addresses it
-   * reports, then its saved routes, then its T3 Connect address. The server
+   * reports, then its saved routes, then its T4 Connect address. The server
    * keeps only those that answer as this machine. Empty for a machine reached
    * only over SSH, whose forward lives in this client.
    */

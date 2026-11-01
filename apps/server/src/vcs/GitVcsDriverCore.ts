@@ -25,21 +25,21 @@ import { ChildProcess, ChildProcessSpawner } from "effect/process";
 import {
   GitCommandError,
   type GitCommandFailureReason,
-  T3_PROJECT_FILE_NAME,
+  T4_PROJECT_FILE_NAME,
   type ReviewBranchCommitsInput,
   type ReviewDiffFileContentsInput,
   type ReviewDiffPreviewInput,
   type ReviewDiffFileStat,
   type ReviewDiffPreviewSource,
   type VcsRef,
-} from "@t3tools/contracts";
-import { dedupeRemoteBranchesWithLocalMatches } from "@t3tools/shared/git";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { compactTraceAttributes } from "@t3tools/shared/observability";
-import { decodeJsonResult } from "@t3tools/shared/schemaJson";
-import { resolveSpawnCommand } from "@t3tools/shared/shell";
-import { parseT3ProjectFile } from "@t3tools/shared/t3ProjectFile";
-import { resolveProjectFileBackedSetting } from "@t3tools/shared/projectSettings";
+} from "@t4tools/contracts";
+import { dedupeRemoteBranchesWithLocalMatches } from "@t4tools/shared/git";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { compactTraceAttributes } from "@t4tools/shared/observability";
+import { decodeJsonResult } from "@t4tools/shared/schemaJson";
+import { resolveSpawnCommand } from "@t4tools/shared/shell";
+import { parseT4ProjectFile } from "@t4tools/shared/t4ProjectFile";
+import { resolveProjectFileBackedSetting } from "@t4tools/shared/projectSettings";
 import { gitCommandDuration, gitCommandsTotal, withMetrics } from "../observability/Metrics.ts";
 import * as GitVcsDriver from "./GitVcsDriver.ts";
 import { removeEmptyDirectory } from "./removeEmptyDirectory.ts";
@@ -57,7 +57,7 @@ import { sourceControlDefinitions } from "../sourceControl/sourceControlDefiniti
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 /** T4 Code's record of the branch, named as on the host, that a branch was cut from. */
-const branchBaseConfigKey = (branch: string) => `branch.${branch}.t3-merge-base`;
+const branchBaseConfigKey = (branch: string) => `branch.${branch}.t4-merge-base`;
 /**
  * Where T4 Code kept that record before it had a key of its own, for every host alike: the GitHub
  * CLI's key, which branches cut before then still carry instead.
@@ -679,7 +679,7 @@ const createTrace2Monitor = Effect.fnUntraced(function* (
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const traceFilePath = yield* fs.makeTempFileScoped({
-    prefix: `t3code-git-trace2-${process.pid}-`,
+    prefix: `T4CODE-git-trace2-${process.pid}-`,
     suffix: ".json",
   });
   const hookStartByChildKey = new Map<string, { hookName: string; startedAtMs: number }>();
@@ -1249,7 +1249,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
     cwd: string,
     requestedBranch: string,
   ) {
-    // A branch at a parent path (such as `t3`) blocks every ref nested under it, so no suffix
+    // A branch at a parent path (such as `t4`) blocks every ref nested under it, so no suffix
     // would help; flatten to a sibling the way temporary worktree branches already do.
     const segments = requestedBranch.split("/");
     let blockedByParent = false;
@@ -1257,7 +1257,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
       blockedByParent = yield* branchExists(cwd, segments.slice(0, index).join("/"));
     }
     const desiredBranch = blockedByParent ? segments.join("-") : requestedBranch;
-    // A branch nested under the name (`t3-fix/child`) blocks it as surely as one with the name.
+    // A branch nested under the name (`t4-fix/child`) blocks it as surely as one with the name.
     const isBranchNameTaken = (name: string) =>
       Effect.zipWith(
         branchExists(cwd, name),
@@ -1848,7 +1848,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
       readonly knownOriginDefaultBranch?: string | null;
     },
   ) {
-    const configuredBaseRef = yield* readConfigValue(cwd, `branch.${refName}.t3-merge-base-ref`);
+    const configuredBaseRef = yield* readConfigValue(cwd, `branch.${refName}.t4-merge-base-ref`);
     if (
       configuredBaseRef?.startsWith("refs/heads/") ||
       configuredBaseRef?.startsWith("refs/remotes/")
@@ -2474,7 +2474,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
           );
           const indexPath = path.resolve(cwd, indexValue.trim());
           const directory = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3code-commit-index-",
+            prefix: "T4CODE-commit-index-",
           });
           const tempIndexPath = path.join(directory, "index");
           const env = { GIT_INDEX_FILE: tempIndexPath } satisfies NodeJS.ProcessEnv;
@@ -2743,10 +2743,10 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
             key: branchBaseConfigKey(branch),
             value: currentUpstream.branchName,
           });
-          if (!(yield* readConfigValue(cwd, `branch.${branch}.t3-merge-base-ref`))) {
+          if (!(yield* readConfigValue(cwd, `branch.${branch}.t4-merge-base-ref`))) {
             yield* writeConfigValue({
               cwd,
-              key: `branch.${branch}.t3-merge-base-ref`,
+              key: `branch.${branch}.t4-merge-base-ref`,
               value: `refs/remotes/${currentUpstream.upstreamRef}`,
             });
           }
@@ -2987,7 +2987,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
       ? indexValue.trim()
       : path.resolve(cwd, indexValue.trim());
     const tempIndexPath = yield* fileSystem.makeTempFileScoped({
-      prefix: `t3code-review-index-${process.pid}-`,
+      prefix: `T4CODE-review-index-${process.pid}-`,
     });
     const indexExists = yield* fileSystem.exists(indexPath);
     if (indexExists) {
@@ -4188,11 +4188,11 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
           options?.submodules ?? null,
           options?.submodules != null
             ? null
-            : yield* fileSystem.readFileString(path.join(worktreePath, T3_PROJECT_FILE_NAME)).pipe(
+            : yield* fileSystem.readFileString(path.join(worktreePath, T4_PROJECT_FILE_NAME)).pipe(
                 Effect.flatMap((contents) => {
-                  const file = parseT3ProjectFile(contents);
+                  const file = parseT4ProjectFile(contents);
                   return file === null
-                    ? Effect.logWarning("t3.json is invalid; initializing submodules recursively", {
+                    ? Effect.logWarning("t4.json is invalid; initializing submodules recursively", {
                         worktreePath,
                       }).pipe(Effect.as(null))
                     : Effect.succeed(file);
@@ -4202,7 +4202,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
         );
     if (hasSubmodules && submoduleMode.value === "none" && progress?.onSubmodulesDisabled) {
       yield* progress.onSubmodulesDisabled({
-        source: submoduleMode.source === "t3.json" ? "t3.json" : "settings",
+        source: submoduleMode.source === "t4.json" ? "t4.json" : "settings",
       });
     }
     if (submoduleMode.value !== "none") {
@@ -4266,7 +4266,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
             // The base key names a branch on the host; this one keeps the remote it came from.
             yield* writeConfigValue({
               cwd: input.cwd,
-              key: `branch.${input.newRefName}.t3-merge-base-ref`,
+              key: `branch.${input.newRefName}.t4-merge-base-ref`,
               value: base.baseRef,
             });
           }
@@ -4372,7 +4372,7 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
         yield* executeGit(
           "GitVcsDriver.refreshCheckedOutBranch.keepPrevious",
           input.cwd,
-          ["update-ref", "refs/t3code/pre-refresh", headCommit],
+          ["update-ref", "refs/T4CODE/pre-refresh", headCommit],
           { fallbackErrorDetail: "git failed to record the previous checkout commit" },
         );
       }

@@ -23,8 +23,8 @@ import {
   type OrchestrationV2StoredEvent,
   type OrchestrationV2ThreadProjection,
   type ServerProvider,
-} from "@t3tools/contracts";
-import { checkpointWorkspace } from "@t3tools/provider-testing/replayWorkspace";
+} from "@t4tools/contracts";
+import { checkpointWorkspace } from "@t4tools/provider-testing/replayWorkspace";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -65,7 +65,7 @@ import type { McpInvocationScope } from "./McpInvocationContext.ts";
 import { idleThreadProjection, liveThreadShell } from "./McpToolAccess.testkit.ts";
 import * as OrchestratorMcpService from "./OrchestratorMcpService.ts";
 import { resolveRuntimeMode } from "./delegatedTaskModes.ts";
-import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
+import type * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
 
 const decodeTarget = Schema.decodeUnknownEffect(OrchestratorMcpTarget);
 
@@ -2360,7 +2360,7 @@ describe("OrchestratorMcpService provider resolution", () => {
       runCount: 0,
       webhook: {
         path: "/hooks/scheduled-task/secret",
-        url: "https://t3.example/hooks/secret",
+        url: "https://t4.example/hooks/secret",
         hasSecret: false,
       },
       ...overrides,
@@ -2425,7 +2425,7 @@ describe("OrchestratorMcpService provider resolution", () => {
         );
         assert.deepEqual(
           listed.tasks.map((summary) => summary.webhookUrl),
-          [undefined, "https://t3.example/hooks/secret"],
+          [undefined, "https://t4.example/hooks/secret"],
         );
       }),
     );
@@ -2981,7 +2981,7 @@ describe("OrchestratorMcpService provider resolution", () => {
 
   it.effect("accepts the inherited options it reports back as a delegate target", () =>
     Effect.gen(function* () {
-      // t3_thread_launch keeps a model selection as given, so a thread can hold an option its model lacks.
+      // t4_thread_launch keeps a model selection as given, so a thread can hold an option its model lacks.
       const inherited = {
         instanceId: codexInstanceId,
         model: "gpt-5.4",
@@ -3388,7 +3388,7 @@ describe("OrchestratorMcpService thread stop", () => {
   it.effect.each([
     { name: "a running turn", queued: false },
     { name: "a running turn with a queued message", queued: true },
-  ])("t3_thread_interrupt stop reports the run it interrupted on $name", ({ queued }) =>
+  ])("t4_thread_interrupt stop reports the run it interrupted on $name", ({ queued }) =>
     Effect.scoped(
       Effect.gen(function* () {
         const cwd = yield* checkpointWorkspace("mcp-thread-stop");

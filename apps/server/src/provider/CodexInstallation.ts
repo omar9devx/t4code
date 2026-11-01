@@ -3,10 +3,10 @@ import {
   ProviderDriverKind,
   type ProviderInstallState,
   type ServerProviderCompatibilityAdvisory,
-} from "@t3tools/contracts";
-import { cliArchiveTarCommand } from "@t3tools/shared/cliRelease";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { resolveCommandPath, resolveSpawnCommand } from "@t3tools/shared/shell";
+} from "@t4tools/contracts";
+import { cliArchiveTarCommand } from "@t4tools/shared/cliRelease";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { resolveCommandPath, resolveSpawnCommand } from "@t4tools/shared/shell";
 import * as Clock from "effect/Clock";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
@@ -145,7 +145,7 @@ interface CodexInstallationService {
 export class CodexInstallation extends Context.Service<
   CodexInstallation,
   CodexInstallationService
->()("t3/provider/CodexInstallation") {
+>()("t4/provider/CodexInstallation") {
   static readonly layer = Layer.effect(
     CodexInstallation,
     Effect.gen(function* () {

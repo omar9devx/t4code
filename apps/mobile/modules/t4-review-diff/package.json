@@ -1,0 +1,17 @@
+{
+  "name": "@t4tools/mobile-review-diff-native",
+  "version": "0.0.0",
+  "private": true,
+  "expo-module": {
+    "ios": {
+      "modules": [
+        "T4ReviewDiffModule"
+      ]
+    },
+    "android": {
+      "modules": [
+        "expo.modules.t4reviewdiff.T4ReviewDiffModule"
+      ]
+    }
+  }
+}

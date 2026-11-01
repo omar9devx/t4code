@@ -62,10 +62,10 @@ import {
   type ServerProviderModel,
   ThreadId,
   isOrchestrationV2WorkActive,
-} from "@t3tools/contracts";
-import { getProviderOptionCurrentValue } from "@t3tools/shared/model";
-import { runRanAfter } from "@t3tools/shared/orchestrationV2ThreadError";
-import { formatThreadLink } from "@t3tools/shared/threadLinks";
+} from "@t4tools/contracts";
+import { getProviderOptionCurrentValue } from "@t4tools/shared/model";
+import { runRanAfter } from "@t4tools/shared/orchestrationV2ThreadError";
+import { formatThreadLink } from "@t4tools/shared/threadLinks";
 import {
   normalizeThreadPullRequestKey,
   visibleThreadPullRequests,
@@ -87,7 +87,7 @@ import * as ProviderAdapterRegistry from "../orchestration-v2/ProviderAdapterReg
 import {
   subagentResultForRun,
   delegatedTaskProgress,
-} from "@t3tools/provider-core/server/subagentProjection";
+} from "@t4tools/provider-core/server/subagentProjection";
 import {
   DispatchModeLimit,
   type DispatchModeRefusal,
@@ -214,7 +214,7 @@ export interface OrchestratorMcpServiceShape {
 export class OrchestratorMcpService extends Context.Service<
   OrchestratorMcpService,
   OrchestratorMcpServiceShape
->()("t3/mcp/OrchestratorMcpService") {}
+>()("t4/mcp/OrchestratorMcpService") {}
 
 const isThreadManagementError = Schema.is(ThreadManagementService.ThreadManagementError);
 
@@ -365,7 +365,7 @@ function providerConstraints(
   return constraints;
 }
 
-/** t3_thread_launch keeps a selection as given, so it can hold options its model does not have. */
+/** t4_thread_launch keeps a selection as given, so it can hold options its model does not have. */
 function knownOptions(
   options: ReadonlyArray<ProviderOptionSelection> | undefined,
   descriptors: ReadonlyArray<ProviderOptionDescriptor> | undefined,

@@ -1,28 +1,31 @@
 # Installs the T4 Code CLI from a GitHub Release archive on Windows. Needs
 # only PowerShell 5.1+; no Node, npm, or compiler.
 #
-#   irm https://t3.codes/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/omar9devx/t4code/main/scripts/install.ps1 | iex
 #
 # Environment:
-#   T3CODE_CHANNEL           release train to follow: stable, nightly, or preview
+#   T4CODE_CHANNEL           release train to follow: stable, nightly, or preview
 #                            (default: stable; preview is a maintainers' test train)
-#   T3CODE_VERSION           exact version to install (overrides T3CODE_CHANNEL)
-#   T3CODE_HOME              T3 home directory (default: ~\.t3)
-#   T3CODE_INSTALL_BIN_DIR   where t3.exe is linked (default: ~\.local\bin)
-#   T3CODE_RELEASE_BASE_URL  mirror for releases/download (default: GitHub)
+#   T4CODE_VERSION           exact version to install (overrides T4CODE_CHANNEL)
+#   T4CODE_HOME              T4 home directory (default: ~\.t4; reuses ~/.t3 if present)
+#   T4CODE_INSTALL_BIN_DIR   where t4.exe is linked (default: ~\.local\bin)
+#   T4CODE_RELEASE_BASE_URL  mirror for releases/download (default: GitHub)
 #
-# The archive is unpacked into $T3CODE_HOME\runtime\versions\<version>, the
-# same layout `t3 service install` uses, so the service reuses this download.
+# The archive is unpacked into $T4CODE_HOME\runtime\versions\<version>, the
+# same layout `t4 service install` uses, so the service reuses this download.
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$repo = "pingdotgg/t3code"
-$baseUrl = if ($env:T3CODE_RELEASE_BASE_URL) { $env:T3CODE_RELEASE_BASE_URL.TrimEnd("/") } else { "https://github.com/$repo/releases/download" }
-$t3Home = if ($env:T3CODE_HOME) { $env:T3CODE_HOME } else { Join-Path $HOME ".t3" }
-$binDir = if ($env:T3CODE_INSTALL_BIN_DIR) { $env:T3CODE_INSTALL_BIN_DIR } else { Join-Path $HOME ".local\bin" }
+$repo = "omar9devx/t4code"
+$baseUrl = if ($env:T4CODE_RELEASE_BASE_URL) { $env:T4CODE_RELEASE_BASE_URL.TrimEnd("/") } else { "https://github.com/$repo/releases/download" }
+$t4Home = if ($env:T4CODE_HOME) { $env:T4CODE_HOME } else { Join-Path $HOME ".t4" }
+if (-not $env:T4CODE_HOME -and -not (Test-Path -LiteralPath $t4Home) -and (Test-Path -LiteralPath (Join-Path $HOME ".t3"))) {
+  $t4Home = Join-Path $HOME ".t3"
+}
+$binDir = if ($env:T4CODE_INSTALL_BIN_DIR) { $env:T4CODE_INSTALL_BIN_DIR } else { Join-Path $HOME ".local\bin" }
 
 function Fail([string] $message) {
-  Write-Error "t3 install: $message"
+  Write-Error "t4 install: $message"
   exit 1
 }
 
@@ -124,41 +127,41 @@ $arch = switch ($rawArch) {
   default { Fail "unsupported architecture $rawArch" }
 }
 
-$channel = if ($env:T3CODE_CHANNEL) { $env:T3CODE_CHANNEL } else { "stable" }
-$version = $env:T3CODE_VERSION
+$channel = if ($env:T4CODE_CHANNEL) { $env:T4CODE_CHANNEL } else { "stable" }
+$version = $env:T4CODE_VERSION
 if (-not $version) {
   $tagPattern = switch ($channel) {
     "stable" { '^v\d+\.\d+\.\d+$' }
     "nightly" { '^v\d+\.\d+\.\d+-nightly\.\d+\.\d+$' }
     "preview" { '^v\d+\.\d+\.\d+-preview\.\d+\.\d+$' }
-    default { Fail "T3CODE_CHANNEL must be stable, nightly, or preview" }
+    default { Fail "T4CODE_CHANNEL must be stable, nightly, or preview" }
   }
   if ($channel -eq "stable") {
     # release.yml marks only plain stable releases latest. This is a github.com
     # page, so it is not cut off by a page of newer nightlies or the API quota.
-    $release = Invoke-RestMethod -Uri "https://github.com/$repo/releases/latest" -Headers @{ "User-Agent" = "t3-install"; "Accept" = "application/json" }
+    $release = Invoke-RestMethod -Uri "https://github.com/$repo/releases/latest" -Headers @{ "User-Agent" = "t4-install"; "Accept" = "application/json" }
     $tag = ($release | Where-Object { $_.tag_name -match $tagPattern }).tag_name
   } else {
     $tag = $null
     for ($page = 1; -not $tag -and $page -le 10; $page++) {
-      $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases?per_page=100&page=$page" -Headers @{ "User-Agent" = "t3-install" }
+      $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases?per_page=100&page=$page" -Headers @{ "User-Agent" = "t4-install" }
       $tag = ($releases | Where-Object { -not $_.draft -and $_.tag_name -match $tagPattern } | Select-Object -First 1).tag_name
       if (-not $releases) { break }
     }
   }
-  if (-not $tag) { Fail "could not find a $channel release; set T3CODE_VERSION" }
+  if (-not $tag) { Fail "could not find a $channel release; set T4CODE_VERSION" }
   $version = $tag.Substring(1)
 }
 if ($version -match '-preview\.') {
-  Write-Warning "t3 $version is a preview build. Preview builds are cut by maintainers from unreleased branches to exercise the release pipeline. They can be broken, receive no fixes, and are never offered as updates. Set T3CODE_CHANNEL=stable (the default) for a supported build."
-  if ($channel -ne "preview" -and -not $env:T3CODE_VERSION) {
+  Write-Warning "t4 $version is a preview build. Preview builds are cut by maintainers from unreleased branches to exercise the release pipeline. They can be broken, receive no fixes, and are never offered as updates. Set T4CODE_CHANNEL=stable (the default) for a supported build."
+  if ($channel -ne "preview" -and -not $env:T4CODE_VERSION) {
     Fail "refusing a preview build that was not explicitly requested"
   }
 }
 
-$stem = "t3-$version-win32-$arch"
+$stem = "t4-$version-win32-$arch"
 $archive = "$stem.zip"
-$versionsDir = Join-Path $t3Home "runtime\versions"
+$versionsDir = Join-Path $t4Home "runtime\versions"
 $targetDir = Join-Path $versionsDir $version
 $marker = Join-Path $targetDir ".install-complete"
 
@@ -177,7 +180,7 @@ if ((Test-Path $marker) -and ((Get-Content $marker -Raw).Trim() -eq $version)) {
     } catch {
       $status = $_.Exception.Response.StatusCode.value__
       if ($status -eq 404) {
-        Fail "t3 $version has no release archive for win32-$arch; releases before the self-contained CLI can only be installed with 'npm install -g t3@$version'"
+        Fail "t4 $version has no release archive for win32-$arch; releases before the self-contained CLI can only be installed with 'npm install -g t4@$version'"
       }
       throw
     }
@@ -201,7 +204,7 @@ if ((Test-Path $marker) -and ((Get-Content $marker -Raw).Trim() -eq $version)) {
     Get-ChildItem (Join-Path $staging $stem) | Move-Item -Destination $staging
     Remove-Item (Join-Path $staging $stem), (Join-Path $staging $archive), (Join-Path $staging "SHA256SUMS") -Recurse -Force
 
-    & (Join-Path $staging "t3.exe") --version | Out-Null
+    & (Join-Path $staging "t4.exe") --version | Out-Null
     if ($LASTEXITCODE -ne 0) { Fail "the downloaded executable does not run" }
     Set-Content -Path (Join-Path $staging ".install-complete") -Value $version -NoNewline
 
@@ -213,14 +216,14 @@ if ((Test-Path $marker) -and ((Get-Content $marker -Raw).Trim() -eq $version)) {
   }
 }
 
-Step "Setting up the t3 command..."
+Step "Setting up the t4 command..."
 New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-$shim = Join-Path $binDir "t3.cmd"
+$shim = Join-Path $binDir "t4.cmd"
 # UTF-8 without a BOM: cmd.exe reads the shim as-is, and ASCII would corrupt
 # non-ASCII characters in the user's home path.
-[System.IO.File]::WriteAllText($shim, "@echo off`r`n`"$(Join-Path $targetDir 't3.exe')`" %*", (New-Object System.Text.UTF8Encoding $false))
+[System.IO.File]::WriteAllText($shim, "@echo off`r`n`"$(Join-Path $targetDir 't4.exe')`" %*", (New-Object System.Text.UTF8Encoding $false))
 # Pruning keeps what this shim points at; a background service cannot see $binDir otherwise.
-$launchers = Join-Path $t3Home "runtime\launchers"
+$launchers = Join-Path $t4Home "runtime\launchers"
 $shimPath = (Resolve-Path $shim).Path
 if (-not ((Test-Path $launchers) -and ((Get-Content $launchers) -contains $shimPath))) {
   [System.IO.File]::AppendAllText($launchers, "$shimPath`r`n", (New-Object System.Text.UTF8Encoding $false))
@@ -228,7 +231,7 @@ if (-not ((Test-Path $launchers) -and ((Get-Content $launchers) -contains $shimP
 if ($interactive) { [Console]::Error.Write("`r$esc[2K") }
 [Console]::Error.WriteLine("  ${green}Installed T4 Code $version$reset`n")
 if (($env:PATH -split ";") -notcontains $binDir) {
-  Write-Host "  Add $binDir to your PATH, then run ${bold}t3$reset.`n"
+  Write-Host "  Add $binDir to your PATH, then run ${bold}t4$reset.`n"
 } else {
-  Write-Host "  Run ${bold}t3$reset to use T4 Code here, or ${bold}t3 up$reset to use it from your other devices.`n"
+  Write-Host "  Run ${bold}t4$reset to use T4 Code here, or ${bold}t4 up$reset to use it from your other devices.`n"
 }

@@ -1,6 +1,6 @@
-import { isWindowsAbsolutePath } from "@t3tools/shared/path";
+import { isWindowsAbsolutePath } from "@t4tools/shared/path";
 
-import { safeDecodeURIComponent } from "@t3tools/shared/markdownLinks";
+import { safeDecodeURIComponent } from "@t4tools/shared/markdownLinks";
 
 export type MediaReference =
   | {

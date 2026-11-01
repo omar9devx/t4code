@@ -1,4 +1,4 @@
-import { EnvironmentId } from "@t3tools/contracts";
+import { EnvironmentId } from "@t4tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 
 import type { toastManager } from "./ui/toast";
@@ -10,7 +10,7 @@ const { add, starred } = vi.hoisted(() => ({
 vi.mock("./ui/toast", () => ({ toastManager: { add, close: vi.fn() } }));
 vi.mock("../rpc/atomRegistry", () => ({ appAtomRegistry: {} }));
 vi.mock("../state/sourceControl", () => ({ sourceControlEnvironment: { checkStarred: {} } }));
-vi.mock("@t3tools/client-runtime/state/runtime", () => ({
+vi.mock("@t4tools/client-runtime/state/runtime", () => ({
   runAtomCommand: async () => {
     starred.duringCheck();
     return { _tag: "Success", value: starred.value };
@@ -23,7 +23,7 @@ function setup({ sent = 0, writable = true, alreadyStarred = false } = {}) {
   add.mockReset();
   starred.value = alreadyStarred;
   starred.duringCheck = () => {};
-  const store = new Map([["t3code:github-star-prompt:sent", String(sent)]]);
+  const store = new Map([["T4CODE:github-star-prompt:sent", String(sent)]]);
   vi.stubGlobal("window", {
     localStorage: {
       getItem: (key: string) => store.get(key) ?? null,
@@ -83,7 +83,7 @@ describe("recordPromptSent", () => {
 
   it("never asks when another tab dismisses it during the star check", async () => {
     const store = setup({ sent: 5 });
-    starred.duringCheck = () => store.set("t3code:github-star-prompt:dismissed", "true");
+    starred.duringCheck = () => store.set("T4CODE:github-star-prompt:dismissed", "true");
     await (await startSession()).send();
     expect(add).not.toHaveBeenCalled();
     vi.unstubAllGlobals();

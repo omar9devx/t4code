@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test";
-import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@t3tools/contracts";
+import { EnvironmentId, ProjectId, ProviderInstanceId, ThreadId } from "@t4tools/contracts";
 import type { Thread } from "../types";
 import { makeThreadFixture } from "../test-fixtures";
 import {
@@ -228,7 +228,7 @@ describe("buildThreadActionItems", () => {
       icon: null,
       run: async () => undefined,
     });
-    const projects = [action("new-thread-in:t3code", "t3code"), action("new-thread-in:web", "web")];
+    const projects = [action("new-thread-in:T4CODE", "T4CODE"), action("new-thread-in:web", "web")];
     const newThreadIn = {
       kind: "submenu" as const,
       value: "action:new-thread-in",
@@ -252,7 +252,7 @@ describe("buildThreadActionItems", () => {
         projectSearchItems: [],
         threadSearchItems: [
           ...buildThreadActionItems({
-            threads: [makeThread({ title: "Thread about t3code" })],
+            threads: [makeThread({ title: "Thread about T4CODE" })],
             projectByKey: new Map(),
             icon: null,
             runThread: async () => undefined,
@@ -260,12 +260,12 @@ describe("buildThreadActionItems", () => {
         ],
       }).map((group) => [group.label, group.items.map((item) => item.title)]);
 
-    expect(search("new thread in t3code", false)[0]).toEqual([
+    expect(search("new thread in T4CODE", false)[0]).toEqual([
       "Suggestions",
-      ["New thread in t3code"],
+      ["New thread in T4CODE"],
     ]);
     expect(search("new thread", false).map(([label]) => label)).not.toContain("Suggestions");
-    expect(search("t3", true)).toEqual([["Projects", ["t3code"]]]);
+    expect(search("t4", true)).toEqual([["Projects", ["T4CODE"]]]);
     expect(search("add project", true)).toEqual([["Actions", ["Add project"]]]);
   });
 
@@ -424,8 +424,8 @@ describe("buildThreadActionItems", () => {
             {
               kind: "action",
               value: "action:new-thread",
-              searchTerms: ["New thread in t3code"],
-              title: "New thread in t3code",
+              searchTerms: ["New thread in T4CODE"],
+              title: "New thread in T4CODE",
               icon: null,
               run: async () => undefined,
             },
@@ -559,15 +559,15 @@ describe("buildThreadActionItems", () => {
               value: "action:new-thread",
               searchTerms: ["new thread", "chat"],
               // Styled: not a string, so only `searchTitle` holds its words.
-              title: ["New thread in ", "t3code"],
-              searchTitle: "New thread in t3code",
+              title: ["New thread in ", "T4CODE"],
+              searchTitle: "New thread in T4CODE",
               icon: null,
               run: async () => undefined,
             },
           ],
         },
       ],
-      query: "> new t3code",
+      query: "> new T4CODE",
       isInSubmenu: false,
       projectSearchItems: [],
       threadSearchItems: [],
@@ -801,8 +801,8 @@ describe("filterPinnedBrowseEntries", () => {
 it.each([
   "#10839",
   "10839",
-  "pingdotgg/t3code#10839",
-  "https://github.com/pingdotgg/t3code/pull/10839",
+  "omar9devx/t4code#10839",
+  "https://github.com/omar9devx/t4code/pull/10839",
 ])("finds linked threads from PR query %s", (query) => {
   const items = buildThreadActionItems({
     threads: [
@@ -811,9 +811,9 @@ it.each([
         pullRequests: [
           {
             host: "github.com",
-            repository: "pingdotgg/t3code",
+            repository: "omar9devx/t4code",
             number: 10839,
-            url: "https://github.com/pingdotgg/t3code/pull/10839",
+            url: "https://github.com/omar9devx/t4code/pull/10839",
             source: "manual",
             linkedAt: "2026-09-08T00:00:00Z",
             snapshot: null,

@@ -14,10 +14,10 @@
       (() => {
         const LIGHT_BACKGROUND = "#ffffff";
         const DARK_BACKGROUND = "#000000";
-        const CUSTOM_THEMES_STORAGE_KEY = "t3code:themes:v1";
-        const THEME_FOLLOW_SYSTEM_STORAGE_KEY = "t3code:theme-follow-system";
-        const THEME_APPEARANCE_MODE_STORAGE_KEY = "t3code:theme-appearance-mode";
-        const THEME_HALVES_STORAGE_KEY = "t3code:theme-halves:v1";
+        const CUSTOM_THEMES_STORAGE_KEY = "T4CODE:themes:v1";
+        const THEME_FOLLOW_SYSTEM_STORAGE_KEY = "T4CODE:theme-follow-system";
+        const THEME_APPEARANCE_MODE_STORAGE_KEY = "T4CODE:theme-appearance-mode";
+        const THEME_HALVES_STORAGE_KEY = "T4CODE:theme-halves:v1";
         const SPLASH_COLORS = {
           light: {
             background: "#ffffff",
@@ -51,7 +51,7 @@
         // Keep this small boot-time copy in sync with the built-in palettes so
         // the selected theme is visible before the app has mounted.
         const BUILT_IN_THEME_PALETTES = {
-          "t3-chat": {
+          "t4-chat": {
             light: {
               background: "oklch(0.982446 0.010114 325.653)",
               foreground: "oklch(0.325698 0.116116 325.037)",
@@ -132,16 +132,16 @@
           "system",
           "light",
           "dark",
-          "t3-chat",
+          "t4-chat",
           "grove",
           "ocean",
           "ember",
           "iris",
-          "t3-chat-dark",
-          "t3-grove",
-          "t3-ocean",
-          "t3-ember",
-          "t3-iris",
+          "t4-chat-dark",
+          "t4-grove",
+          "t4-ocean",
+          "t4-ember",
+          "t4-iris",
         ];
         const setThemeColor = (color) => {
           for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
@@ -213,19 +213,19 @@
         };
 
         try {
-          const storedTheme = window.localStorage.getItem("t3code:theme");
+          const storedTheme = window.localStorage.getItem("T4CODE:theme");
           const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           const LEGACY_THEME_IDS = {
-            "t3-chat-dark": "t3-chat",
-            "t3-grove": "grove",
-            "t3-ocean": "ocean",
-            "t3-ember": "ember",
-            "t3-iris": "iris",
+            "t4-chat-dark": "t4-chat",
+            "t4-grove": "grove",
+            "t4-ocean": "ocean",
+            "t4-ember": "ember",
+            "t4-iris": "iris",
           };
-          const isLegacyT3ChatDark = storedTheme === "t3-chat-dark";
+          const isLegacyT4ChatDark = storedTheme === "t4-chat-dark";
           const themeId =
             storedTheme === null ? "" : (LEGACY_THEME_IDS[storedTheme] ?? storedTheme);
-          const legacyMode = isLegacyT3ChatDark ? "dark" : null;
+          const legacyMode = isLegacyT4ChatDark ? "dark" : null;
           const builtInModes = BUILT_IN_THEME_MODES[themeId] ?? null;
           const customTheme = builtInModes ? null : findCustomTheme(themeId);
           const themeModes =

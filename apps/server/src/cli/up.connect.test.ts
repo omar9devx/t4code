@@ -1,7 +1,7 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { expect, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import * as NetService from "@t3tools/shared/Net";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import * as NetService from "@t4tools/shared/Net";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -14,7 +14,7 @@ import packageJson from "../../package.json" with { type: "json" };
 import * as BootService from "../cloud/bootService.ts";
 import { upCommand } from "./up.ts";
 
-// T3 Connect's flows run only in builds with its public config, and they call
+// T4 Connect's flows run only in builds with its public config, and they call
 // the relay; this file swaps in the link and unlink steps.
 const events = vi.hoisted((): Array<string> => []);
 // The CLI link marker, kept in memory instead of the secret store.
@@ -56,7 +56,7 @@ vi.mock("./connect.ts", async (importOriginal) => {
   };
 });
 
-it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up with T3 Connect", (it) => {
+it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t4 up with T4 Connect", (it) => {
   it.effect.each([
     { label: "no link", prior: null, events: ["link", "restart", "unlink", "restart"] },
     // The publish-only link comes back, with its activity publishing.
@@ -71,14 +71,14 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up with T3 Co
       link.desired = input.prior !== null;
       link.mode = input.prior ?? "managed";
       const fs = yield* FileSystem.FileSystem;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t3-up-connect-test-" });
-      yield* fs.writeFileString(`${baseDir}/service.env`, "T3CODE_LAN=false\n");
+      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t4-up-connect-test-" });
+      yield* fs.writeFileString(`${baseDir}/service.env`, "T4CODE_LAN=false\n");
       const status = {
         supported: true,
         installed: true,
         current: true,
-        unitPath: "/home/me/.config/systemd/user/t3code.service",
-        logPath: "/home/me/.t3/userdata/logs/boot-service.log",
+        unitPath: "/home/me/.config/systemd/user/T4CODE.service",
+        logPath: "/home/me/.t4/userdata/logs/boot-service.log",
       };
       vi.spyOn(BootService, "layer").mockReturnValue(
         Layer.succeed(
@@ -120,7 +120,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up with T3 Co
           ? { desired: false, mode: "managed" }
           : { desired: true, mode: input.prior },
       );
-      expect(yield* fs.readFileString(`${baseDir}/service.env`)).toBe("T3CODE_LAN=false\n");
+      expect(yield* fs.readFileString(`${baseDir}/service.env`)).toBe("T4CODE_LAN=false\n");
     }),
   );
 });

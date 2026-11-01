@@ -8,7 +8,7 @@ import {
   ScheduledTaskId,
   ThreadId,
   type ScheduledTask,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
 

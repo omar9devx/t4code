@@ -2,7 +2,7 @@ import {
   DEFAULT_SERVER_SETTINGS,
   ProviderDriverKind,
   ProviderInstanceId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it } from "@effect/vitest";
 
 import { filterSharedServerPatch } from "./sharedSettings.ts";

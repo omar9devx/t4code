@@ -1,4 +1,4 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import {
   listLoginShellCandidates,
   mergePathEntries,
@@ -6,7 +6,7 @@ import {
   readPathFromLaunchctl,
   resolveWindowsEnvironment,
   setWindowsPath,
-} from "@t3tools/shared/shell";
+} from "@t4tools/shared/shell";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Path from "effect/Path";
@@ -123,7 +123,12 @@ export const expandHomePath = Effect.fn(function* (input: string) {
 export const resolveBaseDir = Effect.fn(function* (raw: string | undefined) {
   const { join, resolve } = yield* Path.Path;
   if (!raw || raw.trim().length === 0) {
-    return join(yield* HostProcess.HomeDirectory, ".t3");
+    const home = yield* HostProcess.HomeDirectory;
+    const fileSystem = yield* FileSystem.FileSystem;
+    const t4Home = join(home, ".t4");
+    if (yield* fileSystem.exists(t4Home)) return t4Home;
+    const legacyT3Home = join(home, ".t3");
+    return (yield* fileSystem.exists(legacyT3Home)) ? legacyT3Home : t4Home;
   }
   return resolve(yield* expandHomePath(raw.trim()));
 });

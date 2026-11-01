@@ -20,12 +20,12 @@ import type {
   VcsStatusResult,
   VcsStatusStreamEvent,
   VcsStatusSubscriptionInput,
-} from "@t3tools/contracts";
-import { DEFAULT_AUTOMATIC_GIT_FETCH_INTERVAL } from "@t3tools/contracts";
-import { resolveServerBackgroundActivitySettings } from "@t3tools/shared/backgroundActivitySettings";
-import { mergeGitStatusParts } from "@t3tools/shared/git";
-import * as KeyedLock from "@t3tools/shared/KeyedLock";
-import { resolveProjectSettings } from "@t3tools/shared/projectSettings";
+} from "@t4tools/contracts";
+import { DEFAULT_AUTOMATIC_GIT_FETCH_INTERVAL } from "@t4tools/contracts";
+import { resolveServerBackgroundActivitySettings } from "@t4tools/shared/backgroundActivitySettings";
+import { mergeGitStatusParts } from "@t4tools/shared/git";
+import * as KeyedLock from "@t4tools/shared/KeyedLock";
+import { resolveProjectSettings } from "@t4tools/shared/projectSettings";
 
 import * as BackgroundPolicy from "../background/BackgroundPolicy.ts";
 import * as GitWorkflowService from "../git/GitWorkflowService.ts";
@@ -146,7 +146,7 @@ interface ActiveRemotePoller {
 }
 
 export class VcsAutomaticFetchInterval extends Context.Reference<Effect.Effect<Duration.Duration>>(
-  "t3/vcs/VcsAutomaticFetchInterval",
+  "t4/vcs/VcsAutomaticFetchInterval",
   { defaultValue: () => Effect.succeed(DEFAULT_AUTOMATIC_GIT_FETCH_INTERVAL) },
 ) {}
 
@@ -165,7 +165,7 @@ export const layerAutomaticFetchInterval = Layer.effect(
 
 export class VcsAutoPullPolicy extends Context.Reference<{
   readonly isEnabled: (cwd: string) => Effect.Effect<boolean, never>;
-}>("t3/vcs/VcsAutoPullPolicy", {
+}>("t4/vcs/VcsAutoPullPolicy", {
   defaultValue: () => ({ isEnabled: () => Effect.succeed(false) }),
 }) {}
 
@@ -222,7 +222,7 @@ export class VcsStatusBroadcaster extends Context.Service<
       input: VcsStatusSubscriptionInput,
     ) => Stream.Stream<VcsStatusStreamEvent, GitManagerServiceError>;
   }
->()("t3/vcs/VcsStatusBroadcaster") {}
+>()("t4/vcs/VcsStatusBroadcaster") {}
 
 function fingerprintStatusPart(status: unknown): string {
   return JSON.stringify(status);

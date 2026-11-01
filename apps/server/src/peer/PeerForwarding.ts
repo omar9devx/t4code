@@ -8,7 +8,7 @@ import {
   OrchestratorMcpThreadReadResult,
   OrchestratorMcpThreadWaitInput,
   OrchestratorMcpThreadWaitResult,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
@@ -27,7 +27,7 @@ import * as PeerMcpClient from "./PeerMcpClient.ts";
 
 /**
  * A peer's `/mcp` holds a wait open for its whole timeout without sending
- * anything, and T3 Connect's edge drops a request idle for about 100 s, so a
+ * anything, and T4 Connect's edge drops a request idle for about 100 s, so a
  * forwarded wait goes out in pieces no longer than this.
  */
 export const FORWARDED_WAIT_CHUNK_MS = 50_000;
@@ -47,7 +47,7 @@ export class PeerForwarding extends Context.Service<
   {
     /**
      * Runs `tool` in the linked environment `environmentId` with `params`. A
-     * `t3_thread_wait` goes in pieces short enough to survive any route.
+     * `t4_thread_wait` goes in pieces short enough to survive any route.
      */
     readonly call: <T extends Tool.Any>(
       scope: Scope,
@@ -55,19 +55,19 @@ export class PeerForwarding extends Context.Service<
       environmentId: EnvironmentId,
       params: Tool.Parameters<T>,
     ) => Effect.Effect<Tool.Success<T>, OrchestratorMcpFailure>;
-    /** `t3_thread_read` there. */
+    /** `t4_thread_read` there. */
     readonly readThread: (
       scope: Scope,
       environmentId: EnvironmentId,
       input: OrchestratorMcpThreadReadInput,
     ) => Effect.Effect<OrchestratorMcpThreadReadResult, OrchestratorMcpFailure>;
-    /** `t3_thread_interrupt` there. */
+    /** `t4_thread_interrupt` there. */
     readonly interruptThread: (
       scope: Scope,
       environmentId: EnvironmentId,
       input: OrchestratorMcpThreadInterruptInput,
     ) => Effect.Effect<OrchestratorMcpThreadInterruptResult, OrchestratorMcpFailure>;
-    /** `t3_thread_wait` there, in pieces short enough to survive any route. */
+    /** `t4_thread_wait` there, in pieces short enough to survive any route. */
     readonly waitForThread: (
       scope: Scope,
       environmentId: EnvironmentId,
@@ -78,7 +78,7 @@ export class PeerForwarding extends Context.Service<
       scope: Scope,
     ) => Effect.Effect<OrchestratorMcpEnvironmentLinksResult, OrchestratorMcpFailure>;
   }
->()("t3/peer/PeerForwarding") {}
+>()("t4/peer/PeerForwarding") {}
 
 /** What an agent hears when it names another machine while the beta is off here. */
 export const linkedEnvironmentsOff = new OrchestratorMcpFailure({
@@ -158,7 +158,7 @@ const make = Effect.gen(function* () {
   const readThread: PeerForwarding["Service"]["readThread"] = (scope, environmentId, input) =>
     forward<OrchestratorMcpThreadReadResult>(
       scope,
-      "t3_thread_read",
+      "t4_thread_read",
       OrchestratorMcpThreadReadInput,
       OrchestratorMcpThreadReadResult,
       environmentId,
@@ -172,7 +172,7 @@ const make = Effect.gen(function* () {
   ) =>
     forward<OrchestratorMcpThreadInterruptResult>(
       scope,
-      "t3_thread_interrupt",
+      "t4_thread_interrupt",
       OrchestratorMcpThreadInterruptInput,
       OrchestratorMcpThreadInterruptResult,
       environmentId,
@@ -191,7 +191,7 @@ const make = Effect.gen(function* () {
       const chunk = Math.min(remaining, FORWARDED_WAIT_CHUNK_MS);
       const result = yield* forward<OrchestratorMcpThreadWaitResult>(
         scope,
-        "t3_thread_wait",
+        "t4_thread_wait",
         OrchestratorMcpThreadWaitInput,
         OrchestratorMcpThreadWaitResult,
         environmentId,
@@ -221,7 +221,7 @@ const make = Effect.gen(function* () {
     const forwarded: Effect.Effect<
       Tool.Success<typeof tool>,
       OrchestratorMcpFailure
-    > = tool.name === "t3_thread_wait"
+    > = tool.name === "t4_thread_wait"
       ? (waitForThread(
           scope,
           environmentId,
@@ -236,7 +236,7 @@ const make = Effect.gen(function* () {
    * empty list reads as a dead end and agents go looking elsewhere.
    */
   const NOT_LISTED =
-    "Not listed: not linked yet. Call t3_environment_link with a hint from the user's words.";
+    "Not listed: not linked yet. Call t4_environment_link with a hint from the user's words.";
 
   const listLinks: PeerForwarding["Service"]["links"] = Effect.fn("PeerForwarding.listLinks")(
     function* (scope) {

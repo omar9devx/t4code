@@ -8,7 +8,7 @@ import {
   type WorktreeMcpHandoffResult,
   type WorktreeMcpSetupScriptStatus,
   type WorktreeMcpStatusResult,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -35,7 +35,7 @@ export class WorktreeMcpService extends Context.Service<
       scope: McpInvocationScope,
     ) => Effect.Effect<WorktreeMcpStatusResult, WorktreeMcpFailure>;
   }
->()("t3/mcp/WorktreeMcpService") {}
+>()("t4/mcp/WorktreeMcpService") {}
 
 function failure(code: WorktreeMcpFailure["code"], message: string): WorktreeMcpFailure {
   return new WorktreeMcpFailure({ code, message });

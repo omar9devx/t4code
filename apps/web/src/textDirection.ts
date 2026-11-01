@@ -1,1 +1,1 @@
-export * from "@t3tools/shared/textDirection";
+export * from "@t4tools/shared/textDirection";

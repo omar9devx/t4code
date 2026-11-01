@@ -11,9 +11,9 @@ import * as SynchronizedRef from "effect/SynchronizedRef";
 
 import * as ElectronDialog from "../electron/ElectronDialog.ts";
 
-const PREVIEW_PARTITION_PREFIX = "persist:t3code-preview-";
+const PREVIEW_PARTITION_PREFIX = "persist:T4CODE-preview-";
 /** Ephemeral partitions omit persist: but retain a product prefix so the webview gate recognizes them. */
-const PREVIEW_EPHEMERAL_PARTITION_PREFIX = "t3code-preview-ephemeral-";
+const PREVIEW_EPHEMERAL_PARTITION_PREFIX = "T4CODE-preview-ephemeral-";
 const PROFILE_PARTITION_MARKER = "profile-";
 
 export type BrowserSessionPartitionNamespace = "profile";
@@ -154,7 +154,7 @@ export class BrowserSession extends Context.Service<
       partitions?: ReadonlyArray<string>,
     ) => Effect.Effect<void, BrowserSessionCacheClearError>;
   }
->()("@t3tools/desktop/preview/BrowserSession") {}
+>()("@t4tools/desktop/preview/BrowserSession") {}
 
 const selectSessions = (
   sessions: ReadonlyMap<string, Session>,

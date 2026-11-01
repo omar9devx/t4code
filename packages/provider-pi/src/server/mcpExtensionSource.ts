@@ -1,27 +1,27 @@
 // No T4 Code imports inside the string; resolve Pi and typebox from the user's Pi install.
-import { T3_CODE_ORCHESTRATION_INSTRUCTIONS } from "@t3tools/provider-core/server/orchestrationInstructions";
+import { T4_CODE_ORCHESTRATION_INSTRUCTIONS } from "@t4tools/provider-core/server/orchestrationInstructions";
 
-export const PI_T3_MCP_EXTENSION_FILENAME = "pi-t3-mcp-extension.ts";
+export const PI_t4_MCP_EXTENSION_FILENAME = "pi-t4-mcp-extension.ts";
 
-export const T3_MCP_URL_ENV = "T3_MCP_URL";
-export const T3_MCP_BEARER_ENV = "T3_MCP_BEARER_TOKEN";
-export const T3_PI_RUNTIME_MODE_ENV = "T3_PI_RUNTIME_MODE";
-export const T3_PI_MCP_EXTENSION_PATH_ENV = "T3_PI_MCP_EXTENSION_PATH";
+export const T4_MCP_URL_ENV = "T4_MCP_URL";
+export const T4_MCP_BEARER_ENV = "T4_MCP_BEARER_TOKEN";
+export const T4_PI_RUNTIME_MODE_ENV = "T4_PI_RUNTIME_MODE";
+export const T4_PI_MCP_EXTENSION_PATH_ENV = "T4_PI_MCP_EXTENSION_PATH";
 
 // These tools trigger file-change approvals, bypassed by Auto-accept edits.
 export const PI_FILE_CHANGE_TOOLS = ["edit", "write"] as const;
 
-export const PI_T3_MCP_EXTENSION_SOURCE = `\
+export const PI_t4_MCP_EXTENSION_SOURCE = `\
 import { stripFrontmatter, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import * as NodeFSP from "node:fs/promises";
 import * as NodePath from "node:path";
 import { Type } from "typebox";
 
-const URL_ENV = ${JSON.stringify(T3_MCP_URL_ENV)};
-const TOKEN_ENV = ${JSON.stringify(T3_MCP_BEARER_ENV)};
-const RUNTIME_MODE_ENV = ${JSON.stringify(T3_PI_RUNTIME_MODE_ENV)};
-const EXTENSION_PATH_ENV = ${JSON.stringify(T3_PI_MCP_EXTENSION_PATH_ENV)};
-const ORCHESTRATION_INSTRUCTIONS = ${JSON.stringify(T3_CODE_ORCHESTRATION_INSTRUCTIONS.trim())};
+const URL_ENV = ${JSON.stringify(T4_MCP_URL_ENV)};
+const TOKEN_ENV = ${JSON.stringify(T4_MCP_BEARER_ENV)};
+const RUNTIME_MODE_ENV = ${JSON.stringify(T4_PI_RUNTIME_MODE_ENV)};
+const EXTENSION_PATH_ENV = ${JSON.stringify(T4_PI_MCP_EXTENSION_PATH_ENV)};
+const ORCHESTRATION_INSTRUCTIONS = ${JSON.stringify(T4_CODE_ORCHESTRATION_INSTRUCTIONS.trim())};
 const PROTOCOL = "2025-06-18";
 const READ_ONLY_TOOLS = new Set(["read", "grep", "find", "ls"]);
 const FILE_CHANGE_TOOLS = new Set(${JSON.stringify(PI_FILE_CHANGE_TOOLS)});
@@ -214,7 +214,7 @@ function createMcpClient(endpoint: string, token: string) {
         {
           protocolVersion: PROTOCOL,
           capabilities: {},
-          clientInfo: { name: "t3-pi-mcp", version: "1.0.0" },
+          clientInfo: { name: "t4-pi-mcp", version: "1.0.0" },
         },
         signal,
       );
@@ -240,7 +240,7 @@ function createMcpClient(endpoint: string, token: string) {
   };
 }
 
-export default async function t3McpExtension(pi: ExtensionAPI) {
+export default async function t4McpExtension(pi: ExtensionAPI) {
   // RPC has no trust prompt, so Pi skips an untrusted folder's protected resources. Session
   // replacement reruns this factory without project_trust, and T4 Code drops notices outside a turn,
   // so check each session's first turn. An explicit --no-approve is deliberate and stays quiet.
@@ -352,7 +352,7 @@ export default async function t3McpExtension(pi: ExtensionAPI) {
   if (endpoint === undefined || token === undefined) {
     pi.on("session_start", async (_event, ctx) => {
       ctx.ui.notify(
-        "T4 Code MCP unavailable: T3_MCP_URL or T3_MCP_BEARER_TOKEN is missing.",
+        "T4 Code MCP unavailable: T4_MCP_URL or T4_MCP_BEARER_TOKEN is missing.",
         "warning",
       );
     });
@@ -372,13 +372,13 @@ export default async function t3McpExtension(pi: ExtensionAPI) {
   const registerTools = () => {
     // Preserve public names for saved loadouts and tool selectors. Hidden
     // canonical names reserve ownership against Pi's configured MCP servers.
-    const prefixes = supportsExposure ? ["mcp__t3-code__", "mcp__t3_code__"] : ["mcp__t3-code__"];
+    const prefixes = supportsExposure ? ["mcp__t4-code__", "mcp__t4_code__"] : ["mcp__t4-code__"];
     readOnlyMcpTools.clear();
     for (const tool of catalog) {
       const name = tool.name;
       for (const prefix of prefixes) {
         if (tool.annotations?.readOnlyHint === true) readOnlyMcpTools.add(\`\${prefix}\${name}\`);
-        const exposure = prefix === "mcp__t3_code__" ? "hidden" :
+        const exposure = prefix === "mcp__t4_code__" ? "hidden" :
           deferOptionalTools && !directTools.has(name) ? "deferred" : "direct";
         pi.registerTool({
           name: \`\${prefix}\${name}\`,
@@ -403,7 +403,7 @@ export default async function t3McpExtension(pi: ExtensionAPI) {
             return {
               content,
               structuredContent: mcpScriptResult(result),
-              details: { server: "t3-code", tool: name },
+              details: { server: "t4-code", tool: name },
               ...(isMcpToolError(result) ? { isError: true } : {}),
             };
           },
@@ -446,7 +446,7 @@ export default async function t3McpExtension(pi: ExtensionAPI) {
     // Pi still applies --tools/--exclude-tools to this active loadout.
     const required = [
       ...(hasToolSearch ? ["tool_search"] : []),
-      ...(ctx.model?.api === "openai-completions" ? catalog.map((tool) => "mcp__t3-code__" + tool.name) : []),
+      ...(ctx.model?.api === "openai-completions" ? catalog.map((tool) => "mcp__t4-code__" + tool.name) : []),
     ];
     const missing = required.filter((name) => !active.includes(name));
     if (missing.length > 0) pi.setActiveTools([...active, ...missing]);
@@ -471,7 +471,7 @@ export default async function t3McpExtension(pi: ExtensionAPI) {
     const sections = event.systemPromptOptions?.sections;
     if (sections && typeof sections === "object" && event.systemPromptOptions?.forceSystemPrompt === undefined) {
       // A full prompt override bypasses Pi's later section rendering.
-      sections.t3_code_orchestration = ORCHESTRATION_INSTRUCTIONS;
+      sections.T4_code_orchestration = ORCHESTRATION_INSTRUCTIONS;
       return undefined;
     }
     return { systemPrompt: event.systemPrompt + "\\n\\n" + ORCHESTRATION_INSTRUCTIONS };

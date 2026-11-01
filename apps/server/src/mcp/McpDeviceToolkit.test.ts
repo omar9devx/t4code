@@ -6,7 +6,7 @@ import {
   EnvironmentId,
   ProviderInstanceId,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
@@ -151,7 +151,7 @@ const layerTest = McpHttpServer.layerDeviceToolkit.pipe(
   Layer.provideMerge(McpToolAccessTestkit.liveThreadsLayer),
   Layer.provideMerge(layerDeviceServiceMock),
   Layer.provide(layerProjectsMock),
-  Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "t3-mcp-device-toolkit-test-" })),
+  Layer.provide(ServerConfig.layerTest(process.cwd(), { prefix: "t4-mcp-device-toolkit-test-" })),
   Layer.provide(NodeServices.layer),
 );
 
@@ -173,7 +173,7 @@ it.effect("registers the device tools and returns the screenshot as image conten
         agentDevice: { command: string; targetArgs: ReadonlyArray<string>; session: string };
         quickStart: string;
       };
-      // Callers that pass the target flags, like test-t3-mobile's pair-client.sh, keep working.
+      // Callers that pass the target flags, like test-t4-mobile's pair-client.sh, keep working.
       expect(openedContent.agentDevice).toMatchObject({
         targetArgs: [
           "--platform",
@@ -277,7 +277,7 @@ it.effect("rejects unavailable agent access before booting or opening a device",
         Layer.provide(layerUnavailable),
         Layer.provide(layerProjectsMock),
         Layer.provide(
-          ServerConfig.layerTest(process.cwd(), { prefix: "t3-mcp-device-toolkit-test-" }),
+          ServerConfig.layerTest(process.cwd(), { prefix: "t4-mcp-device-toolkit-test-" }),
         ),
         Layer.provide(NodeServices.layer),
       ),
@@ -421,7 +421,7 @@ describe("device targeting across hosts", () => {
           Layer.provide(layerDevices),
           Layer.provide(layerProjectsMock),
           Layer.provide(
-            ServerConfig.layerTest(process.cwd(), { prefix: "t3-mcp-device-toolkit-test-" }),
+            ServerConfig.layerTest(process.cwd(), { prefix: "t4-mcp-device-toolkit-test-" }),
           ),
           Layer.provide(NodeServices.layer),
         ),

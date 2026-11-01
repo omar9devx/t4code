@@ -1,6 +1,6 @@
 // @effect-diagnostics nodeBuiltinImport:off globalFetchInEffect:off - verifies generated remote scripts using real shell and Node processes.
 import * as Effect from "effect/Effect";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import { expect, it } from "@effect/vitest";
 import * as NodeChildProcess from "node:child_process";
 import * as NodeFSP from "node:fs/promises";
@@ -15,7 +15,7 @@ it.effect("finds Android Studio Java for a non-interactive SSH session", () =>
   Effect.gen(function* () {
     if ((yield* HostProcess.Platform) === "win32") return;
     yield* Effect.promise(async () => {
-      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-ssh-java-"));
+      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-ssh-java-"));
       try {
         const javaHome = NodePath.join(home, ".local/opt/android-studio/jbr");
         await NodeFSP.mkdir(NodePath.join(javaHome, "bin"), { recursive: true });
@@ -50,7 +50,7 @@ it.effect("stops a daemon left for its owner when starting without agent tools",
   Effect.gen(function* () {
     if ((yield* HostProcess.Platform) === "win32") return;
     yield* Effect.promise(async () => {
-      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-ssh-start-"));
+      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-ssh-start-"));
       try {
         const state = NodePath.join(home, ".t3/device/hosts/owner");
         const daemonFile = NodePath.join(state, "daemon.json");
@@ -97,7 +97,7 @@ it.effect("keeps a daemon record its missing agent CLI cannot stop", () =>
   Effect.gen(function* () {
     if ((yield* HostProcess.Platform) === "win32") return;
     yield* Effect.promise(async () => {
-      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-ssh-start-"));
+      const home = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-ssh-start-"));
       try {
         const state = NodePath.join(home, ".t3/device/hosts/owner");
         const daemonFile = NodePath.join(state, "daemon.json");

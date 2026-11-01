@@ -1,24 +1,24 @@
-import { worktreeSetupAgentStarted } from "@t3tools/client-runtime/worktree-setup";
-import { resolveUserMessagePresentation } from "@t3tools/client-runtime/user-message";
-import { isLiveSubagentTurnItem } from "@t3tools/client-runtime/state/subagentRuntime";
+import { worktreeSetupAgentStarted } from "@t4tools/client-runtime/worktree-setup";
+import { resolveUserMessagePresentation } from "@t4tools/client-runtime/user-message";
+import { isLiveSubagentTurnItem } from "@t4tools/client-runtime/state/subagentRuntime";
 import * as DateTime from "effect/DateTime";
 import * as Equal from "effect/Equal";
 import {
   assistantCitationLabel,
   collectAssistantCitations,
-} from "@t3tools/shared/assistantCitations";
+} from "@t4tools/shared/assistantCitations";
 import { shallow } from "zustand/vanilla/shallow";
-import { claudeResumeCompactionAge } from "@t3tools/shared/claudeCompaction";
+import { claudeResumeCompactionAge } from "@t4tools/shared/claudeCompaction";
 import {
   IDLE_COMPACTING_LABELS,
   IDLE_COMPACTION_TITLES,
-} from "@t3tools/client-runtime/user-message";
-import type { HandoffTimelineRun } from "@t3tools/client-runtime/handoff";
-import { renderCodexDirectivesForCopy } from "@t3tools/shared/codexMarkdownDirectives";
+} from "@t4tools/client-runtime/user-message";
+import type { HandoffTimelineRun } from "@t4tools/client-runtime/handoff";
+import { renderCodexDirectivesForCopy } from "@t4tools/shared/codexMarkdownDirectives";
 import {
   commandDisplayText,
   commandProgramName,
-} from "@t3tools/client-runtime/work-log/command-label";
+} from "@t4tools/client-runtime/work-log/command-label";
 import {
   liveActivityToolStatus,
   normalizeCompactToolLabel,
@@ -28,7 +28,7 @@ import {
   toolGroupSummaryKind,
   contextCompactionTokenCounts,
   type ToolGroupSummaryKind,
-} from "@t3tools/client-runtime/work-log/presentation";
+} from "@t4tools/client-runtime/work-log/presentation";
 import {
   deriveRevertTurnCountByUserMessageId,
   formatDuration,
@@ -60,20 +60,20 @@ import {
   RunId,
   type ThreadId,
   type TurnItemId,
-} from "@t3tools/contracts";
-import type { ThreadRunSummary } from "@t3tools/client-runtime/state/shell";
-import { resolveT3McpToolDefinition } from "@t3tools/shared/t3McpToolPresentation";
-import { compactDynamicToolOutput } from "@t3tools/shared/toolOutput";
-import { htmlRenderReferencesEqual, type HtmlRenderReference } from "@t3tools/shared/htmlRender";
-import { mcpAppReferencesEqual, type McpAppReference } from "@t3tools/shared/mcpApp";
-import { dynamicToolTitle } from "@t3tools/shared/toolActivity";
+} from "@t4tools/contracts";
+import type { ThreadRunSummary } from "@t4tools/client-runtime/state/shell";
+import { resolveT4McpToolDefinition } from "@t4tools/shared/t4McpToolPresentation";
+import { compactDynamicToolOutput } from "@t4tools/shared/toolOutput";
+import { htmlRenderReferencesEqual, type HtmlRenderReference } from "@t4tools/shared/htmlRender";
+import { mcpAppReferencesEqual, type McpAppReference } from "@t4tools/shared/mcpApp";
+import { dynamicToolTitle } from "@t4tools/shared/toolActivity";
 import { formatWorkspaceRelativePath } from "../../filePathDisplay";
 import {
   collectToolFilePaths,
   formatReadToolLabel,
   formatSearchToolLabel,
-} from "@t3tools/shared/toolActivity";
-import { isWindowsAbsolutePath } from "@t3tools/shared/path";
+} from "@t4tools/shared/toolActivity";
+import { isWindowsAbsolutePath } from "@t4tools/shared/path";
 
 function timelineEntryRunId(entry: TimelineEntry): RunId | null {
   if (entry.kind === "message") {
@@ -181,7 +181,7 @@ export function workEntryDisplayLabel(entry: WorkLogEntry, workspaceRoot: string
 export function threadReadTargetId(entry: Pick<WorkLogEntry, "structuredPayload">) {
   const item = entry.structuredPayload;
   if (item?.type !== "dynamic_tool") return null;
-  if (resolveT3McpToolDefinition(item.toolName)?.summaryAction !== "thread-read") return null;
+  if (resolveT4McpToolDefinition(item.toolName)?.summaryAction !== "thread-read") return null;
   const input = item.input;
   const threadId =
     input !== null && typeof input === "object" && "threadId" in input ? input.threadId : null;
@@ -1328,7 +1328,7 @@ function withoutSubagentDelegationRows(entries: ReadonlyArray<TimelineEntry>) {
       item?.type !== "dynamic_tool" ||
       item.runId === null ||
       (item.status !== "running" && item.status !== "completed") ||
-      resolveT3McpToolDefinition(item.toolName)?.summaryAction !== "delegate"
+      resolveT4McpToolDefinition(item.toolName)?.summaryAction !== "delegate"
     )
       return true;
     const output = compactDynamicToolOutput(item.output);

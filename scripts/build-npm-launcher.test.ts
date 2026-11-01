@@ -1,7 +1,7 @@
 // @effect-diagnostics nodeBuiltinImport:off - Serves a fake GitHub Release over real HTTP to the published launcher.
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Path from "effect/Path";
@@ -13,7 +13,7 @@ import * as NodeCrypto from "node:crypto";
 import * as NodeEvents from "node:events";
 import * as NodeHttp from "node:http";
 
-import { npmReleaseDatabaseMigration } from "@t3tools/shared/cliRelease";
+import { npmReleaseDatabaseMigration } from "@t4tools/shared/cliRelease";
 
 import { buildNpmLauncher } from "./build-npm-launcher.ts";
 
@@ -51,16 +51,16 @@ const serveFakeRelease = Effect.fn("test.serveFakeRelease")(function* (root: str
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const key = `${yield* HostProcess.Platform}-${yield* HostProcess.Architecture}`;
-  const stem = `t3-${VERSION}-${key}`;
+  const stem = `t4-${VERSION}-${key}`;
   const archiveName = `${stem}.tar.gz`;
   yield* fs.makeDirectory(path.join(root, "release", stem, "node_modules/native"), {
     recursive: true,
   });
   yield* fs.writeFileString(
-    path.join(root, "release", stem, "t3"),
-    '#!/bin/sh\necho "stub $* launcher=$T3CODE_NPM_LAUNCHER_PATH"\nexit 7\n',
+    path.join(root, "release", stem, "t4"),
+    '#!/bin/sh\necho "stub $* launcher=$T4CODE_NPM_LAUNCHER_PATH"\nexit 7\n',
   );
-  yield* fs.chmod(path.join(root, "release", stem, "t3"), 0o755);
+  yield* fs.chmod(path.join(root, "release", stem, "t4"), 0o755);
   const tar = yield* run("tar", ["-czf", archiveName, stem], {
     cwd: path.join(root, "release"),
     env: { PATH: process.env.PATH },
@@ -106,7 +106,7 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
-        const root = yield* fs.makeTempDirectoryScoped({ prefix: "t3-npm-launcher-test-" });
+        const root = yield* fs.makeTempDirectoryScoped({ prefix: "t4-npm-launcher-test-" });
         const output = yield* buildNpmLauncher({
           version: VERSION,
           outputDir: path.join(root, "out"),
@@ -115,9 +115,9 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         const manifest = yield* decodeManifest(
           yield* fs.readFileString(path.join(output.packageDir, "package.json")),
         );
-        assert.equal(manifest.name, "t3");
+        assert.equal(manifest.name, "t4");
         assert.equal(manifest.version, VERSION);
-        assert.deepStrictEqual(manifest.bin, { t3: "./bin/t3.mjs" });
+        assert.deepStrictEqual(manifest.bin, { t4: "./bin/t4.mjs" });
         assert.isUndefined(manifest.dependencies);
         assert.isUndefined(manifest.optionalDependencies);
         assert.isAbove(npmReleaseDatabaseMigration(manifest) ?? 0, 0);
@@ -135,10 +135,10 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         const home = path.join(root, "home");
         const env = {
           PATH: process.env.PATH,
-          T3CODE_HOME: home,
-          T3CODE_RELEASE_BASE_URL: release.baseUrl,
+          T4CODE_HOME: home,
+          T4CODE_RELEASE_BASE_URL: release.baseUrl,
         };
-        const launcher = path.join(packageDir, "bin/t3.mjs");
+        const launcher = path.join(packageDir, "bin/t4.mjs");
         const first = yield* run(process.execPath, [launcher, "serve", "a b"], {
           cwd: root,
           env,
@@ -161,7 +161,7 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         assert.equal(second.exitCode, 7);
         assert.equal(release.requests.length, requestsAfterFirst);
 
-        const ipcServer = path.join(home, "runtime/versions", VERSION, "t3");
+        const ipcServer = path.join(home, "runtime/versions", VERSION, "t4");
         yield* fs.writeFileString(
           ipcServer,
           `#!${process.execPath}\nprocess.on("SIGTERM", () => process.exit(23));\nprocess.on("message", (m) => process.send({ reply: m }));\nprocess.send({ args: process.argv.slice(2) });\n`,
@@ -186,7 +186,7 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         const raceHome = path.join(root, "race-home");
         const launch = run(process.execPath, [launcher, "--version"], {
           cwd: root,
-          env: { ...env, T3CODE_HOME: raceHome },
+          env: { ...env, T4CODE_HOME: raceHome },
         });
         const [one, two] = yield* Effect.all([launch, launch], { concurrency: "unbounded" });
         assert.equal(one.exitCode, 7, one.stderr);
@@ -201,10 +201,10 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         const staleDir = path.join(staleHome, "runtime/versions", VERSION);
         const peerDir = path.join(root, "peer-runtime");
         yield* fs.makeDirectory(staleDir, { recursive: true });
-        yield* fs.writeFileString(path.join(staleDir, "t3"), "");
+        yield* fs.writeFileString(path.join(staleDir, "t4"), "");
         yield* fs.makeDirectory(peerDir);
-        yield* fs.writeFileString(path.join(peerDir, "t3"), '#!/bin/sh\necho "peer $*"\nexit 7\n');
-        yield* fs.chmod(path.join(peerDir, "t3"), 0o755);
+        yield* fs.writeFileString(path.join(peerDir, "t4"), '#!/bin/sh\necho "peer $*"\nexit 7\n');
+        yield* fs.chmod(path.join(peerDir, "t4"), 0o755);
         yield* fs.writeFileString(path.join(peerDir, ".install-complete"), `${VERSION}\n`);
         yield* fs.writeFileString(path.join(peerDir, "sidecar"), "peer sidecar");
         const peerChecks = path.join(root, "peer-checks.txt");
@@ -219,7 +219,7 @@ const { readFileSync, renameSync, rmSync } = fs;
 let checking = false;
 let published = false;
 const checkPeer = () => {
-  const child = spawnSync(dir + "/t3", ["--version"], { encoding: "utf8" });
+  const child = spawnSync(dir + "/t4", ["--version"], { encoding: "utf8" });
   let sidecar;
   try {
     sidecar = readFileSync(dir + "/sidecar", "utf8");
@@ -264,7 +264,7 @@ fs.readFileSync = (file, ...rest) => {
         const recovered = yield* run(
           process.execPath,
           ["--import", peerHook, launcher, "--version"],
-          { cwd: root, env: { ...env, T3CODE_HOME: staleHome } },
+          { cwd: root, env: { ...env, T4CODE_HOME: staleHome } },
         );
         const checks = (yield* fs.readFileString(peerChecks)).trim().split("\n");
         assert.isAtLeast(checks.length, 2);
@@ -280,21 +280,21 @@ fs.readFileSync = (file, ...rest) => {
         const staleOnlyHome = path.join(root, "stale-only-home");
         const staleOnlyDir = path.join(staleOnlyHome, "runtime/versions", VERSION);
         yield* fs.makeDirectory(staleOnlyDir, { recursive: true });
-        yield* fs.writeFileString(path.join(staleOnlyDir, "t3"), "incomplete");
+        yield* fs.writeFileString(path.join(staleOnlyDir, "t4"), "incomplete");
         yield* fs.makeDirectory(`${staleOnlyDir}.lock`);
         const locked = yield* run(process.execPath, [launcher, "--version"], {
           cwd: root,
-          env: { ...env, T3CODE_HOME: staleOnlyHome },
+          env: { ...env, T4CODE_HOME: staleOnlyHome },
         });
         assert.equal(locked.exitCode, 1);
         assert.include(locked.stderr, `delete ${staleOnlyDir}.lock`);
-        assert.equal(yield* fs.readFileString(path.join(staleOnlyDir, "t3")), "incomplete");
+        assert.equal(yield* fs.readFileString(path.join(staleOnlyDir, "t4")), "incomplete");
 
         // Without a peer, the stale folder is replaced by our own download.
         yield* fs.remove(`${staleOnlyDir}.lock`, { recursive: true });
         const replaced = yield* run(process.execPath, [launcher, "--version"], {
           cwd: root,
-          env: { ...env, T3CODE_HOME: staleOnlyHome },
+          env: { ...env, T4CODE_HOME: staleOnlyHome },
         });
         assert.equal(
           replaced.stdout.trim(),
@@ -310,7 +310,7 @@ fs.readFileSync = (file, ...rest) => {
         release.corruptChecksum();
         const corrupt = yield* run(process.execPath, [launcher, "--version"], {
           cwd: root,
-          env: { ...env, T3CODE_HOME: path.join(root, "other-home") },
+          env: { ...env, T4CODE_HOME: path.join(root, "other-home") },
         });
         assert.equal(corrupt.exitCode, 1);
         assert.include(corrupt.stderr, "checksum mismatch");

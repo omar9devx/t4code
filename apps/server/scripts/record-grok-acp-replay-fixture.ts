@@ -1,8 +1,8 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
-import { type ProviderReplayEntry } from "@t3tools/contracts";
-import { GrokSettings } from "@t3tools/provider-grok/settings";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { resolveSelfInvocation } from "@t3tools/shared/nodeRuntime";
+import { type ProviderReplayEntry } from "@t4tools/contracts";
+import { GrokSettings } from "@t4tools/provider-grok/settings";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { resolveSelfInvocation } from "@t4tools/shared/nodeRuntime";
 import * as Clock from "effect/Clock";
 import * as Console from "effect/Console";
 import * as Effect from "effect/Effect";
@@ -12,26 +12,26 @@ import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
 
-import * as TestProviderHost from "@t3tools/provider-testing/TestProviderHost";
+import * as TestProviderHost from "@t4tools/provider-testing/TestProviderHost";
 import {
   GROK_DEFAULT_INSTANCE_ID,
   GROK_PROVIDER,
   grokLaunchRuntimeMode,
   makeGrokAdapterV2,
-} from "@t3tools/provider-grok/testing";
-import { ACP_PROTOCOL } from "@t3tools/provider-acp/server/adapter";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
-import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
-import * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
+} from "@t4tools/provider-grok/testing";
+import { ACP_PROTOCOL } from "@t4tools/provider-acp/server/adapter";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
+import type * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
+import * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
 import * as ProviderAdapterRegistry from "../src/orchestration-v2/ProviderAdapterRegistry.ts";
 import { provideDeterministicTestRuntime } from "../src/orchestration-v2/testkit/DeterministicRuntime.ts";
 import { ORCHESTRATOR_REPLAY_FIXTURES } from "../src/orchestration-v2/testkit/fixtures/index.ts";
 import { materializeFixtureInput } from "../src/orchestration-v2/testkit/fixtures/shared.ts";
 import { runOrchestratorV2Scenario } from "../src/orchestration-v2/testkit/OrchestratorScenario.ts";
 import * as ProviderReplayHarness from "../src/orchestration-v2/testkit/ProviderReplayHarness.ts";
-import { checkpointWorkspace } from "@t3tools/provider-testing/replayWorkspace";
-import { makeGrokAcpRuntime } from "@t3tools/provider-grok/testing";
-import { buildRuntimeInstructions } from "@t3tools/provider-core/server/runtimeInstructions";
+import { checkpointWorkspace } from "@t4tools/provider-testing/replayWorkspace";
+import { makeGrokAcpRuntime } from "@t4tools/provider-grok/testing";
+import { buildRuntimeInstructions } from "@t4tools/provider-core/server/runtimeInstructions";
 
 const wallClock = Clock.Clock.defaultValue();
 const encodeJson = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
@@ -150,7 +150,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
   readonly droppedFrames: number;
 } {
   const entries: Array<ProviderReplayEntry> = [];
-  const t3Requests = new Map<string, string>();
+  const t4Requests = new Map<string, string>();
   const agentRequests = new Map<string, string>();
   let droppedFrames = 0;
   for (const { direction, message } of wire) {
@@ -162,7 +162,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
       }
       const isRequest = message.id !== undefined && message.id !== null;
       if (isRequest) {
-        (direction === "outgoing" ? t3Requests : agentRequests).set(
+        (direction === "outgoing" ? t4Requests : agentRequests).set(
           String(message.id),
           message.method,
         );
@@ -179,7 +179,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
       });
       continue;
     }
-    const pending = direction === "outgoing" ? agentRequests : t3Requests;
+    const pending = direction === "outgoing" ? agentRequests : t4Requests;
     const method = pending.get(String(message.id));
     if (method === undefined) {
       // Grok answers internal requests on this stream; T4 Code drops them before replay.
@@ -201,7 +201,7 @@ function wireToEntries(wire: ReadonlyArray<WireMessage>): {
   return { entries, droppedFrames };
 }
 
-const T3_INSTRUCTIONS_BODY = /<t[34]_code_instructions>\n[\s\S]*?\n<\/t[34]_code_instructions>/u;
+const T4_INSTRUCTIONS_BODY = /<t[34]_code_instructions>\n[\s\S]*?\n<\/t[34]_code_instructions>/u;
 
 function normalizeOutboundFrame(frame: Record<string, unknown>, runtimeInstructions: string) {
   const params = isRecord(frame.params) ? frame.params : undefined;
@@ -237,8 +237,8 @@ function normalizeOutboundFrame(frame: Record<string, unknown>, runtimeInstructi
               ? {
                   ...part,
                   text: part.text.replace(
-                    T3_INSTRUCTIONS_BODY,
-                    "<t4_code_instructions>\n<any>\n</t4_code_instructions>",
+                    T4_INSTRUCTIONS_BODY,
+                    "<T4_code_instructions>\n<any>\n</T4_code_instructions>",
                   ),
                 }
               : part,
@@ -403,7 +403,7 @@ const recordScenario = Effect.fn("recordGrokScenario")(function* (fixtureName: s
   };
 
   const tee = makeWireTee();
-  const settings = { ...DEFAULT_GROK_SETTINGS, binaryPath: process.env.T3_GROK_BIN ?? "grok" };
+  const settings = { ...DEFAULT_GROK_SETTINGS, binaryPath: process.env.T4_GROK_BIN ?? "grok" };
   const layerRegistry = ProviderAdapterRegistry.layerFromAdaptersEffect(
     Effect.gen(function* () {
       const environment = yield* HostProcess.Environment;

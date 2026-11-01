@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import type { DesktopUpdateState } from "@t3tools/contracts";
+import type { DesktopUpdateState } from "@t4tools/contracts";
 
 import {
   canCheckForUpdate,
@@ -69,10 +69,10 @@ describe("desktop update UI helpers", () => {
     "falls back to upstream for an invalid configured repository: %s",
     (repository) => {
       expect(getDesktopUpdateReleaseHistoryUrl(repository)).toBe(
-        "https://github.com/pingdotgg/t3code/releases",
+        "https://github.com/omar9devx/t4code/releases",
       );
       expect(getDesktopUpdateReleaseUrl("1.2.3", repository)).toBe(
-        "https://github.com/pingdotgg/t3code/releases/tag/v1.2.3",
+        "https://github.com/omar9devx/t4code/releases/tag/v1.2.3",
       );
     },
   );

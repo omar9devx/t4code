@@ -1,4 +1,4 @@
-import { EnvironmentId, ThreadId } from "@t3tools/contracts";
+import { EnvironmentId, ThreadId } from "@t4tools/contracts";
 import { AsyncResult } from "effect/reactivity";
 import { type ReactElement } from "react";
 import { describe, expect, it, vi } from "vite-plus/test";
@@ -45,7 +45,7 @@ vi.mock(import("../state/server"), async (original) => {
   };
 });
 vi.mock(import("../state/session"), async (original) => {
-  const { AuthStandardClientScopes } = await import("@t3tools/contracts");
+  const { AuthStandardClientScopes } = await import("@t4tools/contracts");
   const granted = new Set<string>(AuthStandardClientScopes);
   const hasScope = (environmentId: unknown, scope: string) =>
     environmentId !== null && granted.has(scope);
@@ -195,7 +195,7 @@ describe("ChatMarkdown favicon privacy", () => {
     }
     await rerender(markdown("https://example.com"));
     expect(container.querySelectorAll("img")).toHaveLength(1);
-    await rerender(markdown("https://github.com/pingdotgg/t3code/pull/1"));
+    await rerender(markdown("https://github.com/omar9devx/t4code/pull/1"));
     expect(container.querySelectorAll("img")).toHaveLength(0);
     expect(container.querySelector("a svg")).not.toBeNull();
   });

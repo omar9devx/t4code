@@ -43,7 +43,7 @@ export class CursorSdkCatalog extends Context.Service<
       apiKey: string,
     ) => Effect.Effect<CursorSdkCatalogSnapshot, CursorSdkCatalogError>;
   }
->()("@t3tools/provider-cursor/server/CursorSdkCatalog") {}
+>()("@t4tools/provider-cursor/server/CursorSdkCatalog") {}
 
 function isAuthenticationFailure(cause: unknown): boolean {
   return (

@@ -1,9 +1,9 @@
 import * as NodeAssert from "node:assert/strict";
 
 import {
-  T3_CODE_COMPUTER_USE_TOOL_INSTRUCTIONS,
-  T3_CODE_DEVICE_TOOL_INSTRUCTIONS,
-} from "@t3tools/provider-core/server/orchestrationInstructions";
+  T4_CODE_COMPUTER_USE_TOOL_INSTRUCTIONS,
+  T4_CODE_DEVICE_TOOL_INSTRUCTIONS,
+} from "@t4tools/provider-core/server/orchestrationInstructions";
 import { describe, it } from "vite-plus/test";
 
 import {
@@ -62,7 +62,7 @@ describe("Codex runtime context", () => {
 describe("Codex orchestration context", () => {
   it("routes subagents native first, delegate_task for the rest", () => {
     const orchestration = Object.entries(buildCodexAdditionalContext({ model: "gpt-6.1-sol" }))
-      .filter(([key]) => key.startsWith("t3_code_orchestration_"))
+      .filter(([key]) => key.startsWith("t4_code_orchestration_"))
       .map(([, entry]) => entry.value)
       .join("\n");
 
@@ -72,7 +72,7 @@ describe("Codex orchestration context", () => {
     NodeAssert.ok(
       orchestration.includes("Every new delegate review or re-check is a new `delegate_task`"),
     );
-    NodeAssert.ok(orchestration.includes("never a `t3_thread_send`"));
+    NodeAssert.ok(orchestration.includes("never a `t4_thread_send`"));
     NodeAssert.ok(!orchestration.includes("inheritedOptions"));
     NodeAssert.ok(!orchestration.includes("Prefer native"));
     // The ACP terminal fallback is ACP-only; Codex agents never need it.
@@ -86,9 +86,9 @@ describe("Codex device context", () => {
       buildCodexAdditionalContext(
         { model: "gpt-6.1-sol" },
         { browser: true, device, computerUse: false },
-      ).t3_code_tools?.value ?? "";
+      ).t4_code_tools?.value ?? "";
 
-    NodeAssert.ok(tools(true).includes(T3_CODE_DEVICE_TOOL_INSTRUCTIONS));
+    NodeAssert.ok(tools(true).includes(T4_CODE_DEVICE_TOOL_INSTRUCTIONS));
     NodeAssert.ok(!tools(true).includes("ToolSearch"));
     NodeAssert.ok(!tools(false).includes("## T4 Code devices"));
   });
@@ -102,13 +102,13 @@ describe("Codex device context", () => {
           device: false,
           computerUse,
         },
-      ).t3_code_tools?.value ?? "";
+      ).t4_code_tools?.value ?? "";
 
-    NodeAssert.ok(tools(true).includes(T3_CODE_COMPUTER_USE_TOOL_INSTRUCTIONS));
+    NodeAssert.ok(tools(true).includes(T4_CODE_COMPUTER_USE_TOOL_INSTRUCTIONS));
     NodeAssert.ok(!tools(false).includes("## T4 Code Computer Use"));
   });
 });
 
 function runtimeInstructions(runtime: Parameters<typeof buildCodexAdditionalContext>[0]) {
-  return buildCodexAdditionalContext(runtime).t3_code_runtime!.value;
+  return buildCodexAdditionalContext(runtime).t4_code_runtime!.value;
 }

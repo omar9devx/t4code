@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["T4TerminalModule"],
+    "podspecPath": "T4TerminalNative.podspec"
+  },
+  "android": {
+    "modules": ["expo.modules.t4terminal.T4TerminalModule"]
+  }
+}

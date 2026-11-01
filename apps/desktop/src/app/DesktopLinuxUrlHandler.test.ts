@@ -1,6 +1,6 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, describe, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Cause from "effect/Cause";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -170,7 +170,7 @@ describe("DesktopLinuxUrlHandler", () => {
     const entry = DesktopLinuxUrlHandler.renderUrlHandlerDesktopEntry({
       displayName: "T4 Code (Nightly)",
       execTarget: '/home/al ice/Apps/T4 Code "100%" $HOME\\x.AppImage',
-      scheme: "t3code",
+      scheme: "T4CODE",
       iconPath: "/home/al ice/icons/T4 Code\\x.png",
     });
 
@@ -182,7 +182,7 @@ describe("DesktopLinuxUrlHandler", () => {
     );
     assert.include(entry, "NoDisplay=true");
     assert.notInclude(entry, "StartupWMClass=");
-    assert.include(entry, "MimeType=x-scheme-handler/t3code;");
+    assert.include(entry, "MimeType=x-scheme-handler/T4CODE;");
     assert.include(entry, "Icon=/home/al ice/icons/T4 Code\\\\x.png");
   });
 
@@ -204,7 +204,7 @@ describe("DesktopLinuxUrlHandler", () => {
           recorded.files[0]?.content,
           "Exec=/home/alice/Applications/T4 Code-Code.AppImage %U",
         );
-        assert.include(recorded.files[0]?.content, "MimeType=x-scheme-handler/t3code;");
+        assert.include(recorded.files[0]?.content, "MimeType=x-scheme-handler/T4CODE;");
         assert.deepEqual(recorded.commands, [
           {
             command: "update-desktop-database",
@@ -212,7 +212,7 @@ describe("DesktopLinuxUrlHandler", () => {
           },
           {
             command: "xdg-mime",
-            args: ["default", "com.vorynixal.T4Code.desktop", "x-scheme-handler/t3code"],
+            args: ["default", "com.vorynixal.T4Code.desktop", "x-scheme-handler/T4CODE"],
           },
         ]);
       });
@@ -230,7 +230,7 @@ describe("DesktopLinuxUrlHandler", () => {
         DesktopLinuxUrlHandler.renderUrlHandlerDesktopEntry({
           displayName: "T4 Code (Alpha)",
           execTarget: process.execPath,
-          scheme: "t3code",
+          scheme: "T4CODE",
           iconPath: "/home/alice/.local/share/icons/com.vorynixal.T4Code.desktop.png",
         }),
       );
@@ -242,10 +242,10 @@ describe("DesktopLinuxUrlHandler", () => {
 
     return Effect.gen(function* () {
       yield* runRegister(recorded, {
-        environment: { desktopLauncherPath: Option.some("/opt/T4 Code/t3code") },
+        environment: { desktopLauncherPath: Option.some("/opt/T4 Code/T4CODE") },
       });
 
-      assert.include(recorded.files[0]?.content, 'Exec="/opt/T4 Code/t3code" %U');
+      assert.include(recorded.files[0]?.content, 'Exec="/opt/T4 Code/T4CODE" %U');
     });
   });
 
@@ -257,7 +257,7 @@ describe("DesktopLinuxUrlHandler", () => {
         existingEntry: DesktopLinuxUrlHandler.renderUrlHandlerDesktopEntry({
           displayName: "T4 Code (Alpha)",
           execTarget: "/home/alice/Applications/T4 Code-Code.AppImage",
-          scheme: "t3code",
+          scheme: "T4CODE",
           iconPath: "/home/alice/.local/share/icons/com.vorynixal.T4Code.desktop.png",
         }),
       });
@@ -271,7 +271,7 @@ describe("DesktopLinuxUrlHandler", () => {
         },
         {
           command: "xdg-mime",
-          args: ["default", "com.vorynixal.T4Code.desktop", "x-scheme-handler/t3code"],
+          args: ["default", "com.vorynixal.T4Code.desktop", "x-scheme-handler/T4CODE"],
         },
       ]);
     });
@@ -286,7 +286,7 @@ describe("DesktopLinuxUrlHandler", () => {
         existingEntry: DesktopLinuxUrlHandler.renderUrlHandlerDesktopEntry({
           displayName: "T4 Code (Alpha)",
           execTarget: "/home/alice/Applications/T4 Code-Code.AppImage",
-          scheme: "t3code",
+          scheme: "T4CODE",
           iconPath,
         }),
       });
@@ -535,7 +535,7 @@ const themeIconFixture = (source: Uint8Array) =>
   Effect.gen(function* () {
     const fileSystem = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const root = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-theme-icons-" });
+    const root = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-theme-icons-" });
     yield* fileSystem.makeDirectory(path.join(root, "resources", "icons"), { recursive: true });
     yield* fileSystem.writeFile(path.join(root, "resources", "icons", "256x256.png"), source);
     const hicolorDir = path.join(root, "icons", "hicolor");
@@ -567,8 +567,8 @@ it.layer(NodeServices.layer)("DesktopLinuxUrlHandler theme icons", (it) => {
 
       yield* registerWithRealFileSystem(run);
       assert.deepEqual([...(yield* fileSystem.readDirectory(fixture.appsDir))].sort(), [
-        "com.t3tools.T3Code.png",
-        "com.t3tools.t3code.png",
+        "com.t4tools.T4CODE.png",
+        "com.t4tools.T4CODE.png",
       ]);
       for (const name of ["com.vorynixal.t4code", "com.vorynixal.T4Code"]) {
         const target = path.join(fixture.appsDir, `${name}.png`);

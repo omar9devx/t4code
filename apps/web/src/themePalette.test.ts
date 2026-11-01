@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 import { converter } from "culori/fn";
-import { BUILT_IN_THEMES } from "@t3tools/shared/themePalettes";
+import { BUILT_IN_THEMES } from "@t4tools/shared/themePalettes";
 
 import { CONTEXT_CHIP_ACCENTS, contextChipColorVariable } from "./lib/contextChipAccents";
 
@@ -20,7 +20,7 @@ import {
   resolveDesktopTheme,
   resolveThemeAppearance,
   serializeThemeFile,
-  T3_CHAT_THEME,
+  T4_CHAT_THEME,
   GROVE_THEME,
   updateCustomTheme,
   updateThemeColorFamily,
@@ -278,11 +278,11 @@ describe("theme files", () => {
       canvas: canonical("#101827"),
       text: canonical("#eef5ff"),
     });
-    expect(getThemeModes(T3_CHAT_THEME)).toEqual(["light", "dark"]);
-    expect(resolveThemeAppearance(T3_CHAT_THEME.id, true, true)).toBe("dark");
-    expect(resolveDesktopTheme(T3_CHAT_THEME.id, true)).toBe("system");
-    expect(resolveThemeAppearance(T3_CHAT_THEME.id, false, false, "dark")).toBe("dark");
-    expect(resolveDesktopTheme(T3_CHAT_THEME.id, false, "dark")).toBe("dark");
+    expect(getThemeModes(T4_CHAT_THEME)).toEqual(["light", "dark"]);
+    expect(resolveThemeAppearance(T4_CHAT_THEME.id, true, true)).toBe("dark");
+    expect(resolveDesktopTheme(T4_CHAT_THEME.id, true)).toBe("system");
+    expect(resolveThemeAppearance(T4_CHAT_THEME.id, false, false, "dark")).toBe("dark");
+    expect(resolveDesktopTheme(T4_CHAT_THEME.id, false, "dark")).toBe("dark");
     expect(JSON.parse(serializeThemeFile(theme)).variants.dark).toMatchObject({
       canvas: canonical("#101827"),
       text: canonical("#eef5ff"),

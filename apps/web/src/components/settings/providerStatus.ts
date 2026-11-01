@@ -2,7 +2,7 @@ import type {
   ServerProvider,
   ServerProviderVersionAdvisory,
   ServerProviderCompatibilityAdvisory,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 
 export const PROVIDER_STATUS_STYLES = {
   disabled: {

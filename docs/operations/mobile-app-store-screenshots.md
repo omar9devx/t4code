@@ -10,7 +10,7 @@ opens the production Home, Thread, ThreadTerminal, ThreadReview, and SettingsEnv
 
 No screenshot-specific screen recreates application UI. `EXPO_PUBLIC_SHOWCASE=1` only enables the
 non-rendering pairing/readiness coordinator, disables terminal autofocus so captures do not contain
-the software keyboard, and supplies deterministic T3 Connect discovery rows to the real
+the software keyboard, and supplies deterministic T4 Connect discovery rows to the real
 Environments screen. The local environment cards always come from real paired servers.
 
 ## Capture the default matrix
@@ -51,12 +51,12 @@ shared across every checkout. The readiness check only verifies that the port is
 verify process ownership. Concurrent screenshot harnesses in different worktrees can therefore
 collide or attach to the wrong Metro process.
 
-Every configured device defaults to dark appearance and the `t3-code` palette, so plain
+Every configured device defaults to dark appearance and the `t4-code` palette, so plain
 `pnpm screenshots:mobile` produces 45 dark PNGs. Pass `--appearance light`, `--appearance dark`, or
 `--appearance both` to override the configured appearance; `both` produces 90 PNGs.
 
-Pass `--theme <id>` (repeatable) or `--theme all` to capture the app's other palettes: `t3-code`,
-`t3-chat`, `grove`, `ocean`, `ember`, and `iris`. The runner hands the palette to the app as a launch
+Pass `--theme <id>` (repeatable) or `--theme all` to capture the app's other palettes: `t4-code`,
+`t4-chat`, `grove`, `ocean`, `ember`, and `iris`. The runner hands the palette to the app as a launch
 argument, the app applies it to both color schemes, and a scene only reports itself ready once the
 requested palette is active — so a capture can never show the previous theme. `--theme all`
 multiplies the run by six; only the native build is shared.
@@ -65,14 +65,14 @@ The default matrix is:
 
 | Output folder                           | Capture target                 | Upload dimensions | Store slot                                |
 | --------------------------------------- | ------------------------------ | ----------------- | ----------------------------------------- |
-| `apple/iphone-6.9/dark/t3-code/`        | disposable iPhone 17 Pro Max   | 1320×2868         | App Store Connect iPhone 6.9-inch         |
-| `apple/iphone-6.5/dark/t3-code/`        | disposable iPhone 14 Plus      | 1284×2778         | App Store Connect iPhone 6.5-inch         |
-| `apple/iphone-duo-closed/dark/t3-code/` | iPhone Duo, folded portrait    | 1398×2034         | App Store Connect iPhone Duo              |
-| `apple/iphone-duo-open/dark/t3-code/`   | iPhone Duo, unfolded landscape | 2853×2007         | App Store Connect iPhone Duo              |
-| `apple/ipad-13/dark/t3-code/`           | iPad Pro 13-inch (M5)          | 2752×2064         | App Store Connect iPad 13-inch, landscape |
-| `google-play/phone/dark/t3-code/`       | Pixel AVD at 420 dpi           | 1080×1920         | Google Play phone, portrait 9:16          |
-| `google-play/tablet-7/dark/t3-code/`    | Pixel AVD at 600dp width       | 1080×1920         | Google Play 7-inch tablet, portrait 9:16  |
-| `google-play/tablet-10/dark/t3-code/`   | Pixel AVD at 800dp width       | 1440×2560         | Google Play 10-inch tablet, portrait 9:16 |
+| `apple/iphone-6.9/dark/t4-code/`        | disposable iPhone 17 Pro Max   | 1320×2868         | App Store Connect iPhone 6.9-inch         |
+| `apple/iphone-6.5/dark/t4-code/`        | disposable iPhone 14 Plus      | 1284×2778         | App Store Connect iPhone 6.5-inch         |
+| `apple/iphone-duo-closed/dark/t4-code/` | iPhone Duo, folded portrait    | 1398×2034         | App Store Connect iPhone Duo              |
+| `apple/iphone-duo-open/dark/t4-code/`   | iPhone Duo, unfolded landscape | 2853×2007         | App Store Connect iPhone Duo              |
+| `apple/ipad-13/dark/t4-code/`           | iPad Pro 13-inch (M5)          | 2752×2064         | App Store Connect iPad 13-inch, landscape |
+| `google-play/phone/dark/t4-code/`       | Pixel AVD at 420 dpi           | 1080×1920         | Google Play phone, portrait 9:16          |
+| `google-play/tablet-7/dark/t4-code/`    | Pixel AVD at 600dp width       | 1080×1920         | Google Play 7-inch tablet, portrait 9:16  |
+| `google-play/tablet-10/dark/t4-code/`   | Pixel AVD at 800dp width       | 1440×2560         | Google Play 10-inch tablet, portrait 9:16 |
 
 Each target captures thread, terminal, review, thread list, and environments, and every target except
 the iPad and Duo also captures agent activity. Each palette folder's five or six screenshots satisfy the configured Apple limit of 1–10, Google
@@ -99,18 +99,18 @@ The generated tree is deliberately aligned with the store upload fields:
 
     artifacts/app-store/screenshots/
     ├── apple/
-    │   ├── iphone-6.9/dark/t3-code/{thread,terminal,review,threads,environments,agent-activity}.png
-    │   ├── iphone-6.5/dark/t3-code/{thread,terminal,review,threads,environments,agent-activity}.png
-    │   ├── iphone-duo-closed/dark/t3-code/{thread,terminal,review,threads,environments}.png
-    │   ├── iphone-duo-open/dark/t3-code/{thread,terminal,review,threads,environments}.png
-    │   └── ipad-13/dark/t3-code/{thread,terminal,review,threads,environments}.png
+    │   ├── iphone-6.9/dark/t4-code/{thread,terminal,review,threads,environments,agent-activity}.png
+    │   ├── iphone-6.5/dark/t4-code/{thread,terminal,review,threads,environments,agent-activity}.png
+    │   ├── iphone-duo-closed/dark/t4-code/{thread,terminal,review,threads,environments}.png
+    │   ├── iphone-duo-open/dark/t4-code/{thread,terminal,review,threads,environments}.png
+    │   └── ipad-13/dark/t4-code/{thread,terminal,review,threads,environments}.png
     └── google-play/
-        ├── phone/dark/t3-code/{thread,terminal,review,threads,environments,agent-activity}.png
-        ├── tablet-7/dark/t3-code/{thread,terminal,review,threads,environments,agent-activity}.png
-        └── tablet-10/dark/t3-code/{thread,terminal,review,threads,environments,agent-activity}.png
+        ├── phone/dark/t4-code/{thread,terminal,review,threads,environments,agent-activity}.png
+        ├── tablet-7/dark/t4-code/{thread,terminal,review,threads,environments,agent-activity}.png
+        └── tablet-10/dark/t4-code/{thread,terminal,review,threads,environments,agent-activity}.png
 
 A light-only run writes the same tree under `light/`; `--appearance both` writes both appearance
-folders, and each requested theme adds a sibling folder next to `t3-code/`.
+folders, and each requested theme adds a sibling folder next to `t4-code/`.
 
 Edit [mobile-showcase.config.ts](../../scripts/mobile-showcase.config.ts) to change simulator or AVD
 names, light/dark appearance, default palette, iOS orientation, scenes, output directory, capture
@@ -122,7 +122,7 @@ appearance settings can never drift apart.
 
 Run the `Mobile Showcase Screenshots` workflow from GitHub's Actions tab, choose `all`, `ios`, or
 `android`, select `light`, `dark`, or `both`, and pick a palette (or `all`, which raises each job's
-timeout from 60 to 300 minutes). The default dispatch captures both appearances of the `t3-code`
+timeout from 60 to 300 minutes). The default dispatch captures both appearances of the `t4-code`
 palette and runs iOS and Android concurrently: iPhone and iPad capture on a
 12-vCPU Blacksmith macOS runner, while Android phone, 7-inch tablet, and 10-inch tablet capture on a
 16-vCPU Blacksmith Linux runner with a KVM-accelerated x86_64 emulator.
@@ -134,7 +134,7 @@ Download `app-store-connect-screenshots` and `google-play-screenshots` from the 
 Artifacts section. Artifacts are retained for 14 days.
 
 The workflow uses the same checked-in device and scene matrix as local capture. Android remains
-ARM64 by default for local Apple Silicon development; CI sets `T3_SHOWCASE_ANDROID_ABI=x86_64` so the
+ARM64 by default for local Apple Silicon development; CI sets `T4_SHOWCASE_ANDROID_ABI=x86_64` so the
 debug APK matches its accelerated emulator.
 
 ## Fast iteration
@@ -171,7 +171,7 @@ Then run the capture from the repository root:
 
     pnpm screenshots:mobile --skip-build --skip-metro --device iphone-6.9
 
-`pnpm --filter @t3tools/mobile showcase` starts Expo on its normal port, so it is not compatible with
+`pnpm --filter @t4tools/mobile showcase` starts Expo on its normal port, so it is not compatible with
 the harness's `--skip-metro` mode.
 
 List the matrix and flags:

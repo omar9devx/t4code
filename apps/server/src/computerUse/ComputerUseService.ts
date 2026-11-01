@@ -2,8 +2,8 @@
 import * as NodeChildProcess from "node:child_process";
 import * as NodeReadline from "node:readline";
 import * as NodeURL from "node:url";
-import { ComputerUseError, type ServerSettings as ServerSettingsValue } from "@t3tools/contracts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { ComputerUseError, type ServerSettings as ServerSettingsValue } from "@t4tools/contracts";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -89,7 +89,7 @@ export class ComputerUseService extends Context.Service<
     }) => Effect.Effect<void, ComputerUseError>;
     readonly close: Effect.Effect<void, ComputerUseError>;
   }
->()("t3/computerUse/ComputerUseService") {}
+>()("t4/computerUse/ComputerUseService") {}
 
 const error = (operation: ComputerUseError["operation"], reason: string, cause?: unknown) =>
   new ComputerUseError({ operation, reason, ...(cause === undefined ? {} : { cause }) });

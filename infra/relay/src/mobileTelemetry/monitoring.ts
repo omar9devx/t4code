@@ -9,7 +9,7 @@ import { notifierConfig } from "../monitoring.ts";
 import { isPreviewStage } from "../previewStages.ts";
 
 const RUNBOOK_URL =
-  "https://github.com/pingdotgg/t3code/blob/main/docs/operations/relay-observability.md#mobile-crashes-and-errors";
+  "https://github.com/omar9devx/t4code/blob/main/docs/operations/relay-observability.md#mobile-crashes-and-errors";
 
 // A new dataset has none of these fields until a report carries them, and an
 // unknown field fails the whole query, so every one has a default.
@@ -282,7 +282,7 @@ export const MobileMonitoring = Effect.fn("MobileMonitoring")(function* (
     dashboard: Output.map(datasets, (names) => {
       const charts = mobileDashboardCharts(names);
       return {
-        name: relayResourceNameForStage("t3-code-mobile-health", stage),
+        name: relayResourceNameForStage("t4-code-mobile-health", stage),
         owner: "X-AXIOM-EVERYONE",
         description: `T4 Code mobile app crashes and errors. Crashes count JS and native once each. Runbook: ${RUNBOOK_URL}`,
         refreshTime: 300,

@@ -3,8 +3,8 @@ import {
   EnvironmentId,
   makeProviderSettingsSchema,
   SourceControlProviderKind,
-} from "@t3tools/contracts";
-import { UNKNOWN_SOURCE_CONTROL_CLIENT } from "@t3tools/client-runtime/source-control-clients";
+} from "@t4tools/contracts";
+import { UNKNOWN_SOURCE_CONTROL_CLIENT } from "@t4tools/client-runtime/source-control-clients";
 import * as Schema from "effect/Schema";
 
 import {
@@ -133,7 +133,7 @@ describe("searchSettings", () => {
       "review-guide-model",
       "review-guide-instructions",
       "source-control-writing-style",
-      "t3-connect",
+      "t4-connect",
       "hold-webhooks-while-offline",
       "tailscale-https",
       "wsl-backend",

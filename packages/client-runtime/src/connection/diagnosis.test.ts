@@ -1,7 +1,7 @@
 import {
   RelayEnvironmentEndpointUnavailableError,
   type RelayProtectedError,
-} from "@t3tools/contracts/relay";
+} from "@t4tools/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 
 import { presentConnectionDiagnosis } from "./diagnosis.ts";
@@ -75,7 +75,7 @@ describe("presentConnectionDiagnosis", () => {
     expect(diagnosis?.steps.join(" ")).not.toContain("On Mac mini");
   });
 
-  it("stops at T3 Connect when this device cannot reach the relay", () => {
+  it("stops at T4 Connect when this device cannot reach the relay", () => {
     const failure = mapManagedRelayError(
       new ManagedRelayRequestFailedError({
         action: "connect relay environment",
@@ -83,7 +83,7 @@ describe("presentConnectionDiagnosis", () => {
         cause: new TypeError("Failed to fetch"),
       }),
     );
-    expect(diagnose(backoff(failure))?.headline).toBe("This device can't reach T3 Connect");
+    expect(diagnose(backoff(failure))?.headline).toBe("This device can't reach T4 Connect");
     expect(results(backoff(failure))).toEqual([
       "device:ok",
       "relay:failed",
@@ -92,7 +92,7 @@ describe("presentConnectionDiagnosis", () => {
     ]);
   });
 
-  it("does not blame this device's network when T3 Connect answered with an error", () => {
+  it("does not blame this device's network when T4 Connect answered with an error", () => {
     const failure = mapManagedRelayError(
       new ManagedRelayRequestFailedError({
         action: "connect relay environment",
@@ -101,7 +101,7 @@ describe("presentConnectionDiagnosis", () => {
       }),
     );
     const diagnosis = diagnose(backoff(failure));
-    expect(diagnosis?.headline).toBe("T3 Connect returned an error");
+    expect(diagnosis?.headline).toBe("T4 Connect returned an error");
     expect(diagnosis?.steps.join(" ")).not.toContain("this device");
   });
 

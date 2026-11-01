@@ -1,4 +1,4 @@
-import { scopeProjectRef } from "@t3tools/client-runtime/environment";
+import { scopeProjectRef } from "@t4tools/client-runtime/environment";
 import { requestCustomSnooze } from "../components/CustomSnoozeDialog";
 import { openGuestShareDialog } from "../components/chat/guestShareDialogState";
 import {
@@ -6,13 +6,13 @@ import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import { canSnooze, effectiveSnoozed } from "@t3tools/client-runtime/state/thread-settled";
+} from "@t4tools/client-runtime/state/runtime";
+import { canSnooze, effectiveSnoozed } from "@t4tools/client-runtime/state/thread-settled";
 import {
   AuthOrchestrationOperateScope,
   type ScopedThreadRef,
   type ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { useRouter } from "@tanstack/react-router";
 
 import { pickSnoozePreset, resolveSnoozePresets } from "../components/Sidebar.snooze";
@@ -23,8 +23,8 @@ import {
 } from "../components/threadActionMenu.logic";
 import { stackedThreadToast, toastManager } from "../components/ui/toast";
 import { copyThreadReference } from "../lib/copyThreadReference";
-import { threadChipCopyTarget } from "@t3tools/client-runtime/thread-reference";
-import { threadTranscriptMarkdown } from "@t3tools/shared/threadTranscriptMarkdown";
+import { threadChipCopyTarget } from "@t4tools/client-runtime/thread-reference";
+import { threadTranscriptMarkdown } from "@t4tools/shared/threadTranscriptMarkdown";
 import { threadEnvironment } from "../state/threads";
 import { orchestrationEnvironment } from "../state/orchestration";
 import { useAtomCommand } from "../state/use-atom-command";
@@ -42,9 +42,9 @@ import {
   deriveLogicalProjectKeyFromSettings,
   derivePhysicalProjectKey,
   selectProjectGroupingSettings,
-} from "@t3tools/client-runtime/state/project-grouping";
+} from "@t4tools/client-runtime/state/project-grouping";
 import { buildPhysicalToLogicalProjectKeyMap } from "../sidebarProjectGrouping";
-import { threadRuntimeCanArchive } from "@t3tools/client-runtime/state/models";
+import { threadRuntimeCanArchive } from "@t4tools/client-runtime/state/models";
 import { useCopyToClipboard } from "./useCopyToClipboard";
 import { useNewThreadHandler } from "./useHandleNewThread";
 import { useClientSettings } from "./useSettings";

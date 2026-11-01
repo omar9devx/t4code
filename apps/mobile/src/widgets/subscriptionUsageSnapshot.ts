@@ -3,7 +3,7 @@ import {
   collectLimitPools,
   type LimitAccount,
   type LimitPresentations,
-} from "@t3tools/shared/usageLimits";
+} from "@t4tools/shared/usageLimits";
 
 import type { WidgetTheme } from "./widgetTheme";
 

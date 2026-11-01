@@ -1,4 +1,4 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Config from "effect/Config";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Console from "effect/Console";
@@ -34,18 +34,18 @@ type Routes = Readonly<Record<Route, boolean>>;
 /** How other devices reach this machine now. */
 interface Setup {
   readonly service: BootService.BootServiceStatus;
-  /** Null in builds without T3 Connect. Off when T3 Connect revoked the link. */
+  /** Null in builds without T4 Connect. Off when T4 Connect revoked the link. */
   readonly connect: boolean | null;
-  /** T3 Connect revoked the link; `t3 connect` links again. */
+  /** T4 Connect revoked the link; `t4 connect` links again. */
   readonly connectRevoked: boolean;
   readonly lan: boolean;
-  /** An installed service with no T3CODE_LAN keeps the old default: on. */
+  /** An installed service with no T4CODE_LAN keeps the old default: on. */
   readonly lanFromOldDefault: boolean;
   readonly host: string | undefined;
 }
 
 /**
- * T3 Connect is on when this CLI asked for a managed link, or when the desktop or
+ * T4 Connect is on when this CLI asked for a managed link, or when the desktop or
  * web app made one: that saves the tunnel config but no CLI marker. Revoked is off.
  */
 export const connectEnabled = (link: {
@@ -62,7 +62,7 @@ const readSetup = Effect.fn("cli.up.read_setup")(function* () {
   const service = yield* (yield* BootService.BootService).status;
   const { entries } = yield* CliService.readServiceEnv(baseDir);
   // Parsed as the server parses it.
-  const lan = yield* Config.Boolean("T3CODE_LAN")
+  const lan = yield* Config.Boolean("T4CODE_LAN")
     .pipe(Config.option)
     .parse(ConfigProvider.fromEnv({ env: entries }));
   const secrets = yield* ServerSecretStore.ServerSecretStore;
@@ -82,13 +82,13 @@ const readSetup = Effect.fn("cli.up.read_setup")(function* () {
     connectRevoked,
     lan: Option.getOrElse(lan, () => service.installed),
     lanFromOldDefault: Option.isNone(lan) && service.installed,
-    host: entries.T3CODE_HOST,
+    host: entries.T4CODE_HOST,
   } satisfies Setup;
 });
 
 /**
- * The routes `t3 up` starts from. With no route flag it asks about every
- * route, starting a machine with no service from T3 Connect. Any route flag
+ * The routes `t4 up` starts from. With no route flag it asks about every
+ * route, starting a machine with no service from T4 Connect. Any route flag
  * means it asks nothing and keeps the routes not named as they are.
  */
 export const planRoutes = (
@@ -111,12 +111,12 @@ export const planRoutes = (
   };
 };
 
-/** A running service reads T3CODE_LAN and its T3 Connect link only when it starts. */
+/** A running service reads T4CODE_LAN and its T4 Connect link only when it starts. */
 const needsRestart = (before: Routes, after: Routes) =>
   after.lan !== before.lan || (after.connect && !before.connect);
 
 const CHOICES = {
-  connect: { title: "T3 Connect", description: "Creates a tunnel to control your PC." },
+  connect: { title: "T4 Connect", description: "Creates a tunnel to control your PC." },
   lan: { title: "Local network", description: "LAN and tailnet. Pairing code required." },
 } satisfies Record<Route, { readonly title: string; readonly description: string }>;
 
@@ -128,25 +128,25 @@ const formatSetup = (setup: Setup) => {
       !service.supported
         ? "unavailable"
         : service.installed
-          ? `installed · t3@${service.installedVersion ?? packageJson.version}`
+          ? `installed · t4@${service.installedVersion ?? packageJson.version}`
           : "not installed",
     ],
     ...(setup.connect === null
       ? []
       : [
           [
-            "T3 Connect",
+            "T4 Connect",
             setup.connect
               ? "on · your T4 Code account"
               : setup.connectRevoked
-                ? "off · link revoked. Run `t3 connect`."
+                ? "off · link revoked. Run `t4 connect`."
                 : "off",
           ] as const,
         ]),
     [
       "Local network",
       setup.host !== undefined
-        ? `overridden · T3CODE_HOST=${setup.host}`
+        ? `overridden · T4CODE_HOST=${setup.host}`
         : setup.lanFromOldDefault
           ? "on · kept from an older install"
           : setup.lan
@@ -159,7 +159,7 @@ const formatSetup = (setup: Setup) => {
       ? ["Anyone on your LAN or tailnet can reach the port. A pairing code is the only lock."]
       : []),
     ...(setup.lanFromOldDefault
-      ? ["Older installs keep LAN access on. Turn it off: `t3 up --no-lan`."]
+      ? ["Older installs keep LAN access on. Turn it off: `t4 up --no-lan`."]
       : []),
   ];
   return [
@@ -171,15 +171,15 @@ const formatSetup = (setup: Setup) => {
 const formatNextSteps = (routes: Routes, serviceInstalled: boolean) =>
   [
     ...(routes.connect
-      ? ["On your other device, sign in to T3 Connect with the same account."]
+      ? ["On your other device, sign in to T4 Connect with the same account."]
       : []),
-    ...(routes.lan ? ["Run `t3 pair`. Use the code on your other device."] : []),
+    ...(routes.lan ? ["Run `t4 pair`. Use the code on your other device."] : []),
     ...(routes.connect || routes.lan
       ? []
       : [
           serviceInstalled
             ? "Remote access is off. T4 Code still runs here in the background."
-            : "Remote access is off. Run `t3` to use T4 Code here.",
+            : "Remote access is off. Run `t4` to use T4 Code here.",
         ]),
   ].join("\n");
 
@@ -198,7 +198,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
   if (before.connect === null && Option.getOrElse(flags.connect, () => false)) {
     return yield* new CliError.UserError({
       cause: "connect",
-      userMessage: "T3 Connect is unavailable in this build.",
+      userMessage: "T4 Connect is unavailable in this build.",
     });
   }
 
@@ -233,7 +233,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
       cause: "routes",
       userMessage: `No terminal. Choose access with ${
         before.connect === null ? "--lan" : "--connect or --lan"
-      }, or use --yes for the default. See \`t3 up --help\`.`,
+      }, or use --yes for the default. See \`t4 up --help\`.`,
     });
   }
   // Nothing to run in the background, but a route left on still gets turned off.
@@ -241,7 +241,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
     if (current.connect || before.connectRevoked) {
       yield* disconnectCloud({ clearAuthorization: false });
     }
-    if (current.lan) yield* CliService.writeServiceEnv(baseDir, { T3CODE_LAN: "false" });
+    if (current.lan) yield* CliService.writeServiceEnv(baseDir, { T4CODE_LAN: "false" });
     return yield* Console.log(formatNextSteps(routes, false));
   }
   const { installedVersion } = before.service;
@@ -278,7 +278,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
     });
     if (linked === null) return;
     yield* Console.log(
-      `✓ Signed in to T3 Connect${linked.identity ? ` as ${linked.identity}` : ""}`,
+      `✓ Signed in to T4 Connect${linked.identity ? ` as ${linked.identity}` : ""}`,
     );
   }
   // A running server unlinks live; when that fails, only a restart stops its tunnel.
@@ -286,15 +286,15 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
     !routes.connect && (current.connect || before.connectRevoked)
       ? (yield* disconnectCloud({ clearAuthorization: false })).status === "failed"
       : false;
-  const previousLan = (yield* CliService.readServiceEnv(baseDir)).entries.T3CODE_LAN;
-  // Also with no service manager: the file records the choice that `t3 status` shows.
-  yield* CliService.writeServiceEnv(baseDir, { T3CODE_LAN: String(routes.lan) });
+  const previousLan = (yield* CliService.readServiceEnv(baseDir)).entries.T4CODE_LAN;
+  // Also with no service manager: the file records the choice that `t4 status` shows.
+  yield* CliService.writeServiceEnv(baseDir, { T4CODE_LAN: String(routes.lan) });
   // When the service step fails, an installed service still runs with the old
   // value, so the file goes back to match it.
-  // A new T3 Connect link is undone too, with any tunnel the failed start saved, so a
+  // A new T4 Connect link is undone too, with any tunnel the failed start saved, so a
   // rerun sees it as a change and restarts. The sign-in stays.
   const restoreServiceEnv = before.service.installed
-    ? CliService.writeServiceEnv(baseDir, { T3CODE_LAN: previousLan }).pipe(
+    ? CliService.writeServiceEnv(baseDir, { T4CODE_LAN: previousLan }).pipe(
         Effect.andThen(
           !routes.connect || current.connect
             ? Effect.void
@@ -311,22 +311,22 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
     : Effect.void;
   if (before.host !== undefined) {
     yield* Console.warn(
-      `T3CODE_HOST=${before.host} in service.env overrides the network choice. Remove it to apply it.`,
+      `T4CODE_HOST=${before.host} in service.env overrides the network choice. Remove it to apply it.`,
     );
   }
 
   const printServeCommand = Effect.fn(function* (reason: string) {
     const { command } = yield* resolveHostCliCommand("serve", [
       ...Option.match(flags.baseDir, { onNone: () => [], onSome: (dir) => ["--base-dir", dir] }),
-      // Explicit either way, so a T3CODE_LAN in the shell cannot override the choice.
+      // Explicit either way, so a T4CODE_LAN in the shell cannot override the choice.
       routes.lan ? "--lan" : "--no-lan",
     ]);
     yield* Console.log(`${reason} Keep this command running:\n  ${command}`);
     // A host wins over --lan and --no-lan, as it does in service.env.
-    const shellHost = (yield* HostProcess.Environment).T3CODE_HOST;
+    const shellHost = (yield* HostProcess.Environment).T4CODE_HOST;
     if (shellHost !== undefined) {
       yield* Console.warn(
-        `T3CODE_HOST=${shellHost} in this shell overrides that choice. Unset it before you run the command.`,
+        `T4CODE_HOST=${shellHost} in this shell overrides that choice. Unset it before you run the command.`,
       );
     }
   });
@@ -335,7 +335,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
     yield* printServeCommand("Background service unavailable.");
   } else {
     if (newer) {
-      yield* Console.log(`Keeping installed service version t3@${installedVersion}.`);
+      yield* Console.log(`Keeping installed service version t4@${installedVersion}.`);
     }
     if (update && !interactive) {
       yield* Console.log("Updating T4 Code. Running agent turns will stop.");
@@ -353,7 +353,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
       // The old service still runs, so a foreground server would clash with it.
       yield* restoreServiceEnv;
       yield* Console.log(
-        `Service setup failed: ${result.failed} Fix that, then run \`t3 up\` again.`,
+        `Service setup failed: ${result.failed} Fix that, then run \`t4 up\` again.`,
       );
     } else if ("failed" in result) {
       yield* printServeCommand(`Service setup failed: ${result.failed}`);
@@ -367,12 +367,12 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
         (yield* Prompt.run(
           Prompt.Confirm({
             message:
-              "The running service still has T3 Connect on. Restart it? Running agent turns will stop.",
+              "The running service still has T4 Connect on. Restart it? Running agent turns will stop.",
             initial: true,
           }),
         ).pipe(Effect.catchTags({ QuitError: () => Effect.succeed(false) })));
       if (!confirmed) {
-        yield* Console.log("Run `t3 service restart` to turn T3 Connect off.");
+        yield* Console.log("Run `t4 service restart` to turn T4 Connect off.");
       } else {
         if (!interactive && !stopped) {
           yield* Console.log("Restarting T4 Code. Running agent turns will stop.");
@@ -383,7 +383,7 @@ const setUp = Effect.fn("cli.up")(function* (flags: {
         }
         if (outcome === "skipped") {
           yield* Console.log(
-            "The installed service runs another T3 home, so it was not restarted. Pass its --base-dir.",
+            "The installed service runs another T4 home, so it was not restarted. Pass its --base-dir.",
           );
         }
         started = outcome === "restarted";
@@ -406,7 +406,7 @@ export const upCommand = Command.make("up", {
   ...projectLocationFlags,
   connect: Flag.Boolean("connect").pipe(
     Flag.withDescription(
-      "Allow access through T3 Connect with your T4 Code account. Turn off with --no-connect.",
+      "Allow access through T4 Connect with your T4 Code account. Turn off with --no-connect.",
     ),
     Flag.optional,
   ),
@@ -418,7 +418,7 @@ export const upCommand = Command.make("up", {
   ),
   yes: Flag.Boolean("yes").pipe(
     Flag.withDescription(
-      "Ask nothing. Keep the access settings; a new machine gets T3 Connect. A restart stops running agent turns.",
+      "Ask nothing. Keep the access settings; a new machine gets T4 Connect. A restart stops running agent turns.",
     ),
     Flag.withDefault(false),
   ),
@@ -429,12 +429,12 @@ export const upCommand = Command.make("up", {
     "Set up remote access and the T4 Code background service. Access flags skip the question, and routes not named keep their settings. Without a terminal, a needed restart runs without asking and stops running agent turns.",
   ),
   Command.withExamples([
-    { command: "t3 up", description: "Choose remote access." },
-    { command: "t3 up --connect", description: "Turn on T3 Connect. Keep other settings." },
-    { command: "t3 up --lan", description: "Allow LAN access with pairing codes." },
-    { command: "t3 up --no-lan", description: "Stop LAN access." },
-    { command: "t3 up --yes", description: "Take the defaults with no questions." },
-    { command: "t3 status --json", description: "Read the settings from a script." },
+    { command: "t4 up", description: "Choose remote access." },
+    { command: "t4 up --connect", description: "Turn on T4 Connect. Keep other settings." },
+    { command: "t4 up --lan", description: "Allow LAN access with pairing codes." },
+    { command: "t4 up --no-lan", description: "Stop LAN access." },
+    { command: "t4 up --yes", description: "Take the defaults with no questions." },
+    { command: "t4 status --json", description: "Read the settings from a script." },
   ]),
   Command.withHandler((flags) => runCloudCommand(flags, setUp(flags), { quietLogs: true })),
 );
@@ -443,7 +443,7 @@ export const connectCommand = Command.make("connect", {
   ...projectLocationFlags,
   headless: headlessFlag,
 }).pipe(
-  Command.withDescription("Set up T3 Connect for this machine. Same as `t3 up --connect`."),
+  Command.withDescription("Set up T4 Connect for this machine. Same as `t4 up --connect`."),
   Command.withHandler((flags) =>
     runCloudCommand(
       flags,
@@ -454,7 +454,7 @@ export const connectCommand = Command.make("connect", {
   Command.withSubcommands(connectSubcommands),
 );
 
-/** `t3 status --json`, for scripts and agents. */
+/** `t4 status --json`, for scripts and agents. */
 const setupJson = (setup: Setup) =>
   JSON.stringify(
     {
@@ -484,15 +484,15 @@ export const statusCommand = Command.make("status", {
 }).pipe(
   Command.withDescription("Show service setup and remote access settings."),
   Command.withExamples([
-    { command: "t3 status", description: "Show the settings." },
-    { command: "t3 status --json", description: "Print them for scripts and agents." },
+    { command: "t4 status", description: "Show the settings." },
+    { command: "t4 status --json", description: "Print them for scripts and agents." },
   ]),
   Command.withHandler(
     Effect.fn("cli.status")(function* (flags) {
       const config = yield* resolveCliAuthConfig(flags, yield* GlobalFlag.LogLevel, {
         quietLogs: flags.json,
       });
-      // Only what readSetup reads: no database, unlike the T3 Connect commands.
+      // Only what readSetup reads: no database, unlike the T4 Connect commands.
       const setup = yield* readSetup().pipe(
         Effect.provide(
           Layer.merge(CliService.layer(config), ServerSecretStore.layer).pipe(
@@ -503,7 +503,7 @@ export const statusCommand = Command.make("status", {
       yield* Console.log(
         flags.json
           ? setupJson(setup)
-          : `This machine\n${formatSetup(setup)}\n\nChange access: \`t3 up\`.`,
+          : `This machine\n${formatSetup(setup)}\n\nChange access: \`t4 up\`.`,
       );
     }),
   ),

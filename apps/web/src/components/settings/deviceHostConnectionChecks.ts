@@ -3,7 +3,7 @@ import {
   type DevicePlatformAvailability,
   type EnvironmentId,
   SshDeviceHostConfig,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Schema from "effect/Schema";
 
 export interface DeviceHostCheckTarget {

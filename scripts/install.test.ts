@@ -1,5 +1,5 @@
 // @effect-diagnostics nodeBuiltinImport:off - Drives the real shell installer against a local GitHub fixture.
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as NodeChildProcess from "node:child_process";
 import * as NodeCrypto from "node:crypto";
 import * as NodeFSP from "node:fs/promises";
@@ -18,15 +18,15 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chan
     ["stable", "1.2.3"],
     ["preview", "1.2.4-preview.20261019.50"],
   ])("finds the newest %s release behind a full page of nightlies", async (channel, version) => {
-    const root = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-install-index-"));
+    const root = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-install-index-"));
     const target = NodePath.join(root, "home/runtime/versions", version);
     const server = NodeHttp.createServer((request, response) => {
       const url = new URL(request.url ?? "/", "http://fixture");
       const body =
-        url.pathname === "/pingdotgg/t3code/releases/latest" &&
+        url.pathname === "/omar9devx/t4code/releases/latest" &&
         request.headers.accept === "application/json"
           ? { tag_name: "v1.2.3" }
-          : url.pathname === "/repos/pingdotgg/t3code/releases"
+          : url.pathname === "/repos/omar9devx/t4code/releases"
             ? { "1": nightlies, "2": [{ tag_name: `v${version}` }, { tag_name: "v1.2.3" }] }[
                 url.searchParams.get("page") ?? ""
               ]
@@ -54,12 +54,12 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chan
           const child = NodeChildProcess.spawn("sh", [installer], {
             env: {
               ...process.env,
-              T3CODE_VERSION: "",
-              T3CODE_CHANNEL: channel,
-              T3CODE_HOME: NodePath.join(root, "home"),
-              T3CODE_INSTALL_BIN_DIR: NodePath.join(root, "bin"),
+              T4CODE_VERSION: "",
+              T4CODE_CHANNEL: channel,
+              T4CODE_HOME: NodePath.join(root, "home"),
+              T4CODE_INSTALL_BIN_DIR: NodePath.join(root, "bin"),
               // A wrong version must fail here instead of downloading a real release.
-              T3CODE_RELEASE_BASE_URL: origin,
+              T4CODE_RELEASE_BASE_URL: origin,
             },
             stdio: ["ignore", "pipe", "pipe"],
           });
@@ -94,10 +94,10 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chec
       );
       expect(availableTools.length).toBeGreaterThan(0);
       for (const checksumTool of availableTools) {
-        const root = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-install-checksum-"));
+        const root = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-install-checksum-"));
         const home = NodePath.join(root, homeName);
         const version = "1.2.3";
-        const stem = `t3-${version}-linux-${HostProcess.Architecture.defaultValue()}`;
+        const stem = `t4-${version}-linux-${HostProcess.Architecture.defaultValue()}`;
         const archiveName = `${stem}.tar.gz`;
         const server = NodeHttp.createServer();
         try {
@@ -127,8 +127,8 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chec
           }
           await NodeFSP.mkdir(NodePath.join(root, stem));
           await NodeFSP.writeFile(
-            NodePath.join(root, stem, "t3"),
-            "#!/bin/sh\necho 't3 v1.2.3'\n",
+            NodePath.join(root, stem, "t4"),
+            "#!/bin/sh\necho 't4 v1.2.3'\n",
             { mode: 0o755 },
           );
           const archivePath = NodePath.join(root, archiveName);
@@ -154,10 +154,10 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chec
                   env: {
                     ...process.env,
                     PATH: tools,
-                    T3CODE_VERSION: version,
-                    T3CODE_HOME: home,
-                    T3CODE_INSTALL_BIN_DIR: NodePath.join(root, "bin"),
-                    T3CODE_RELEASE_BASE_URL: `http://127.0.0.1:${address.port}`,
+                    T4CODE_VERSION: version,
+                    T4CODE_HOME: home,
+                    T4CODE_INSTALL_BIN_DIR: NodePath.join(root, "bin"),
+                    T4CODE_RELEASE_BASE_URL: `http://127.0.0.1:${address.port}`,
                   },
                   stdio: ["ignore", "pipe", "pipe"],
                 },
@@ -176,10 +176,10 @@ describe.skipIf(HostProcess.Platform.defaultValue() !== "linux")("installer chec
               await NodeFSP.readFile(NodePath.join(versions, version, ".install-complete"), "utf8"),
             ).toBe("1.2.3\n");
             expect(
-              NodeChildProcess.execFileSync(NodePath.join(root, "bin/t3"), ["--version"], {
+              NodeChildProcess.execFileSync(NodePath.join(root, "bin/t4"), ["--version"], {
                 encoding: "utf8",
               }).trim(),
-            ).toBe("t3 v1.2.3");
+            ).toBe("t4 v1.2.3");
           } else {
             expect(code).not.toBe(0);
             expect(output).toContain("checksum mismatch");

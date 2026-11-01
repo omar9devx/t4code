@@ -1,5 +1,5 @@
-import { parseThreadLinkHref } from "@t3tools/shared/threadLinks";
-import { isAttachmentOnlyBootstrapPrompt } from "@t3tools/shared/composerContextReferences";
+import { parseThreadLinkHref } from "@t4tools/shared/threadLinks";
+import { isAttachmentOnlyBootstrapPrompt } from "@t4tools/shared/composerContextReferences";
 import type { Nodes } from "mdast";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";

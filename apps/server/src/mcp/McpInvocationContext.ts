@@ -8,11 +8,11 @@ import {
   type ProviderInteractionMode,
   type RuntimeMode,
   type ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
-import { formatThreadLink } from "@t3tools/shared/threadLinks";
+import { formatThreadLink } from "@t4tools/shared/threadLinks";
 
 const ALL_MCP_CAPABILITIES = [
   "preview",
@@ -42,7 +42,7 @@ export interface McpClientCaller {
    */
   readonly linked?: boolean | undefined;
   /**
-   * Narrower modes the client asked for on this request (`T3-Mode-Limit`):
+   * Narrower modes the client asked for on this request (`T4-Mode-Limit`):
    * another environment passing on the limits of the agent it calls for.
    */
   readonly narrowedTo?: ClientModes | undefined;
@@ -51,12 +51,12 @@ export interface McpClientCaller {
 }
 
 /**
- * `T3-Mode-Limit: <runtimeMode>/<interactionMode>` lets an OAuth client cap
+ * `T4-Mode-Limit: <runtimeMode>/<interactionMode>` lets an OAuth client cap
  * a request below what it was approved with: another environment passes on
  * the limits of the agent it calls for. It can only narrow (see
  * `clientModeCeiling`), so a client gains nothing by sending a broad one.
  */
-export const MODE_LIMIT_HEADER = "t3-mode-limit";
+export const MODE_LIMIT_HEADER = "t4-mode-limit";
 
 export interface ClientModes {
   readonly runtimeMode: RuntimeMode;
@@ -110,7 +110,7 @@ export interface McpInvocationScope {
 }
 
 /**
- * T4 Code renders `t3-thread://` links as thread chips. Other MCP clients cannot open them, so
+ * T4 Code renders `t4-thread://` links as thread chips. Other MCP clients cannot open them, so
  * they get a web URL on the origin they reached instead.
  */
 export const threadLinkFor = (
@@ -126,7 +126,7 @@ export const threadLinkFor = (
 export class McpInvocationContext extends Context.Service<
   McpInvocationContext,
   McpInvocationScope
->()("t3/mcp/McpInvocationContext") {}
+>()("t4/mcp/McpInvocationContext") {}
 
 /**
  * `McpSchema.EnabledWhen` for tools a delegated child must not see or call.

@@ -34,13 +34,13 @@ import {
   ServerProvider,
   type ServerProviderSlashCommand,
   type ServerSettings as ContractServerSettings,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { ChildProcessSpawner } from "effect/process";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { deepMerge } from "@t3tools/shared/Struct";
-import { createModelCapabilities } from "@t3tools/shared/model";
-import { applyServerSettingsPatch } from "@t3tools/shared/serverSettings";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { deepMerge } from "@t4tools/shared/Struct";
+import { createModelCapabilities } from "@t4tools/shared/model";
+import { applyServerSettingsPatch } from "@t4tools/shared/serverSettings";
 
 import { checkCodexProviderStatus, type CodexAppServerProviderSnapshot } from "./CodexProvider.ts";
 import { checkClaudeProviderStatus } from "./ClaudeProvider.ts";
@@ -49,11 +49,11 @@ import * as AntigravityInstallation from "./AntigravityInstallation.ts";
 import * as ModelManifest from "./ModelManifest.ts";
 import { applyProviderCompatibility } from "./providerCompatibility.ts";
 import * as ResetCreditCoordinator from "./resetCreditCoordinator.ts";
-import * as ProviderLatestVersions from "@t3tools/provider-core/server/ProviderLatestVersions";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
-import * as OpenCodeRuntime from "@t3tools/provider-opencode/server/OpenCodeRuntime";
-import * as OpenCodeServerLedger from "@t3tools/provider-opencode/server/OpenCodeServerLedger";
-import * as ProviderEventLoggers from "@t3tools/provider-core/server/ProviderEventLoggers";
+import * as ProviderLatestVersions from "@t4tools/provider-core/server/ProviderLatestVersions";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
+import * as OpenCodeRuntime from "@t4tools/provider-opencode/server/OpenCodeRuntime";
+import * as OpenCodeServerLedger from "@t4tools/provider-opencode/server/OpenCodeServerLedger";
+import * as ProviderEventLoggers from "@t4tools/provider-core/server/ProviderEventLoggers";
 import * as ProviderInstanceRegistryHydration from "./ProviderInstanceRegistryHydration.ts";
 import * as PortScanner from "../preview/PortScanner.ts";
 import * as ServerConfig from "../config.ts";
@@ -63,16 +63,16 @@ import {
   resolveProviderStatusCachePath,
   writeProviderStatusCache,
 } from "./providerStatusCache.ts";
-import { COMPACT_SLASH_COMMAND } from "@t3tools/provider-core/server/snapshotProbe";
+import { COMPACT_SLASH_COMMAND } from "@t4tools/provider-core/server/snapshotProbe";
 import type {
   ProviderInstance,
   ProviderWorkspaceSnapshot,
-} from "@t3tools/provider-core/server/driver";
+} from "@t4tools/provider-core/server/driver";
 import * as ProviderInstanceRegistry from "./ProviderInstanceRegistry.ts";
 import * as ProviderInstanceRegistryMutator from "./ProviderInstanceRegistryMutator.ts";
 import * as ProviderRegistry from "./ProviderRegistry.ts";
-import { mergeProviderInstanceEnvironment } from "@t3tools/provider-core/server/instanceEnvironment";
-import { makeManualOnlyProviderMaintenanceCapabilities } from "@t3tools/provider-core/server/maintenanceResolver";
+import { mergeProviderInstanceEnvironment } from "@t4tools/provider-core/server/instanceEnvironment";
+import { makeManualOnlyProviderMaintenanceCapabilities } from "@t4tools/provider-core/server/maintenanceResolver";
 vi.mock("@anthropic-ai/claude-agent-sdk", { spy: true });
 
 const decodeServerProvider = Schema.decodeSync(ServerProvider);
@@ -95,7 +95,7 @@ const defaultClaudeSettings: ClaudeSettings = Schema.decodeSync(ClaudeSettings)(
 const decodeCodexSettings = Schema.decodeSync(CodexSettings);
 const defaultCodexSettings: CodexSettings = Schema.decodeSync(CodexSettings)({});
 
-process.env.T3CODE_CURSOR_ENABLED = "1";
+process.env.T4CODE_CURSOR_ENABLED = "1";
 
 const encoder = new TextEncoder();
 const TEST_EPOCH = DateTime.makeUnsafe("1970-01-01T00:00:00.000Z");
@@ -225,7 +225,7 @@ function layerMockSpawner(
 const writeFakeCodexCli = Effect.fn("writeFakeCodexCli")(function* (script: string) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
-  const directory = yield* fs.makeTempDirectoryScoped({ prefix: "t3-fake-codex-" });
+  const directory = yield* fs.makeTempDirectoryScoped({ prefix: "t4-fake-codex-" });
   const binaryPath = path.join(directory, "codex");
   yield* fs.writeFileString(binaryPath, `#!/bin/sh\n${script}\n`);
   yield* fs.chmod(binaryPath, 0o755);
@@ -480,7 +480,7 @@ it.layer(
       Effect.gen(function* () {
         if ((yield* HostProcess.Platform) === "win32") return;
         const codexHome = yield* FileSystem.FileSystem.pipe(
-          Effect.flatMap((fs) => fs.makeTempDirectoryScoped({ prefix: "t3-codex-home-" })),
+          Effect.flatMap((fs) => fs.makeTempDirectoryScoped({ prefix: "t4-codex-home-" })),
         );
         const { binaryPath } = yield* writeFakeCodexCli(
           [
@@ -1140,7 +1140,7 @@ it.layer(
           }).pipe(
             Effect.provide(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "t3-pi-model-cache-",
+                prefix: "t4-pi-model-cache-",
               }).pipe(Layer.provideMerge(NodeServices.layer)),
             ),
           ),
@@ -1276,7 +1276,7 @@ it.layer(
         }).pipe(
           Effect.provide(
             ServerConfig.layerTest(process.cwd(), {
-              prefix: "t3-codex-retired-model-cache-",
+              prefix: "t4-codex-retired-model-cache-",
             }).pipe(Layer.provideMerge(NodeServices.layer)),
           ),
         ),
@@ -1545,7 +1545,7 @@ it.layer(
               Layer.provideMerge(layerInstanceRegistry),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "t3-provider-registry-shared-workspace-scan-",
+                  prefix: "t4-provider-registry-shared-workspace-scan-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -1641,7 +1641,7 @@ it.layer(
             Layer.provideMerge(layerInstanceRegistry),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "t3-provider-registry-unhealthy-workspace-",
+                prefix: "t4-provider-registry-unhealthy-workspace-",
               }),
             ),
             Layer.provideMerge(NodeServices.layer),
@@ -1762,7 +1762,7 @@ it.layer(
             Layer.provideMerge(instanceRegistryLayer),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "t3-provider-registry-shared-refresh-",
+                prefix: "t4-provider-registry-shared-refresh-",
               }),
             ),
             Layer.provideMerge(NodeServices.layer),
@@ -1869,7 +1869,7 @@ it.layer(
             Layer.provideMerge(layerInstanceRegistry),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "t3-provider-registry-merged-persist-",
+                prefix: "t4-provider-registry-merged-persist-",
               }),
             ),
             Layer.provideMerge(layerBackgroundPolicyAlwaysRun),
@@ -1998,7 +1998,7 @@ it.layer(
               Layer.provideMerge(layerInstanceRegistry),
               Layer.provideMerge(
                 ServerConfig.layerTest(process.cwd(), {
-                  prefix: "t3-provider-registry-opencode-authoritative-persist-",
+                  prefix: "t4-provider-registry-opencode-authoritative-persist-",
                 }),
               ),
               Layer.provideMerge(NodeServices.layer),
@@ -2102,7 +2102,7 @@ it.layer(
             Layer.provideMerge(layerInstanceRegistry),
             Layer.provideMerge(
               ServerConfig.layerTest(process.cwd(), {
-                prefix: "t3-provider-registry-refresh-failure-",
+                prefix: "t4-provider-registry-refresh-failure-",
               }),
             ),
             Layer.provideMerge(layerBackgroundPolicyAlwaysRun),
@@ -2128,8 +2128,8 @@ it.layer(
 
     it.effect("re-probes when settings change the codex binaryPath", () =>
       Effect.gen(function* () {
-        const firstMissing = `t3code_codex_first_`;
-        const secondMissing = `t3code_codex_second_`;
+        const firstMissing = `T4CODE_codex_first_`;
+        const secondMissing = `T4CODE_codex_second_`;
         const spawnedCommands: Array<string> = [];
         const secondProbeStarted = yield* Deferred.make<void>();
         const releaseSecondProbe = yield* Deferred.make<void>();
@@ -2169,7 +2169,7 @@ it.layer(
           Layer.provideMerge(ServerSecretStore.layer),
           Layer.provideMerge(
             ServerConfig.layerTest(process.cwd(), {
-              prefix: "t3-provider-registry-",
+              prefix: "t4-provider-registry-",
             }),
           ),
           Layer.provideMerge(layerTestHttpClient),
@@ -2287,7 +2287,7 @@ it.layer(
           Layer.provideMerge(ServerSecretStore.layer),
           Layer.provideMerge(
             ServerConfig.layerTest(process.cwd(), {
-              prefix: "t3-provider-registry-",
+              prefix: "t4-provider-registry-",
             }),
           ),
           Layer.provideMerge(layerTestHttpClient),
@@ -2396,7 +2396,7 @@ it.layer(
             Layer.succeed(ServerSettingsModule.ServerSettingsService, serverSettings),
           ),
           Layer.provideMerge(
-            ServerConfig.layerTest(process.cwd(), { prefix: "t3-provider-registry-" }),
+            ServerConfig.layerTest(process.cwd(), { prefix: "t4-provider-registry-" }),
           ),
           Layer.provideMerge(layerTestHttpClient),
           Layer.provideMerge(
@@ -2594,7 +2594,7 @@ it.layer(
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const configDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-settings-",
+            prefix: "t4-claude-settings-",
           });
           yield* fileSystem.writeFileString(
             path.join(configDir, "settings.json"),

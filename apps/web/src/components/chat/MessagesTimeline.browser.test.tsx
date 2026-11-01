@@ -15,7 +15,7 @@ import {
   ScheduledTaskId,
   ThreadId,
   type OrchestrationV2Subagent,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { LegendList, type LegendListRef } from "@legendapp/list/react";
 import {
   createRef,
@@ -41,7 +41,7 @@ import {
   deriveTimelineEntriesFromVisibleTurnItems,
 } from "../../session-logic";
 import { remarkThoughtPreview } from "./TimelineWorkEntryRow.logic";
-import { parseMarkdownWithMath } from "@t3tools/shared/markdownMath";
+import { parseMarkdownWithMath } from "@t4tools/shared/markdownMath";
 import { collectThreadFindRanges } from "./threadFindHighlights";
 import { toastManager } from "../ui/toast";
 import type { CitedHistory } from "./citationProcedure";
@@ -50,8 +50,8 @@ import { rememberTimelinePosition } from "./timelineScrollAnchoring";
 import {
   COMPOSER_CONTEXT_CLIPBOARD_MIME,
   decodeComposerContextFragment,
-} from "@t3tools/shared/composerContextClipboard";
-import { collectComposerContextReferences } from "@t3tools/shared/composerContextReferences";
+} from "@t4tools/shared/composerContextClipboard";
+import { collectComposerContextReferences } from "@t4tools/shared/composerContextReferences";
 
 const environmentQuery = vi.hoisted(() => ({
   error: "Pull request not found",
@@ -494,22 +494,22 @@ describe("MessagesTimeline messages", () => {
 
   it("renders unsafe user HTML as inert source text", async () => {
     const source =
-      '<script>globalThis.__t3Xss = 1</script><img src="x" onerror="globalThis.__t3Xss = 2">';
+      '<script>globalThis.__t4Xss = 1</script><img src="x" onerror="globalThis.__t4Xss = 2">';
     await using screen = await renderTimeline([message(source)]);
     expect(screen.text()).toContain(source);
     expect(screen.container.querySelector("script, img")).toBeNull();
-    expect((globalThis as { __t3Xss?: number }).__t3Xss).toBeUndefined();
+    expect((globalThis as { __t4Xss?: number }).__t4Xss).toBeUndefined();
   });
 
   it("renders sanitized raw HTML in assistant messages", async () => {
     await using screen = await renderTimeline([
       message(
         [
-          '<details onclick="globalThis.__t3Xss = 1">',
+          '<details onclick="globalThis.__t4Xss = 1">',
           "<summary>Safe details</summary>",
-          "<script>globalThis.__t3Xss = 2</script>",
-          '<img src="x" onerror="globalThis.__t3Xss = 3">',
-          '<a href="javascript:globalThis.__t3Xss = 4">Unsafe link</a>',
+          "<script>globalThis.__t4Xss = 2</script>",
+          '<img src="x" onerror="globalThis.__t4Xss = 3">',
+          '<a href="javascript:globalThis.__t4Xss = 4">Unsafe link</a>',
           "</details>",
         ].join(""),
         { role: "assistant" },
@@ -522,7 +522,7 @@ describe("MessagesTimeline messages", () => {
     expect(screen.container.querySelector("script, [onclick], [onerror]")).toBeNull();
     expect(screen.container.innerHTML).not.toContain("javascript:");
     await click(screen.button("Safe details"));
-    expect((globalThis as { __t3Xss?: number }).__t3Xss).toBeUndefined();
+    expect((globalThis as { __t4Xss?: number }).__t4Xss).toBeUndefined();
   });
 });
 

@@ -14,7 +14,7 @@ const webIconSource = NodeFS.readFileSync(
   NodePath.join(repositoryRoot, "apps/web/src/pierre-icons.ts"),
   "utf8",
 );
-const customSprite = webIconSource.match(/const T3_FILE_ICON_SPRITE = `([\s\S]*?)`;/)?.[1];
+const customSprite = webIconSource.match(/const T4_FILE_ICON_SPRITE = `([\s\S]*?)`;/)?.[1];
 
 if (!customSprite) {
   throw new Error(
@@ -80,9 +80,9 @@ const colors = {
 };
 
 const customIcons = {
-  agents: "t3-file-icon-agents",
-  pnpm: "t3-file-icon-pnpm",
-  video: "t3-file-icon-video",
+  agents: "t4-file-icon-agents",
+  pnpm: "t4-file-icon-pnpm",
+  video: "t4-file-icon-video",
 };
 
 function symbolFromSprite(sprite, id) {

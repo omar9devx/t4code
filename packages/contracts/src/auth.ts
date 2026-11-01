@@ -169,7 +169,7 @@ export const AuthTokenExchangeGrantType =
   "urn:ietf:params:oauth:grant-type:token-exchange" as const;
 export const AuthAccessTokenType = "urn:ietf:params:oauth:token-type:access_token" as const;
 export const AuthEnvironmentBootstrapTokenType =
-  "urn:t3:params:oauth:token-type:environment-bootstrap" as const;
+  "urn:t4:params:oauth:token-type:environment-bootstrap" as const;
 
 export const ServerAuthDescriptor = Schema.Struct({
   policy: ServerAuthPolicy,
@@ -449,7 +449,7 @@ export type AuthMcpAuthorizationServerMetadata = typeof AuthMcpAuthorizationServ
  * to this one. Its session is then a peer link: the work it starts here stays
  * within that link. Claiming it only ever adds limits.
  */
-export const MCP_PEER_LINK_SOFTWARE_ID = "t3code-peer-link";
+export const MCP_PEER_LINK_SOFTWARE_ID = "T4CODE-peer-link";
 
 export const AuthMcpClientRegistration = Schema.Struct({
   client_name: Schema.optionalKey(Schema.String),

@@ -1,7 +1,7 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { expect, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import * as NetService from "@t3tools/shared/Net";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import * as NetService from "@t4tools/shared/Net";
 import * as Cause from "effect/Cause";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
@@ -23,13 +23,13 @@ const none = Option.none<boolean>();
 
 it.each([
   {
-    label: "a new machine starts from T3 Connect and asks",
+    label: "a new machine starts from T4 Connect and asks",
     setup: { installed: false, connect: false, lan: false },
     flags: { connect: none, lan: none },
     expected: { routes: { connect: true, lan: false }, ask: ["connect", "lan"] },
   },
   {
-    label: "a build without T3 Connect never offers it",
+    label: "a build without T4 Connect never offers it",
     setup: { installed: false, connect: null, lan: false },
     flags: { connect: none, lan: none },
     expected: { routes: { connect: false, lan: false }, ask: ["lan"] },
@@ -60,8 +60,8 @@ const SERVICE = {
   supported: true,
   installed: true,
   current: true,
-  unitPath: "/home/me/.config/systemd/user/t3code.service",
-  logPath: "/home/me/.t3/userdata/logs/boot-service.log",
+  unitPath: "/home/me/.config/systemd/user/T4CODE.service",
+  logPath: "/home/me/.t4/userdata/logs/boot-service.log",
 } as const;
 
 it.each([
@@ -113,7 +113,7 @@ it.each([
     revoked: false,
     on: false,
   },
-] as const)("T3 Connect is on for $label: $on", ({ label: _, on, ...link }) => {
+] as const)("T4 Connect is on for $label: $on", ({ label: _, on, ...link }) => {
   expect(connectEnabled(link)).toBe(on);
 });
 
@@ -151,7 +151,7 @@ const answering = (text: string) =>
     display: () => Effect.void,
   });
 
-it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => {
+it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t4 up", (it) => {
   afterEach(() => vi.restoreAllMocks());
 
   it.effect.each<{
@@ -172,20 +172,20 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
     {
       label: "nothing changed",
       installed: true,
-      env: "T3CODE_LAN=false\n",
+      env: "T4CODE_LAN=false\n",
       args: ["--no-lan"],
       installs: 0,
       restarts: 0,
-      envAfter: "T3CODE_LAN=false\n",
+      envAfter: "T4CODE_LAN=false\n",
     },
     {
       label: "the local network opens",
       installed: true,
-      env: "T3CODE_LAN=false\n",
+      env: "T4CODE_LAN=false\n",
       args: ["--lan"],
       installs: 0,
       restarts: 1,
-      envAfter: "T3CODE_LAN=true\n",
+      envAfter: "T4CODE_LAN=true\n",
     },
     {
       label: "a new service starts with its settings",
@@ -194,31 +194,31 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
       args: ["--lan"],
       installs: 1,
       restarts: 0,
-      envAfter: "T3CODE_LAN=true\n",
+      envAfter: "T4CODE_LAN=true\n",
     },
     {
       label: "a route turns off with no service to run",
       installed: false,
-      env: "T3CODE_LAN=true\n",
+      env: "T4CODE_LAN=true\n",
       args: ["--no-lan"],
       installs: 0,
       restarts: 0,
-      envAfter: "T3CODE_LAN=false\n",
+      envAfter: "T4CODE_LAN=false\n",
     },
     {
       label: "a stopped newer service starts as it is",
       installed: true,
       status: { current: false, installedVersion: "999.0.0", problems: ["service-stopped"] },
-      env: "T3CODE_LAN=false\n",
+      env: "T4CODE_LAN=false\n",
       args: ["--yes"],
       installs: 0,
       restarts: 1,
-      envAfter: "T3CODE_LAN=false\n",
+      envAfter: "T4CODE_LAN=false\n",
     },
     {
       label: "a failed update keeps service.env matching the old service",
       // The old service still runs, so no foreground server is offered.
-      prints: "Fix that, then run `t3 up` again.",
+      prints: "Fix that, then run `t4 up` again.",
       installed: true,
       status: { current: false },
       installFails: true,
@@ -232,22 +232,22 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
       label: "a failed restart puts service.env back and restarts on it",
       installed: true,
       restartFails: true,
-      env: "T3CODE_LAN=false\n",
+      env: "T4CODE_LAN=false\n",
       args: ["--lan"],
       installs: 0,
       restarts: 2,
-      envAfter: "T3CODE_LAN=false\n",
+      envAfter: "T4CODE_LAN=false\n",
     },
     {
       label: "declining an update changes nothing",
       installed: true,
       status: { current: false },
       answer: "n",
-      env: "T3CODE_LAN=false\n",
+      env: "T4CODE_LAN=false\n",
       args: ["--lan"],
       installs: 0,
       restarts: 0,
-      envAfter: "T3CODE_LAN=false\n",
+      envAfter: "T4CODE_LAN=false\n",
     },
     {
       label: "no service manager still records the choice",
@@ -257,7 +257,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
       args: ["--lan"],
       installs: 0,
       restarts: 0,
-      envAfter: "T3CODE_LAN=true\n",
+      envAfter: "T4CODE_LAN=true\n",
     },
     {
       label: "the old default is kept",
@@ -266,12 +266,12 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
       args: ["--yes"],
       installs: 0,
       restarts: 0,
-      envAfter: "T3CODE_LAN=true\n",
+      envAfter: "T4CODE_LAN=true\n",
     },
   ])("restarts the service only when it must: $label", (input) =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t3-up-test-" });
+      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t4-up-test-" });
       yield* fs.writeFileString(`${baseDir}/service.env`, input.env);
       let installs = 0;
       let restarts = 0;
@@ -302,7 +302,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
                 : Effect.sync(() => {
                     installs++;
                     return {
-                      program: ["t3"],
+                      program: ["t4"],
                       baseDir,
                       unitPath: status.unitPath,
                       logPath: status.logPath,
@@ -348,9 +348,9 @@ it.layer(Layer.mergeAll(NodeServices.layer, NetService.layer))("t3 up", (it) => 
 });
 
 it("rewrites only the named service.env keys and keeps the user's lines", () => {
-  const before = ["# my settings", "T3CODE_PORT=4000", "export T3CODE_LAN=0", "T3CODE_LAN=1", ""];
-  expect(upsertServiceEnv(before.join("\n"), { T3CODE_LAN: "true", T3CODE_HOST: undefined })).toBe(
-    ["# my settings", "T3CODE_PORT=4000", "T3CODE_LAN=true", ""].join("\n"),
+  const before = ["# my settings", "T4CODE_PORT=4000", "export T4CODE_LAN=0", "T4CODE_LAN=1", ""];
+  expect(upsertServiceEnv(before.join("\n"), { T4CODE_LAN: "true", T4CODE_HOST: undefined })).toBe(
+    ["# my settings", "T4CODE_PORT=4000", "T4CODE_LAN=true", ""].join("\n"),
   );
-  expect(upsertServiceEnv("", { T3CODE_LAN: "false" })).toBe("T3CODE_LAN=false\n");
+  expect(upsertServiceEnv("", { T4CODE_LAN: "false" })).toBe("T4CODE_LAN=false\n");
 });

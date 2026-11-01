@@ -1,4 +1,4 @@
-import { ProjectId, ThreadId, type ThreadPullRequestLink } from "@t3tools/contracts";
+import { ProjectId, ThreadId, type ThreadPullRequestLink } from "@t4tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { v2Project, v2ShellSnapshot, v2ThreadShell } from "./orchestrationV2TestFixtures.ts";
@@ -279,9 +279,9 @@ describe("applyShellStreamEvent", () => {
 describe("reuseUnchangedThreadShells", () => {
   const link: ThreadPullRequestLink = {
     host: "github.com",
-    repository: "pingdotgg/t3code",
+    repository: "omar9devx/t4code",
     number: 3,
-    url: "https://github.com/pingdotgg/t3code/pull/3",
+    url: "https://github.com/omar9devx/t4code/pull/3",
     source: "agent",
     linkedAt: "2026-06-20T00:00:00.000Z",
     snapshot: null,

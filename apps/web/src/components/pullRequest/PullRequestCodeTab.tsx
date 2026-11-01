@@ -1,7 +1,7 @@
 import {
   capitalizeTerm,
   sourceControlClients,
-} from "@t3tools/client-runtime/source-control-clients";
+} from "@t4tools/client-runtime/source-control-clients";
 import type { CodeViewItem, DiffLineAnnotation, SelectedLineRange } from "@pierre/diffs";
 import type { CodeViewAnnotationArgs, CodeViewDiffItem } from "@pierre/diffs/react";
 import type {
@@ -14,7 +14,7 @@ import type {
   PullRequestReviewPosition,
   PullRequestReviewThread,
   PullRequestThreadCommentsResult,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -51,8 +51,8 @@ import { pullRequestFindingKey, type PullRequestFinding } from "./pullRequestDet
 import {
   canEditPullRequestComment,
   canResolvePullRequestThread,
-} from "@t3tools/client-runtime/pull-request-editing";
-import { isTestChangedFile } from "@t3tools/shared/changedFileKind";
+} from "@t4tools/client-runtime/pull-request-editing";
+import { isTestChangedFile } from "@t4tools/shared/changedFileKind";
 import { orderDiffFiles } from "./pullRequestFileOrder.logic";
 import {
   buildFileDiffRenderKey,
@@ -137,7 +137,7 @@ type ReviewAnnotation = DiffLineAnnotation<ReviewAnnotationGroup>;
 
 const COMMIT_PAGE_SIZE = 10;
 
-const PULL_REQUEST_FILE_TREE_STORAGE_KEY = "t3code.pullRequestFileTreeOpen";
+const PULL_REQUEST_FILE_TREE_STORAGE_KEY = "T4CODE.pullRequestFileTreeOpen";
 
 interface DiffSlice {
   readonly source: PullRequestDiffResult;
@@ -449,7 +449,7 @@ function PullRequestCodeTab({
     isStale: isFileViewedStale,
   } = filesViewed;
   const appliedRefreshToken = useRef(refreshToken);
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- a new refresh token clears loaded slices and refetches the first diff page and viewed files
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- a new refresh token clears loaded slices and refetches the first diff page and viewed files
   useEffect(() => {
     if (appliedRefreshToken.current === refreshToken) return;
     appliedRefreshToken.current = refreshToken;
@@ -461,7 +461,7 @@ function PullRequestCodeTab({
     refreshFilesViewed();
   }, [refreshToken, scopeKey, refreshFirstDiffPage, refreshFilesViewed]);
   const appliedBackgroundRefreshToken = useRef(backgroundRefreshToken);
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- a background refresh token refetches the first diff page and viewed files while keeping slices
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- a background refresh token refetches the first diff page and viewed files while keeping slices
   useEffect(() => {
     if (appliedBackgroundRefreshToken.current === backgroundRefreshToken) return;
     appliedBackgroundRefreshToken.current = backgroundRefreshToken;
@@ -1360,7 +1360,7 @@ function PullRequestCodeTab({
     answeredRevealNonce.current = revealRequest.nonce;
     revealFile(revealRequest.path);
   });
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- scrolls the code view to a requested file once loaded, or pages forward until it arrives
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- scrolls the code view to a requested file once loaded, or pages forward until it arrives
   useEffect(() => {
     // oxlint-disable-next-line react/set-state-in-effect -- A reveal for a file not loaded yet pages forward, which sets the slice cursor.
     answerReveal();
@@ -1518,7 +1518,7 @@ function PullRequestCodeTab({
         {fileTreeOpen ? (
           <FileExplorerPane
             resizable
-            storageKey="t3code:diff-file-tree-width"
+            storageKey="T4CODE:diff-file-tree-width"
             defaultWidth={320}
             defaultWidthFraction={0.4}
             minWidth={192}

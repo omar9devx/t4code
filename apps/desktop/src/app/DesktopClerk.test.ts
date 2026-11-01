@@ -4,15 +4,15 @@ import * as NodeHttp from "node:http";
 import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
 import * as NodePathLayer from "@effect/platform-node/NodePath";
-import { codexAuthHandoffUrl, readCodexAuthDelivery } from "@t3tools/shared/codexAuthHandoff";
-import { EnvironmentId, ProviderInstanceId } from "@t3tools/contracts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { codexAuthHandoffUrl, readCodexAuthDelivery } from "@t4tools/shared/codexAuthHandoff";
+import { EnvironmentId, ProviderInstanceId } from "@t4tools/contracts";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import { assert, describe, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { afterAll, beforeEach, vi } from "vite-plus/test";
 
-const clerkStateDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t3-desktop-clerk-"));
+const clerkStateDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t4-desktop-clerk-"));
 afterAll(() => {
   NodeFS.rmSync(clerkStateDir, { recursive: true, force: true });
 });
@@ -140,7 +140,7 @@ describe("DesktopClerk", () => {
       name: "development",
       isDevelopment: true,
       platform: "win32" as const,
-      userData: "/tmp/app-data/t3code-dev",
+      userData: "/tmp/app-data/T4CODE-dev",
     },
   ])(
     "creates the bridge before startup can yield to the event loop ($name)",
@@ -151,7 +151,7 @@ describe("DesktopClerk", () => {
         events.push("createClerkBridge");
         return { cleanup: vi.fn(), isPrimaryInstance: true };
       });
-      // oxlint-disable-next-line t3code/no-manual-effect-runtime-in-tests -- The assertion IS that the layer builds synchronously; it.effect would mask a regression to async.
+      // oxlint-disable-next-line T4CODE/no-manual-effect-runtime-in-tests -- The assertion IS that the layer builds synchronously; it.effect would mask a regression to async.
       Effect.runSync(
         Effect.scoped(
           Layer.build(
@@ -197,11 +197,11 @@ describe("DesktopClerk", () => {
 
       return Effect.gen(function* () {
         const clerk = yield* DesktopClerk.DesktopClerk;
-        if (entry === "before configure") listeners.get("second-instance")?.({}, ["t3"]);
+        if (entry === "before configure") listeners.get("second-instance")?.({}, ["t4"]);
         yield* clerk.configure;
 
         assert.equal(quit.mock.calls.length, 0);
-        if (entry === "after configure") listeners.get("second-instance")!({}, ["t3"]);
+        if (entry === "after configure") listeners.get("second-instance")!({}, ["t4"]);
         assert.strictEqual(yield* Effect.promise(() => revealed.promise), window);
       }).pipe(
         Effect.scoped,
@@ -218,10 +218,10 @@ describe("DesktopClerk", () => {
     createClerkBridgeMock.mockReturnValue({ cleanup: vi.fn(), isPrimaryInstance: true });
     const listeners = new Map<string, (...args: unknown[]) => void>();
     const received: string[] = [];
-    const first = "t3code://new?prompt=first";
-    const second = "t3code://threads/env-1/thread-1";
-    const later = "t3code://new?prompt=later";
-    const launchPair = "t3code://pair?pairingUrl=https%3A%2F%2Fvps.example.com%2F%23token%3Dabc";
+    const first = "T4CODE://new?prompt=first";
+    const second = "T4CODE://threads/env-1/thread-1";
+    const later = "T4CODE://new?prompt=later";
+    const launchPair = "T4CODE://pair?pairingUrl=https%3A%2F%2Fvps.example.com%2F%23token%3Dabc";
     const delivered = Promise.withResolvers<void>();
     const electronApp = {
       on: (name: string, listener: (...args: unknown[]) => void) =>
@@ -232,13 +232,13 @@ describe("DesktopClerk", () => {
 
     return Effect.gen(function* () {
       const clerk = yield* DesktopClerk.DesktopClerk;
-      listeners.get("second-instance")?.({}, ["t3", first]);
-      listeners.get("second-instance")?.({}, ["t3", second]);
+      listeners.get("second-instance")?.({}, ["t4", first]);
+      listeners.get("second-instance")?.({}, ["t4", second]);
       listeners.get("open-url")?.({ preventDefault: () => undefined }, launchPair);
       assert.deepEqual(received, []);
 
       yield* clerk.configure;
-      listeners.get("second-instance")!({}, ["t3", later]);
+      listeners.get("second-instance")!({}, ["t4", later]);
       yield* Effect.promise(() => delivered.promise);
 
       assert.deepEqual(received, [launchPair, first, second, later]);
@@ -317,19 +317,19 @@ it.effect(
       const clerk = yield* DesktopClerk.DesktopClerk;
       yield* clerk.configure;
       const event = { preventDefault: vi.fn() };
-      listeners.get("open-url")!(event, "t3code-dev://app/auth/callback?code=clerk-code");
-      listeners.get("open-url")!(event, "t3code://app/welcome");
+      listeners.get("open-url")!(event, "T4CODE-dev://app/auth/callback?code=clerk-code");
+      listeners.get("open-url")!(event, "T4CODE://app/welcome");
       assert.equal(loadURL.mock.calls.length, 0);
       assert.equal(event.preventDefault.mock.calls.length, 0);
       listeners.get("second-instance")!({}, [
-        "t3",
-        "t3code-dev://app/settings/providers?instanceId=work&code=never-forward",
+        "t4",
+        "T4CODE-dev://app/settings/providers?instanceId=work&code=never-forward",
       ]);
       yield* Effect.promise(() => revealed.promise);
       assert.deepEqual(loadURL.mock.calls, [
-        ["t3code-dev://app/settings/providers?instanceId=work"],
+        ["T4CODE-dev://app/settings/providers?instanceId=work"],
       ]);
-      listeners.get("open-url")!(event, "t3code-dev://app/welcome#agents:machine-id");
+      listeners.get("open-url")!(event, "T4CODE-dev://app/welcome#agents:machine-id");
       assert.equal(event.preventDefault.mock.calls.length, 1);
     }).pipe(
       Effect.scoped,
@@ -401,7 +401,7 @@ it.effect.each(["startup", "open-url", "early-second-instance"] as const)(
       yield* Effect.gen(function* () {
         const clerk = yield* DesktopClerk.DesktopClerk;
         if (entry === "early-second-instance") {
-          listeners.get("second-instance")?.({}, ["t3", link]);
+          listeners.get("second-instance")?.({}, ["t4", link]);
         }
         yield* clerk.configure;
         if (entry === "open-url") {
@@ -416,7 +416,7 @@ it.effect.each(["startup", "open-url", "early-second-instance"] as const)(
         assert.strictEqual(delivery?.returnUrl, request.returnUrl);
       }).pipe(
         Effect.provide(layerDesktopClerk(true, [], "darwin", undefined, shell, listeners)),
-        Effect.provideService(HostProcess.Arguments, entry === "startup" ? ["t3", link] : ["t3"]),
+        Effect.provideService(HostProcess.Arguments, entry === "startup" ? ["t4", link] : ["t4"]),
         Effect.provideService(ElectronApp.ElectronApp, electronApp),
         Effect.provideService(
           ElectronWindow.ElectronWindow,
@@ -440,7 +440,7 @@ it.effect("hands web and app links to the renderer and leaves other links alone"
         }),
     } as unknown as ElectronApp.ElectronApp["Service"];
     const received: Array<string> = [];
-    const pairLink = "t3code://pair?pairingUrl=https%3A%2F%2Fvps.example.com%2F%23token%3Dabc";
+    const pairLink = "T4CODE://pair?pairingUrl=https%3A%2F%2Fvps.example.com%2F%23token%3Dabc";
     yield* Effect.gen(function* () {
       const clerk = yield* DesktopClerk.DesktopClerk;
       yield* clerk.configure;
@@ -451,23 +451,23 @@ it.effect("hands web and app links to the renderer and leaves other links alone"
       };
       assert.strictEqual(open("https://example.com/page"), 1);
       assert.strictEqual(open("http://localhost:3000/"), 1);
-      assert.strictEqual(open("t3code://new?prompt=hi"), 1);
-      assert.strictEqual(open("t3code://threads/env-1/thread-1"), 1);
+      assert.strictEqual(open("T4CODE://new?prompt=hi"), 1);
+      assert.strictEqual(open("T4CODE://threads/env-1/thread-1"), 1);
       assert.strictEqual(open(pairLink), 1);
-      assert.strictEqual(open("t3code://pair"), 0);
+      assert.strictEqual(open("T4CODE://pair"), 0);
       assert.strictEqual(open("mailto:hello@example.com"), 0);
-      assert.strictEqual(open("t3code://somewhere-else"), 0);
+      assert.strictEqual(open("T4CODE://somewhere-else"), 0);
       yield* Effect.yieldNow;
       assert.deepStrictEqual(received, [
         "https://example.com/page",
         "http://localhost:3000/",
-        "t3code://new?prompt=hi",
-        "t3code://threads/env-1/thread-1",
+        "T4CODE://new?prompt=hi",
+        "T4CODE://threads/env-1/thread-1",
         pairLink,
       ]);
     }).pipe(
       Effect.provide(layerDesktopClerk(true, [], "darwin", undefined, undefined, listeners)),
-      Effect.provideService(HostProcess.Arguments, ["t3"]),
+      Effect.provideService(HostProcess.Arguments, ["t4"]),
       Effect.provideService(ElectronApp.ElectronApp, electronApp),
       Effect.provideService(
         ElectronWindow.ElectronWindow,

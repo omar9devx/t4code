@@ -2,8 +2,8 @@ import {
   AuthStandardClientScopes,
   EnvironmentId,
   ORCHESTRATION_PROTOCOL_VERSION,
-} from "@t3tools/contracts";
-import { type RelayEnvironmentConnectResponse } from "@t3tools/contracts/relay";
+} from "@t4tools/contracts";
+import { type RelayEnvironmentConnectResponse } from "@t4tools/contracts/relay";
 import { describe, expect, it } from "@effect/vitest";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -180,9 +180,9 @@ const makeHarness = Effect.fn("TestRemoteAuthorization.makeHarness")(function* (
     createEnvironmentLinkChallenge: unexpected,
     linkEnvironment: unexpected,
     unlinkEnvironment: unexpected,
-    getT3ChatLink: unexpected,
-    createT3ChatLinkRequest: unexpected,
-    unlinkT3Chat: unexpected,
+    getT4ChatLink: unexpected,
+    createT4ChatLinkRequest: unexpected,
+    unlinkT4Chat: unexpected,
     getEnvironmentStatus: unexpected,
     connectEnvironment: (request) =>
       Effect.gen(function* () {
@@ -311,7 +311,7 @@ describe("RemoteEnvironmentAuthorization", () => {
         success: { socketUrl: expect.stringContaining("wsTicket=cold-ticket") },
       });
       expect(harness.fetch.calls.map(([url]) => new URL(String(url)).pathname)).toEqual([
-        "/.well-known/t3/environment",
+        "/.well-known/t4/environment",
         "/api/auth/websocket-ticket/rpc",
       ]);
     }),
@@ -375,7 +375,7 @@ describe("RemoteEnvironmentAuthorization", () => {
       expect(first.socketUrl).toContain("wsTicket=first-ticket");
       expect(second.socketUrl).toContain("wsTicket=second-ticket");
       expect(
-        harness.fetch.calls.filter(([url]) => String(url).endsWith("/.well-known/t3/environment")),
+        harness.fetch.calls.filter(([url]) => String(url).endsWith("/.well-known/t4/environment")),
       ).toHaveLength(2);
       expect(
         harness.fetch.calls.filter(([url]) =>
@@ -418,7 +418,7 @@ describe("RemoteEnvironmentAuthorization", () => {
     }),
   );
 
-  it.effect("uses the T3 Connect token on a learned direct address without the relay", () =>
+  it.effect("uses the T4 Connect token on a learned direct address without the relay", () =>
     Effect.gen(function* () {
       const cached = new TokenStore.RemoteDpopAccessToken({
         environmentId: ENVIRONMENT_ID,
@@ -449,7 +449,7 @@ describe("RemoteEnvironmentAuthorization", () => {
       expect(authorized.socketUrl).toMatch(/^ws:\/\/192\.168\.1\.10:3773\/ws\?/);
       expect(yield* Ref.get(harness.bootstrapCalls)).toBe(0);
       expect(harness.fetch.calls.map(([url]) => String(url))).toEqual([
-        "http://192.168.1.10:3773/.well-known/t3/environment",
+        "http://192.168.1.10:3773/.well-known/t4/environment",
         "http://192.168.1.10:3773/api/auth/websocket-ticket/rpc",
       ]);
     }),
@@ -479,7 +479,7 @@ describe("RemoteEnvironmentAuthorization", () => {
 
       expect(error).toMatchObject({ _tag: "ConnectionBlockedError", reason: "configuration" });
       expect(harness.fetch.calls.map(([url]) => String(url))).toEqual([
-        "http://192.168.1.10:3773/.well-known/t3/environment",
+        "http://192.168.1.10:3773/.well-known/t4/environment",
       ]);
       expect((yield* Ref.get(harness.tokens)).get(ENVIRONMENT_ID)?.accessToken).toBe(
         "cached-access-token",

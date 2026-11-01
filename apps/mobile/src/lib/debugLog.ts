@@ -11,7 +11,7 @@ function globalValue(name: string): unknown {
 
 export function createDebugLogger(namespace: string): DebugLogger {
   const isEnabled = () => {
-    const filter = globalValue("__T3_DEBUG__");
+    const filter = globalValue("__t4_DEBUG__");
     return filter === true || (Array.isArray(filter) && filter.includes(namespace));
   };
   const log = (event: string, data?: Record<string, unknown>) => {
@@ -19,9 +19,9 @@ export function createDebugLogger(namespace: string): DebugLogger {
       return;
     }
     if (data === undefined) {
-      console.log(`[t3-${namespace}] ${event}`);
+      console.log(`[t4-${namespace}] ${event}`);
     } else {
-      console.log(`[t3-${namespace}] ${event}`, data);
+      console.log(`[t4-${namespace}] ${event}`, data);
     }
   };
   return { isEnabled, log };

@@ -2,7 +2,7 @@ import {
   MOBILE_DEFAULT_THEME_ID,
   MOBILE_THEME_IDS,
   type MobileThemeId,
-} from "@t3tools/shared/themePalettes";
+} from "@t4tools/shared/themePalettes";
 
 import { SHOWCASE_SCENES, type ShowcaseScene } from "./mobile-showcase-environment.ts";
 
@@ -73,7 +73,7 @@ function resolveShowcaseAndroidAbi(
     return value as NonNullable<ShowcaseAndroidDevice["abi"]>;
   }
   throw new Error(
-    `Unsupported T3_SHOWCASE_ANDROID_ABI '${value}'. Use ${ANDROID_ABIS.join(", ")}.`,
+    `Unsupported T4_SHOWCASE_ANDROID_ABI '${value}'. Use ${ANDROID_ABIS.join(", ")}.`,
   );
 }
 
@@ -161,7 +161,7 @@ const config: ShowcaseConfig = {
       platform: "android",
       avd: "Pixel_10_Pro",
       // Apple Silicon defaults to ARM64; Blacksmith Linux CI overrides to x86_64 for KVM.
-      abi: resolveShowcaseAndroidAbi(process.env.T3_SHOWCASE_ANDROID_ABI),
+      abi: resolveShowcaseAndroidAbi(process.env.T4_SHOWCASE_ANDROID_ABI),
       appearance: "dark",
       theme: DEFAULT_SHOWCASE_THEME,
       viewport: {
@@ -184,7 +184,7 @@ const config: ShowcaseConfig = {
       id: "android-tablet-7",
       platform: "android",
       avd: "Pixel_10_Pro",
-      abi: resolveShowcaseAndroidAbi(process.env.T3_SHOWCASE_ANDROID_ABI),
+      abi: resolveShowcaseAndroidAbi(process.env.T4_SHOWCASE_ANDROID_ABI),
       appearance: "dark",
       theme: DEFAULT_SHOWCASE_THEME,
       viewport: {
@@ -207,7 +207,7 @@ const config: ShowcaseConfig = {
       id: "android-tablet-10",
       platform: "android",
       avd: "Pixel_10_Pro",
-      abi: resolveShowcaseAndroidAbi(process.env.T3_SHOWCASE_ANDROID_ABI),
+      abi: resolveShowcaseAndroidAbi(process.env.T4_SHOWCASE_ANDROID_ABI),
       appearance: "dark",
       theme: DEFAULT_SHOWCASE_THEME,
       viewport: {

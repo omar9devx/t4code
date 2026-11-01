@@ -1,6 +1,6 @@
 import { it as effectIt } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { parseKeybindingShortcut } from "@t3tools/shared/keybindings";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { parseKeybindingShortcut } from "@t4tools/shared/keybindings";
 import * as Effect from "effect/Effect";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -255,7 +255,7 @@ describe("findAccessibleWindow", () => {
   };
 
   const chromeCapture = {
-    title: "Issues · pingdotgg/t3code",
+    title: "Issues · omar9devx/t4code",
     bounds: captured.bounds,
     platform: "darwin" as const,
     bundleId: "com.google.Chrome",
@@ -429,8 +429,8 @@ describe("findAccessibleWindow", () => {
   });
 
   it.each([
-    ["⠋ t3code", "t3code"],
-    ["t3code", "⠙ t3code"],
+    ["⠋ T4CODE", "T4CODE"],
+    ["T4CODE", "⠙ T4CODE"],
   ])("matches a Wayland spinner starting or stopping: %s → %s", (title, name) => {
     const windows = [{ name, bounds: captured.bounds }];
 
@@ -438,10 +438,10 @@ describe("findAccessibleWindow", () => {
   });
 
   it.each([
-    ["⠋ t3code", "⠙ private"],
-    ["t3code ⠋", "t3code ⠙"],
-    ["⠋t3code", "⠙t3code"],
-    ["⠁ t3code", "⠙ t3code"],
+    ["⠋ T4CODE", "⠙ private"],
+    ["T4CODE ⠋", "T4CODE ⠙"],
+    ["⠋T4CODE", "⠙T4CODE"],
+    ["⠁ T4CODE", "⠙ T4CODE"],
     ["⠋", "⠋"],
   ])("does not guess a Wayland title match: %s → %s", (title, name) => {
     expect(
@@ -476,7 +476,7 @@ describe("isWaylandSession", () => {
           const { createServer } = await import("node:net");
           const { tmpdir } = await import("node:os");
           const { join } = await import("node:path");
-          const runtimeDirectory = await mkdtemp(join(tmpdir(), "t3-wayland-"));
+          const runtimeDirectory = await mkdtemp(join(tmpdir(), "t4-wayland-"));
           const socketPath = join(runtimeDirectory, "wayland-0");
           const server = createServer();
           try {
@@ -495,7 +495,7 @@ describe("isWaylandSession", () => {
                 XDG_SESSION_TYPE: "x11",
               }),
             ).toBe(false);
-            expect(isWaylandSession("linux", { XDG_RUNTIME_DIR: "/nonexistent-t3-test" })).toBe(
+            expect(isWaylandSession("linux", { XDG_RUNTIME_DIR: "/nonexistent-t4-test" })).toBe(
               false,
             );
           } finally {

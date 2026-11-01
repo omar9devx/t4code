@@ -1,4 +1,4 @@
-import { makeProviderSettingsSchema, SourceControlProviderKind } from "@t3tools/contracts";
+import { makeProviderSettingsSchema, SourceControlProviderKind } from "@t4tools/contracts";
 import {
   buildCommitUrl,
   changeRequestUrlBelow,
@@ -11,7 +11,7 @@ import {
   projectChangeRequestHost,
   remoteWebOrigin,
   type SourceControlAppSignIn,
-} from "@t3tools/source-control-core/shared/definition";
+} from "@t4tools/source-control-core/shared/definition";
 
 import { gitHubMediaUrl } from "./gitHubMedia.ts";
 import { icon } from "./icon.ts";
@@ -48,7 +48,7 @@ function isRepositoryPath(repository: string): boolean {
 export const APP_SIGN_IN: SourceControlAppSignIn = {
   appName: "T4 Code for GitHub",
   hosts: ["github.com"],
-  installUrl: "https://github.com/apps/t3-code-for-github/installations/new",
+  installUrl: "https://github.com/apps/t4-code-for-github/installations/new",
   revokeUrl: "https://github.com/settings/apps/authorizations",
 };
 

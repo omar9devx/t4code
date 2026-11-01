@@ -1,0 +1,14 @@
+{
+  "description": "Report-only T3→T4 rename suggestions. Disabled entries remain visible as planned migration rules.",
+  "replacements": [
+    { "upstream": "T3 Code", "fork": "T4 Code", "enabled": true },
+    { "upstream": "T3CODE", "fork": "T4CODE", "enabled": false },
+    { "upstream": "t3_code", "fork": "t4_code", "enabled": false },
+    { "upstream": "t3code", "fork": "t4code", "enabled": false },
+    { "upstream": "@t3tools", "fork": "@t4tools", "enabled": false },
+    { "upstream": "t3tools", "fork": "t4tools", "enabled": false },
+    { "upstream": "T3 Connect", "fork": "T4 Connect", "enabled": false },
+    { "upstream": "t3connect", "fork": "t4connect", "enabled": false },
+    { "upstream": "t3_connect", "fork": "t4_connect", "enabled": false }
+  ]
+}

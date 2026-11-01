@@ -1,14 +1,14 @@
 import { useScopedSettingsWriteAllowed } from "./useScopedSettings";
-import { AuthSettingsWriteScope } from "@t3tools/contracts";
-import { EnvironmentId, type T3ProjectFileScript } from "@t3tools/contracts";
+import { AuthSettingsWriteScope } from "@t4tools/contracts";
+import { EnvironmentId, type T4ProjectFileScript } from "@t4tools/contracts";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t3tools/shared/keybindings";
+} from "@t4tools/client-runtime/state/runtime";
+import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t4tools/shared/keybindings";
 import { ChevronDownIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { useT3ProjectFileState } from "../../hooks/useT3ProjectFileScripts";
+import { useT4ProjectFileState } from "../../hooks/useT4ProjectFileScripts";
 import { useEnvironments } from "../../state/environments";
 import {
   EMPTY_PROJECT_SCRIPT_INPUT,
@@ -71,11 +71,11 @@ export function ProjectActionsSettings() {
   );
 
   const representativeMember = target?.projectId ? memberById.get(target.projectId) : undefined;
-  const t3File = useT3ProjectFileState(
+  const t4File = useT4ProjectFileState(
     representativeMember?.environmentId ?? EnvironmentId.make("none"),
     representativeMember?.workspaceRoot ?? null,
   );
-  const importableScripts = t3File.scripts.filter(
+  const importableScripts = t4File.scripts.filter(
     (fileScript) =>
       !scripts.some(
         (script) =>
@@ -83,7 +83,7 @@ export function ProjectActionsSettings() {
           script.name.toLowerCase() === fileScript.name.toLowerCase(),
       ),
   );
-  const importFileScript = async (fileScript: T3ProjectFileScript) => {
+  const importFileScript = async (fileScript: T4ProjectFileScript) => {
     const payload: NewProjectScriptInput = {
       name: fileScript.name,
       command: fileScript.command,
@@ -135,7 +135,7 @@ export function ProjectActionsSettings() {
                 </MenuTrigger>
                 <MenuPopup align="end">
                   <MenuGroup>
-                    <MenuGroupLabel>Import from t3.json</MenuGroupLabel>
+                    <MenuGroupLabel>Import from t4.json</MenuGroupLabel>
                     <p className="px-2 pb-2 text-pretty text-sm text-muted-foreground">
                       Add actions declared by this checkout without editing them first.
                     </p>
@@ -183,10 +183,10 @@ export function ProjectActionsSettings() {
           onEdit={(script) => setRequest(editorRequestForScript(script, keybindings))}
         />
       )}
-      {t3File.status === "invalid" ? (
+      {t4File.status === "invalid" ? (
         <SettingsRow
-          title="t3.json is invalid"
-          description="A t3.json exists in this checkout but fails to parse, so every action and icon it declares is ignored. Check the JSON syntax and icon values."
+          title="t4.json is invalid"
+          description="A t4.json exists in this checkout but fails to parse, so every action and icon it declares is ignored. Check the JSON syntax and icon values."
           className="text-warning"
         />
       ) : null}

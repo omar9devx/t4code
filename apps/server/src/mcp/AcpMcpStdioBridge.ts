@@ -8,7 +8,7 @@ import * as Result from "effect/Result";
 import * as Fiber from "effect/Fiber";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
-import { discardResponseBody, responsePayloads } from "@t3tools/shared/mcpResponsePayloads";
+import { discardResponseBody, responsePayloads } from "@t4tools/shared/mcpResponsePayloads";
 
 /** ACP mandates stdio MCP support; HTTP/SSE support varies. */
 
@@ -68,7 +68,7 @@ export interface McpToolSession {
 
 /**
  * One initialized MCP session over T4 Code's HTTP endpoint, terminated when
- * the scope closes. Used by the ACP terminal fallback and `t3 thread`.
+ * the scope closes. Used by the ACP terminal fallback and `t4 thread`.
  */
 export const mcpToolSession = (
   options: McpToolSessionOptions,
@@ -116,7 +116,7 @@ export const mcpToolSession = (
     method: string,
     params: unknown,
   ): Effect.fn.Return<JsonRpcEnvelope, AcpMcpBridgeError> {
-    const id = `t3-cli-${nextId++}`;
+    const id = `t4-cli-${nextId++}`;
     const responses = yield* send({ jsonrpc: "2.0", id, method, params });
     const envelope = asEnvelope(responses.find((entry) => asEnvelope(entry)?.id === id));
     if (envelope === null || envelope.error !== undefined) {
@@ -167,7 +167,7 @@ function callAcpMcpTool(options: {
   readonly tool: string;
   readonly arguments: Readonly<Record<string, unknown>>;
 }): Effect.Effect<unknown, AcpMcpBridgeError> {
-  return mcpToolSession({ ...options, clientName: "t3-code-acp-cli" }).pipe(
+  return mcpToolSession({ ...options, clientName: "t4-code-acp-cli" }).pipe(
     Effect.flatMap((session) => session.call(options.tool, options.arguments)),
     Effect.scoped,
   );
@@ -324,10 +324,10 @@ export async function runAcpMcpCliFastPath(
   command: "acp-mcp-bridge" | "acp-mcp-call",
   args: ReadonlyArray<string>,
 ): Promise<void> {
-  const endpoint = process.env.T3_ACP_MCP_ENDPOINT;
-  const authorization = process.env.T3_ACP_MCP_AUTHORIZATION;
+  const endpoint = process.env.T4_ACP_MCP_ENDPOINT;
+  const authorization = process.env.T4_ACP_MCP_AUTHORIZATION;
   if (endpoint === undefined || authorization === undefined) {
-    process.stderr.write(`${command} requires T3_ACP_MCP_ENDPOINT and T3_ACP_MCP_AUTHORIZATION.\n`);
+    process.stderr.write(`${command} requires T4_ACP_MCP_ENDPOINT and T4_ACP_MCP_AUTHORIZATION.\n`);
     process.exitCode = 2;
     return;
   }

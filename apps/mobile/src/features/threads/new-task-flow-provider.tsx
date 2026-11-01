@@ -1,5 +1,5 @@
 import { ActiveNewTaskContext } from "../../state/active-new-task";
-import { resolveNewThreadModelSelection } from "@t3tools/shared/usageLimits";
+import { resolveNewThreadModelSelection } from "@t4tools/shared/usageLimits";
 import { useNowMinuteMs } from "../../lib/clock";
 import * as Dialog from "../../components/ui/Dialog";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,15 +11,15 @@ import type {
   ProviderOptionSelection,
   RuntimeMode,
   ServerProvider,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import {
   CommandId,
   DEFAULT_PROVIDER_INTERACTION_MODE,
   MessageId,
   repositoryGroupingKeyOf,
   ThreadId,
-} from "@t3tools/contracts";
-import { threadContextsOutsideEnvironment } from "@t3tools/shared/composerContextReferences";
+} from "@t4tools/contracts";
+import { threadContextsOutsideEnvironment } from "@t4tools/shared/composerContextReferences";
 import * as Arr from "effect/Array";
 import { pipe } from "effect/Function";
 
@@ -70,13 +70,13 @@ import {
   useRemoteConnectionStatus,
   useSavedRemoteConnections,
 } from "../../state/use-remote-environment-registry";
-import { availableScratchWorkspaceRoot } from "@t3tools/client-runtime/operations/projects";
+import { availableScratchWorkspaceRoot } from "@t4tools/client-runtime/operations/projects";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import { EnvironmentProject } from "@t3tools/client-runtime/state/shell";
-import { type VcsRef } from "@t3tools/client-runtime/state/vcs";
+} from "@t4tools/client-runtime/state/runtime";
+import { EnvironmentProject } from "@t4tools/client-runtime/state/shell";
+import { type VcsRef } from "@t4tools/client-runtime/state/vcs";
 import {
   buildHomeProjectScopes,
   sortHomeProjectScopes,
@@ -335,7 +335,7 @@ export function NewTaskFlowProvider(
   const serverConfigs = useServerConfigs();
   const { connectedEnvironments } = useRemoteConnectionStatus();
   const selectedProjectDraftKey = selectedProject ? activeDraftKey : null;
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- creates the persistent draft in the new-task flow store once a project is selected, before the composer mounts
+  // oxlint-disable-next-line T4CODE/no-unreasoned-state-sync -- creates the persistent draft in the new-task flow store once a project is selected, before the composer mounts
   useEffect(() => {
     // A route that names a draft binds that draft, or returns to the picker.
     if (

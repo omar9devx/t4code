@@ -12,7 +12,7 @@ import {
   type DevicePlatform,
   type DevicePlatformAvailability,
   type SimlockDeviceHostConfig,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";
 import * as Duration from "effect/Duration";
@@ -25,8 +25,8 @@ import * as Random from "effect/Random";
 import * as Schema from "effect/Schema";
 import * as Semaphore from "effect/Semaphore";
 import { HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } from "effect/http";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import type { NodeRuntimeUnavailableError } from "@t3tools/shared/nodeRuntime";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import type { NodeRuntimeUnavailableError } from "@t4tools/shared/nodeRuntime";
 
 import * as ServerConfig from "../config.ts";
 import * as ProcessRunner from "../processRunner.ts";
@@ -426,7 +426,7 @@ export const make = Effect.fn("SimlockDeviceHost.make")(function* (
       });
     }
     const suffix = (yield* Random.nextIntBetween(0, 0xffffff)).toString(16).padStart(6, "0");
-    const session = `t3-${suffix}`;
+    const session = `t4-${suffix}`;
     const dir = path.join(hostDir, suffix);
     const configPath = path.join(dir, "agent-device.json");
     yield* writeAgentDeviceConfig(configPath, {

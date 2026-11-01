@@ -1,19 +1,19 @@
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
-import { scopeThreadRef } from "@t3tools/client-runtime/environment";
-import { resolveHandoffEndpoints, type HandoffEndpoints } from "@t3tools/client-runtime/handoff";
-import { resolveModelShortName } from "@t3tools/client-runtime/provider-clients";
+import { scopeThreadRef } from "@t4tools/client-runtime/environment";
+import { resolveHandoffEndpoints, type HandoffEndpoints } from "@t4tools/client-runtime/handoff";
+import { resolveModelShortName } from "@t4tools/client-runtime/provider-clients";
 import {
   normalizeProviderAccentColor,
   resolveProviderInstanceDisplayName,
   shouldShowInstanceBadge,
-} from "@t3tools/client-runtime/state/provider-instance-display";
+} from "@t4tools/client-runtime/state/provider-instance-display";
 import type {
   EnvironmentId,
   OrchestrationV2ProjectedTurnItem,
   ProviderInstanceId,
   ServerProvider,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { Atom } from "effect/reactivity";
 import { useMemo } from "react";
 import { Pressable, View, type ColorValue } from "react-native";

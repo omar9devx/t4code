@@ -4,8 +4,8 @@ import {
   ProjectId,
   type ThreadId,
   VcsProcessSpawnError,
-} from "@t3tools/contracts";
-import { newProjectFolderName } from "@t3tools/shared/path";
+} from "@t4tools/contracts";
+import { newProjectFolderName } from "@t4tools/shared/path";
 import * as Cause from "effect/Cause";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
@@ -108,7 +108,7 @@ export class ManagedProjectFolders extends Context.Service<
       NamedProjectError
     >;
   }
->()("t3/project/ManagedProjectFolders") {}
+>()("t4/project/ManagedProjectFolders") {}
 
 const folderWords = (text: string) =>
   text
@@ -177,7 +177,7 @@ function namedProjectReadme(name: string): string {
     "",
     `# ${name}`,
     "",
-    "Created in [T4 Code](https://t3.codes).",
+    "Created in [T4 Code](https://github.com/omar9devx/t4code).",
     "",
   ].join("\n");
 }

@@ -2,4 +2,4 @@ export {
   CodexAuthCallbackError,
   cancelCodexAuthCallback,
   receiveCodexAuthCallback,
-} from "@t3tools/shared/codexAuthCallback";
+} from "@t4tools/shared/codexAuthCallback";

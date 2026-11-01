@@ -1,4 +1,4 @@
-import type { ClientSettings } from "@t3tools/contracts/settings";
+import type { ClientSettings } from "@t4tools/contracts/settings";
 import { createBrowserHistory, createHashHistory } from "@tanstack/react-router";
 import * as Schema from "effect/Schema";
 

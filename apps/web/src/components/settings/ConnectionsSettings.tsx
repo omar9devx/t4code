@@ -16,12 +16,12 @@ import {
   type DesktopWslState,
   type EnvironmentId,
   resolveEnvironmentMachineKind,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import {
   isAtomCommandInterrupted,
   settlePromise,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@t4tools/client-runtime/state/runtime";
 import * as Cause from "effect/Cause";
 
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
@@ -85,7 +85,7 @@ import {
   supportsDesktopAppUpdate,
 } from "~/versionSkew";
 import { hasCloudPublicConfig } from "~/cloud/publicConfig";
-import { RemoveT3ConnectEnvironmentDialog } from "../clerk/RemoveT3ConnectEnvironmentDialog";
+import { RemoveT4ConnectEnvironmentDialog } from "../clerk/RemoveT4ConnectEnvironmentDialog";
 import { authEnvironment } from "~/state/auth";
 import { environmentCatalog } from "~/connection/catalog";
 import { readEnvironmentScope, useEnvironmentScope } from "~/state/session";
@@ -584,13 +584,13 @@ export function ConnectionsSettings({ view }: { readonly view: "environments" | 
     }
   };
 
-  // Removing a T3 Connect route preserves account registration; use a separate dialog pointing to
+  // Removing a T4 Connect route preserves account registration; use a separate dialog pointing to
   // deregistration.
-  const [pendingT3ConnectRemoval, setPendingT3ConnectRemoval] =
+  const [pendingT4ConnectRemoval, setPendingT4ConnectRemoval] =
     useState<EnvironmentPresentation | null>(null);
   const handleRemoveSavedBackend = async (environment: EnvironmentPresentation) => {
     if (environment.relayManaged && hasCloudPublicConfig()) {
-      setPendingT3ConnectRemoval(environment);
+      setPendingT4ConnectRemoval(environment);
       return;
     }
     const confirmed = await requestConfirmDialog(
@@ -1196,7 +1196,7 @@ export function ConnectionsSettings({ view }: { readonly view: "environments" | 
                 <AlertDialogDescription>
                   {pendingDesktopServerExposureMode === "network-accessible"
                     ? "Let your other devices connect to T4 Code over the network. Pair devices to give them access. T4 Code will restart."
-                    : "Devices connected over your local network will disconnect. Existing tunnels, such as T3 Connect or Tailscale HTTPS, keep working. T4 Code will restart."}
+                    : "Devices connected over your local network will disconnect. Existing tunnels, such as T4 Connect or Tailscale HTTPS, keep working. T4 Code will restart."}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -1508,14 +1508,14 @@ export function ConnectionsSettings({ view }: { readonly view: "environments" | 
         />
       </SettingsSection>
       {hasCloudPublicConfig() ? (
-        <RemoveT3ConnectEnvironmentDialog
-          environmentLabel={pendingT3ConnectRemoval?.label ?? null}
-          environmentId={pendingT3ConnectRemoval?.environmentId ?? null}
-          onCancel={() => setPendingT3ConnectRemoval(null)}
+        <RemoveT4ConnectEnvironmentDialog
+          environmentLabel={pendingT4ConnectRemoval?.label ?? null}
+          environmentId={pendingT4ConnectRemoval?.environmentId ?? null}
+          onCancel={() => setPendingT4ConnectRemoval(null)}
           onConfirm={() => {
-            if (!pendingT3ConnectRemoval) return;
-            setPendingT3ConnectRemoval(null);
-            void removeSavedBackend(pendingT3ConnectRemoval);
+            if (!pendingT4ConnectRemoval) return;
+            setPendingT4ConnectRemoval(null);
+            void removeSavedBackend(pendingT4ConnectRemoval);
           }}
         />
       ) : null}

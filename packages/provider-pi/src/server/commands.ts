@@ -1,4 +1,4 @@
-import { type ServerProviderSkill, type ServerProviderSlashCommand } from "@t3tools/contracts";
+import { type ServerProviderSkill, type ServerProviderSlashCommand } from "@t4tools/contracts";
 import * as Predicate from "effect/Predicate";
 
 // Pi RPC get_commands omits TUI builtins. Advertise /compact so T4 Code can map it to RPC compact.

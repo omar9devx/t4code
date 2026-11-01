@@ -20,16 +20,16 @@ import type { ThreadMoveDestination } from "./threadOrder";
 import type {
   EnvironmentProject,
   EnvironmentThreadShell,
-} from "@t3tools/client-runtime/state/shell";
-import type { EnvironmentThreadSearchMatch } from "@t3tools/client-runtime/state/thread-search";
+} from "@t4tools/client-runtime/state/shell";
+import type { EnvironmentThreadSearchMatch } from "@t4tools/client-runtime/state/thread-search";
 import {
   formatWorkingDurationLabel,
   resolveThreadWorkingStartedAt,
-} from "@t3tools/client-runtime/state/models";
-import { AuthOrchestrationOperateScope, type EnvironmentMachineKind } from "@t3tools/contracts";
-import type { SnoozePresetSetting } from "@t3tools/contracts/settings";
-import { canSnooze } from "@t3tools/client-runtime/state/thread-settled";
-import { threadChipCopyTarget } from "@t3tools/client-runtime/thread-reference";
+} from "@t4tools/client-runtime/state/models";
+import { AuthOrchestrationOperateScope, type EnvironmentMachineKind } from "@t4tools/contracts";
+import type { SnoozePresetSetting } from "@t4tools/contracts/settings";
+import { canSnooze } from "@t4tools/client-runtime/state/thread-settled";
+import { threadChipCopyTarget } from "@t4tools/client-runtime/thread-reference";
 import type { MenuAction } from "@react-native-menu/menu";
 import { memo, useCallback, useMemo, useState, type ComponentProps } from "react";
 import { Platform, Pressable, useWindowDimensions, View } from "react-native";
@@ -46,8 +46,8 @@ import { useNowAfter } from "../../lib/clock";
 import { cn } from "../../lib/cn";
 import { copyTextWithHaptic, tryCopyTextWithHaptic } from "../../lib/copyTextWithHaptic";
 import { copyThreadReference } from "../../lib/copyThreadReference";
-import { threadTranscriptMarkdown } from "@t3tools/shared/threadTranscriptMarkdown";
-import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
+import { threadTranscriptMarkdown } from "@t4tools/shared/threadTranscriptMarkdown";
+import { squashAtomCommandFailure } from "@t4tools/client-runtime/state/runtime";
 import { useUniwindTheme } from "../../lib/useUniwindTheme";
 import { useEnvironmentScope } from "../../state/session";
 import type { PendingNewTask } from "../../state/use-pending-new-tasks";
@@ -191,7 +191,7 @@ function ThreadListV2Section(props: {
     <>
       <Text
         className={cn(
-          "text-xs font-t3-medium",
+          "text-xs font-t4-medium",
           sidebarPane
             ? "text-drawer-foreground-muted"
             : snoozed
@@ -330,8 +330,8 @@ export const ThreadListV2ShowMoreRow = memo(function ThreadListV2ShowMoreRow(pro
       <Text
         className={
           props.pane === "sidebar"
-            ? "text-xs font-t3-medium text-drawer-foreground-muted"
-            : "text-xs font-t3-medium text-foreground-muted"
+            ? "text-xs font-t4-medium text-drawer-foreground-muted"
+            : "text-xs font-t4-medium text-foreground-muted"
         }
       >
         {label}
@@ -434,7 +434,7 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
         ) : null}
         <Text
           className={cn(
-            "flex-1 text-sm font-t3-medium text-foreground-muted",
+            "flex-1 text-sm font-t4-medium text-foreground-muted",
             sidebarPane && "text-drawer-foreground-muted",
           )}
           numberOfLines={1}
@@ -464,7 +464,7 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
       </View>
       <Text
         className={cn(
-          "mt-1 text-base font-t3-medium text-foreground",
+          "mt-1 text-base font-t4-medium text-foreground",
           sidebarPane && "text-drawer-foreground",
         )}
         numberOfLines={1}
@@ -1104,7 +1104,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
         <Text
           className={cn(
             "flex-1 text-base",
-            !recede && "font-t3-medium",
+            !recede && "font-t4-medium",
             selected
               ? selectedThreadRowColors.foregroundClassName
               : rowAppearance.foregroundClassName,
@@ -1154,7 +1154,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
               />
               <Text
                 className={cn(
-                  "text-xs font-t3-bold",
+                  "text-xs font-t4-bold",
                   selected
                     ? selectedThreadRowColors.foregroundClassName
                     : "text-warning-foreground",
@@ -1178,7 +1178,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
               />
               <Text
                 className={cn(
-                  "text-xs font-t3-bold",
+                  "text-xs font-t4-bold",
                   (status === "working" || status === "waiting") && "tabular-nums",
                   selected ? selectedThreadRowColors.foregroundClassName : statusLabel.className,
                 )}

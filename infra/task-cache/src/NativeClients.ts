@@ -5,7 +5,7 @@ import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
 import { developerIdentity } from "./developerAuth.ts";
 
-export const routePrefix = "/projects/t3code/native-clients/";
+export const routePrefix = "/projects/T4CODE/native-clients/";
 
 export class NativeClientsError extends Schema.TaggedError<NativeClientsError>()(
   "NativeClientsError",
@@ -21,12 +21,12 @@ export class Bindings extends Context.Service<
     readonly readLimit: Cloudflare.RateLimit;
     readonly storeLimit: Cloudflare.RateLimit;
   }
->()("@t3tools/task-cache/NativeClients/Bindings") {}
+>()("@t4tools/task-cache/NativeClients/Bindings") {}
 
 export class NativeClients extends Context.Service<
   NativeClients,
   { readonly handle: (request: Request) => Effect.Effect<Response> }
->()("@t3tools/task-cache/NativeClients") {}
+>()("@t4tools/task-cache/NativeClients") {}
 
 const CompleteBody = Schema.fromJsonString(
   Schema.Struct({
@@ -56,7 +56,7 @@ const make = Effect.gen(function* () {
   const limit = Effect.fn("NativeClients.limit")(function* (writing: boolean) {
     const allowed = yield* r2(() =>
       (writing ? bindings.storeLimit : bindings.readLimit).limit({
-        key: writing ? "t3code:native-store" : "t3code:native-read",
+        key: writing ? "T4CODE:native-store" : "T4CODE:native-read",
       }),
     );
     if (!allowed.success)
@@ -129,14 +129,14 @@ const make = Effect.gen(function* () {
         });
       }
       if (operation === "create") {
-        const digest = request.headers.get("x-t3-digest") ?? "";
+        const digest = request.headers.get("x-t4-digest") ?? "";
         if (!digestPattern.test(digest))
           return yield* new NativeClientsError({ status: 400, reason: "invalid_digest" });
         if (yield* r2(() => bindings.CLIENTS.head(key))) {
           yield* Effect.annotateCurrentSpan({ "native.result": "exists" });
           return Response.json({ exists: true });
         }
-        const buildMs = request.headers.get("x-t3-build-ms") ?? "";
+        const buildMs = request.headers.get("x-t4-build-ms") ?? "";
         const upload = yield* r2(() =>
           bindings.CLIENTS.createMultipartUpload(key, {
             customMetadata: {

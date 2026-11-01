@@ -1,18 +1,18 @@
-import { scopeThreadRef } from "@t3tools/client-runtime/environment";
-import { deriveThreadQueueWorkflowState } from "@t3tools/client-runtime/state/thread-workflows";
-import { assistantCitationsToPlainText } from "@t3tools/shared/assistantCitations";
+import { scopeThreadRef } from "@t4tools/client-runtime/environment";
+import { deriveThreadQueueWorkflowState } from "@t4tools/client-runtime/state/thread-workflows";
+import { assistantCitationsToPlainText } from "@t4tools/shared/assistantCitations";
 import {
   isAttachmentOnlyBootstrapPrompt,
   replaceComposerContextReferences,
-} from "@t3tools/shared/composerContextReferences";
+} from "@t4tools/shared/composerContextReferences";
 import type {
   ChatAttachment as ContractChatAttachment,
   EnvironmentId,
   MessageId,
   RunId,
   ThreadId,
-} from "@t3tools/contracts";
-import { resolveUserMessagePresentation } from "@t3tools/client-runtime/user-message";
+} from "@t4tools/contracts";
+import { resolveUserMessagePresentation } from "@t4tools/client-runtime/user-message";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowUpIcon,
@@ -34,7 +34,7 @@ import { isImageAttachment, type ChatMessage } from "../../types";
 import { cn } from "~/lib/utils";
 import { Button, InlineButton } from "../ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
-import type { TimestampFormat } from "@t3tools/contracts/settings";
+import type { TimestampFormat } from "@t4tools/contracts/settings";
 import { GuestMessageName } from "./guestMessageStyle";
 import { TimelineRowTimestamp } from "./TimelineRowParts";
 import { FoldedMessageHeader, useScheduledTaskTitle } from "./TimelineUserMessageRow";
@@ -434,7 +434,7 @@ function QueuedMessage(props: {
 
   return (
     <>
-      {attribution === "t3code" ? (
+      {attribution === "T4CODE" ? (
         <p className="me-1 text-2xs text-muted-foreground/70">Sent by T4 Code</p>
       ) : null}
       {presentation?.guestName === undefined ? null : (

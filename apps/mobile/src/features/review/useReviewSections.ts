@@ -1,9 +1,9 @@
 import { useAtomValue } from "@effect/atom-react";
-import { resolveFilesystemReadAccess } from "@t3tools/client-runtime/state/filesystem";
+import { resolveFilesystemReadAccess } from "@t4tools/client-runtime/state/filesystem";
 import { Atom } from "effect/reactivity";
 
-import { deriveThreadCheckpointSummaries } from "@t3tools/client-runtime/state/thread-checkpoints";
-import type { EnvironmentId, ReviewDiffPreviewSource, ThreadId } from "@t3tools/contracts";
+import { deriveThreadCheckpointSummaries } from "@t4tools/client-runtime/state/thread-checkpoints";
+import type { EnvironmentId, ReviewDiffPreviewSource, ThreadId } from "@t4tools/contracts";
 
 import { useCheckpointDiff } from "../../state/queries";
 import { useEnvironmentQuery } from "../../state/query";

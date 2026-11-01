@@ -2,9 +2,9 @@ import {
   isAtomCommandInterrupted,
   runAtomCommand,
   squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
-import { AuthOrchestrationOperateScope } from "@t3tools/contracts";
+} from "@t4tools/client-runtime/state/runtime";
+import type { EnvironmentThreadShell } from "@t4tools/client-runtime/state/shell";
+import { AuthOrchestrationOperateScope } from "@t4tools/contracts";
 import * as Haptics from "expo-haptics";
 
 import * as Dialog from "../../components/ui/Dialog";

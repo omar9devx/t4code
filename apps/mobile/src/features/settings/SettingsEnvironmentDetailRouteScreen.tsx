@@ -6,9 +6,9 @@ import {
   AuthOrchestrationReadScope,
   type EnvironmentId,
   type ServerProvider,
-} from "@t3tools/contracts";
-import { settlePromise, squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
-import { sessionPermissionsUnavailableMessage } from "@t3tools/shared/authScopeOptions";
+} from "@t4tools/contracts";
+import { settlePromise, squashAtomCommandFailure } from "@t4tools/client-runtime/state/runtime";
+import { sessionPermissionsUnavailableMessage } from "@t4tools/shared/authScopeOptions";
 import * as Cause from "effect/Cause";
 import * as Exit from "effect/Exit";
 import { AsyncResult } from "effect/reactivity";
@@ -310,7 +310,7 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                         <View className="gap-1 p-4">
                           <View className="flex-row items-center gap-2">
                             <ProviderIcon provider={provider.driver} size={18} />
-                            <Text className="min-w-0 flex-1 text-base font-t3-medium text-foreground">
+                            <Text className="min-w-0 flex-1 text-base font-t4-medium text-foreground">
                               {provider.displayName ?? provider.driver}
                             </Text>
                           </View>

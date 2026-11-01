@@ -1,7 +1,7 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as ModelManifest from "./ModelManifest.ts";
 import { expect, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Crypto from "effect/Crypto";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
@@ -19,7 +19,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/process";
 import * as CodexInstallation from "./CodexInstallation.ts";
 
 const archive = Buffer.from(
-  "H4sIAAAAAAAC/+3W0W6DIBQGYB/FcD0sKNSkD7J7aom6tmAQtzXL3n3QZM3qdWVt+n8XoCckJp78wLY3q8bu9Ge2HBbUUp7nYD4H8s9zrNdSsCxnWQLT6JULn8ye09K9h/u2/c0/jSM9xqGzo0+bf3Gdf15WQiD/Kdy61/CA+z8dlO9Wrv2387+c5Z9VZY38p7BY0+Gh8t/sVauLt9Ga9Pnnop7ln1e4/6fxRQ7qZCf/qt3YW0M2OX/JyfvljbCCy3XBSaiGH9VqH4tKuaZbC6qG4aDpTrmP3sQV2nh3Gmxvzqsud0vyjaABAAAAAAAAAAAAAAAk8gOq19rvACgAAA==",
+  "H4sIAAAAAAAC/+3W0W6DIBQGYB/FcD0sKNSkD7J7aom6tmAQtzXL3n3QZM3qdWVt+n8XoCckJp78wLY3q8bu9Ge2HBbUUp7nYD4H8s9zrNdSsCxnWQLT6JULn8ye09K9h/u2/c0/jSM9xqGzo0+bf3Gdf15WQiD/Kdy61/CA+z8dlO9Wrv2387+c5Z9VZY38p7BY0+Gh8t/sVauLt9Ga9Pnnop7ln1e4/6fxRQ7qZCf/qt4YW0M2OX/JyfvljbCCy3XBSaiGH9VqH4tKuaZbC6qG4aDpTrmP3sQV2nh3Gmxvzqsud0vyjaABAAAAAAAAAAAAAAAk8gOq19rvACgAAA==",
   "base64",
 );
 const asset = {
@@ -43,7 +43,7 @@ const makeHarness = Effect.fn("test.makeCodexInstallation")(function* (
 ) {
   const fs = yield* FileSystem.FileSystem;
   const baseDir =
-    input.baseDir ?? (yield* fs.makeTempDirectoryScoped({ prefix: "t3-codex-install-test-" }));
+    input.baseDir ?? (yield* fs.makeTempDirectoryScoped({ prefix: "t4-codex-install-test-" }));
   const localDirectory = `${baseDir}/local`;
   const localBinaryPath = `${localDirectory}/codex${input.platform === "win32" ? ".exe" : ""}`;
   const probeLog = `${baseDir}/local-probes.txt`;
@@ -235,7 +235,7 @@ it.effect("rechecks a cached local executable when the shared manifest policy ch
       compatibility: [
         {
           driver: "codex",
-          t3CodeRange: ">=0.0.42",
+          T4CODERange: ">=0.0.42",
           ranges: [
             { range: ">=0.156.1", status: "supported" },
             { range: "<0.156.1", status: "broken" },
@@ -413,7 +413,7 @@ it.effect(
   () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const directory = yield* fs.makeTempDirectoryScoped({ prefix: "t3-codex-install-test-" });
+      const directory = yield* fs.makeTempDirectoryScoped({ prefix: "t4-codex-install-test-" });
       const baseDir = `${directory}/not-a-directory`;
       yield* fs.writeFileString(baseDir, "existing file");
       const h = yield* makeHarness({ baseDir });

@@ -3,7 +3,7 @@ import {
   UsageDay,
   type UsageProviderKind,
   type UsageSummary,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import { usageEnvironmentProgress, usageLoadingState, usageProgress } from "./usageProgress.ts";

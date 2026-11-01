@@ -2,7 +2,7 @@ import type {
   GitRunStackedActionInput,
   GitStackedAction,
   VcsStatusResult,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { type ChangeRequestTerminology, sourceControlClients } from "../sourceControlClients.ts";
 
 export type GitActionIconName = "commit" | "push" | "pr";

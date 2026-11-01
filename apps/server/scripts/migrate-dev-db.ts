@@ -4,7 +4,7 @@ import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as NodeOS from "node:os";
 import * as NodeURL from "node:url";
-import { resolveWorktreeT3Home } from "@t3tools/shared/devHome";
+import { resolveWorktreeT4Home } from "@t4tools/shared/devHome";
 import * as Console from "effect/Console";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -18,14 +18,14 @@ import { Command, Flag } from "effect/cli";
 import * as ProjectionStore from "../src/orchestration-v2/ProjectionStore.ts";
 import { rebuildMessageSearch } from "../src/orchestration-v2/messageSearchIndex.ts";
 import { migrationManifest, runMigrations } from "../src/persistence/Migrations.ts";
-import * as NodeSqliteClient from "@t3tools/shared/nodeSqliteClient";
+import * as NodeSqliteClient from "@t4tools/shared/nodeSqliteClient";
 
 export class MigrateDevDbNotInWorktreeError extends Schema.TaggedError<MigrateDevDbNotInWorktreeError>()(
   "MigrateDevDbNotInWorktreeError",
   {},
 ) {
   override get message(): string {
-    return "Not inside a linked git worktree. Pass --base-dir to target an isolated .t3 directory.";
+    return "Not inside a linked git worktree. Pass --base-dir to target an isolated .t4 directory.";
   }
 }
 
@@ -34,7 +34,7 @@ export class MigrateDevDbSharedHomeError extends Schema.TaggedError<MigrateDevDb
   {},
 ) {
   override get message(): string {
-    return "Refusing to rebuild the shared ~/.t3 database. Use an isolated --base-dir.";
+    return "Refusing to rebuild the shared T4 database. Use an isolated --base-dir.";
   }
 }
 
@@ -440,7 +440,14 @@ export const runMigrateDevDb = Effect.fn("runMigrateDevDb")(function* (
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
 
-  const sharedHome = path.resolve(options.sharedHome ?? path.join(NodeOS.homedir(), ".t3"));
+  const defaultT4Home = path.join(NodeOS.homedir(), ".t4");
+  const legacyT3Home = path.join(NodeOS.homedir(), ".t3");
+  const defaultHome =
+    options.sharedHome ??
+    ((yield* fs.exists(defaultT4Home)) || !(yield* fs.exists(legacyT3Home))
+      ? defaultT4Home
+      : legacyT3Home);
+  const sharedHome = path.resolve(defaultHome);
   const sourcePath = path.resolve(
     input.source ?? path.join(sharedHome, "userdata", "statev2.sqlite"),
   );
@@ -448,7 +455,7 @@ export const runMigrateDevDb = Effect.fn("runMigrateDevDb")(function* (
   const baseDir =
     input.baseDir !== undefined
       ? path.resolve(input.baseDir)
-      : yield* resolveWorktreeT3Home(process.cwd());
+      : yield* resolveWorktreeT4Home(process.cwd());
   if (baseDir === undefined) {
     return yield* new MigrateDevDbNotInWorktreeError();
   }
@@ -459,11 +466,16 @@ export const runMigrateDevDb = Effect.fn("runMigrateDevDb")(function* (
   if (!(yield* fs.exists(sourcePath))) {
     return yield* new MigrateDevDbSourceMissingError({ sourcePath });
   }
-  const [canonicalBaseDir, canonicalSharedHome] = yield* Effect.all([
+  const sharedHomes = [
+    sharedHome,
+    path.join(NodeOS.homedir(), ".t4"),
+    path.join(NodeOS.homedir(), ".t3"),
+  ];
+  const [canonicalBaseDir, canonicalSharedHomes] = yield* Effect.all([
     fs.realPath(baseDir).pipe(Effect.orElseSucceed(() => baseDir)),
-    fs.realPath(sharedHome).pipe(Effect.orElseSucceed(() => sharedHome)),
+    Effect.all(sharedHomes.map((home) => fs.realPath(home).pipe(Effect.orElseSucceed(() => home)))),
   ]);
-  if (canonicalBaseDir === canonicalSharedHome) {
+  if (canonicalSharedHomes.includes(canonicalBaseDir)) {
     return yield* new MigrateDevDbSharedHomeError();
   }
   // Both destination and snapshot are deleted below; reject sources resolving to either.
@@ -587,11 +599,11 @@ export const migrateDevDbCommand = Command.make(
     ),
     baseDir: Flag.String("base-dir").pipe(
       Flag.optional,
-      Flag.withDescription("Isolated .t3 directory. Defaults to the current worktree's .t3."),
+      Flag.withDescription("Isolated .t4 directory. Defaults to the current worktree's .t4."),
     ),
     source: Flag.String("source").pipe(
       Flag.optional,
-      Flag.withDescription("Source database. Defaults to ~/.t3/userdata/statev2.sqlite."),
+      Flag.withDescription("Source database. Defaults to the T4 home database."),
     ),
   },
   ({ projects, threadsPerProject, baseDir, source }) =>
@@ -618,7 +630,7 @@ export const migrateDevDbCommand = Command.make(
     }),
 ).pipe(
   Command.withDescription(
-    "Rebuild the worktree dev database from a pruned snapshot of the real ~/.t3 data, then run migrations.",
+    "Rebuild the worktree dev database from a pruned snapshot of the T4 home data, then run migrations.",
   ),
 );
 

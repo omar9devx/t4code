@@ -1,11 +1,11 @@
 import {
   squashAtomCommandFailure,
   type AtomCommandResult,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@t4tools/client-runtime/state/runtime";
 import type {
   PullRequestDiffFileContentsInput,
   PullRequestDiffFileContentsResult,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 
 import { createNativeReviewDiffSourceLoader } from "../diffs/nativeReviewDiffSource";
 import {

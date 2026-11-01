@@ -36,7 +36,7 @@ import {
   type ProviderInstanceId,
   type RunId,
   type RuntimeRequestId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import type * as Cause from "effect/Cause";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";
@@ -52,40 +52,40 @@ import * as Schema from "effect/Schema";
 import * as Semaphore from "effect/Semaphore";
 import * as Stream from "effect/Stream";
 
-import * as ProviderHost from "@t3tools/provider-core/server/ProviderHost";
+import * as ProviderHost from "@t4tools/provider-core/server/ProviderHost";
 import * as OpenCode2Client from "./OpenCode2Client.ts";
 import * as OpenCode2Server from "./OpenCode2Server.ts";
 import * as OpenCodeRuntime from "../OpenCodeRuntime.ts";
 import { readableProviderErrorMessage } from "../providerErrorMessage.ts";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
-import { buildRuntimeInstructions } from "@t3tools/provider-core/server/runtimeInstructions";
-import { t3OrchestrationSystemPrompt } from "@t3tools/provider-core/server/orchestrationInstructions";
-import { SKILL_MENTION_PATTERN } from "@t3tools/shared/composerInlineTokens";
-import * as KeyedLock from "@t3tools/shared/KeyedLock";
-import { getModelSelectionStringOptionValue, modelSelectionsEqual } from "@t3tools/shared/model";
-import { causeErrorTag } from "@t3tools/shared/observability";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
+import { buildRuntimeInstructions } from "@t4tools/provider-core/server/runtimeInstructions";
+import { t4OrchestrationSystemPrompt } from "@t4tools/provider-core/server/orchestrationInstructions";
+import { SKILL_MENTION_PATTERN } from "@t4tools/shared/composerInlineTokens";
+import * as KeyedLock from "@t4tools/shared/KeyedLock";
+import { getModelSelectionStringOptionValue, modelSelectionsEqual } from "@t4tools/shared/model";
+import { causeErrorTag } from "@t4tools/shared/observability";
 
 import {
   isProviderNativeImageAttachment,
   providerMessageTextWithAttachmentPaths,
-} from "@t3tools/provider-core/server/attachmentPrompt";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
+} from "@t4tools/provider-core/server/attachmentPrompt";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
 import {
   backgroundWorkNotification,
   type BackgroundWorkReport,
-} from "@t3tools/provider-core/server/notification";
-import * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
+} from "@t4tools/provider-core/server/notification";
+import * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
 import {
   makeProviderFailure,
   makeProviderRetryTurnItem,
-} from "@t3tools/provider-core/server/failure";
+} from "@t4tools/provider-core/server/failure";
 import {
   makeSubagentChildThread,
   makeSubagentConversationArtifacts,
   subagentThreadTitle,
-} from "@t3tools/provider-core/server/subagentProjection";
-import * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
-import { turnScopedSelectionTransition } from "@t3tools/provider-core/server/selectionTransition";
+} from "@t4tools/provider-core/server/subagentProjection";
+import * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
+import { turnScopedSelectionTransition } from "@t4tools/provider-core/server/selectionTransition";
 import { OPENCODE_PROVIDER, openCodePermissionRequestKind } from "../adapter.ts";
 import { openCodeToolTurnItem } from "../toolItems.ts";
 
@@ -347,14 +347,14 @@ interface PendingRequest {
 const rule = (action: string, effect: Rule["effect"]): Rule => ({ action, resource: "*", effect });
 
 /** OpenCode hides tools for names over 64 chars and rejects names over 100; hash long thread IDs. */
-export const t3McpServerName = Effect.fn("t3McpServerName")(function* (threadId: string) {
-  const name = `t3-code-${threadId.replaceAll(/[^a-zA-Z0-9_-]/g, "_")}`;
+export const t4McpServerName = Effect.fn("t4McpServerName")(function* (threadId: string) {
+  const name = `t4-code-${threadId.replaceAll(/[^a-zA-Z0-9_-]/g, "_")}`;
   if (name.length <= 64) return name;
   const crypto = yield* Crypto.Crypto;
   const digest = yield* crypto
     .digest("SHA-256", new TextEncoder().encode(threadId))
     .pipe(Effect.orDie);
-  return `t3-code-${Hex.encode(digest).slice(0, 16)}`;
+  return `t4-code-${Hex.encode(digest).slice(0, 16)}`;
 });
 
 // Last match wins: deny all threads' T4 Code servers, then allow only this thread's.
@@ -362,7 +362,7 @@ const mcpRules = (mcpServerName: string | null): ReadonlyArray<Rule> =>
   mcpServerName === null
     ? []
     : [
-        { action: "t3-code-*", resource: "*", effect: "deny" },
+        { action: "t4-code-*", resource: "*", effect: "deny" },
         { action: `${mcpServerName}_*`, resource: "*", effect: "allow" },
       ];
 
@@ -520,7 +520,7 @@ const isWakeTurn = (turn: OrchestrationV2ProviderTurn) =>
   turn.nativeTurnRef?.nativeId?.includes(":wake:") === true;
 
 const INTERRUPT_TIMEOUT = "10 seconds";
-const INSTRUCTIONS_KEY = "t3-code";
+const INSTRUCTIONS_KEY = "t4-code";
 const RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = "2 seconds";
 const RECONCILE_TIMEOUT = "25 seconds";
@@ -555,9 +555,9 @@ type ModelRef = ReturnType<typeof Model.Ref.make>;
 // msg_ IDs cannot cross sessions; include session identity because T4 Code IDs repeat across environments.
 // Pre-acknowledgement IDs also establish fork/rollback boundaries.
 const turnPromptId = (sessionId: string, attemptId: string) =>
-  SessionMessage.ID.make(`msg_t3_turn_${sessionId}:${attemptId}`);
+  SessionMessage.ID.make(`msg_t4_turn_${sessionId}:${attemptId}`);
 const steerPromptId = (sessionId: string, messageId: string) =>
-  SessionMessage.ID.make(`msg_t3_steer_${sessionId}:${messageId}`);
+  SessionMessage.ID.make(`msg_t4_steer_${sessionId}:${messageId}`);
 
 const promptOf = (turn: OrchestrationV2ProviderTurn) => {
   const nativeId = turn.nativeTurnRef?.nativeId;
@@ -657,7 +657,7 @@ export const make = Effect.fn("OpenCode2Adapter.make")(function* (instanceId: Pr
   const crypto = yield* Crypto.Crypto;
   const driver = OPENCODE_PROVIDER;
   const mcpServerNameFor = (threadId: string) =>
-    t3McpServerName(threadId).pipe(Effect.provideService(Crypto.Crypto, crypto));
+    t4McpServerName(threadId).pipe(Effect.provideService(Crypto.Crypto, crypto));
 
   const borrow = Effect.gen(function* () {
     const lent = yield* Deferred.make<
@@ -3063,7 +3063,7 @@ export const make = Effect.fn("OpenCode2Adapter.make")(function* (instanceId: Pr
       }
       const instructions = [
         buildRuntimeInstructions({ harness: "OpenCode", model: turnInput.modelSelection.model }),
-        t3OrchestrationSystemPrompt(
+        t4OrchestrationSystemPrompt(
           mcpAvailable,
           mcpSession?.capabilities?.has("device") === true,
           mcpSession?.capabilities?.has("computer-use") === true,

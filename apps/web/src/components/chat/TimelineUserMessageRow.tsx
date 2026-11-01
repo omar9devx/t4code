@@ -1,5 +1,5 @@
 import { InlineAudioPreview } from "../files/InlineAudioPreview";
-import { filePreviewKind } from "@t3tools/shared/filePreview";
+import { filePreviewKind } from "@t4tools/shared/filePreview";
 import { findRevealRef } from "./markdownFindContext";
 import {
   type EnvironmentId,
@@ -7,13 +7,13 @@ import {
   type ScheduledTaskId,
   type ServerProviderSkill,
   ThreadId,
-} from "@t3tools/contracts";
-import { resolveUserMessagePresentation } from "@t3tools/client-runtime/user-message";
+} from "@t4tools/contracts";
+import { resolveUserMessagePresentation } from "@t4tools/client-runtime/user-message";
 import { Link } from "@tanstack/react-router";
 import { useQuietThreadShell } from "../../state/entities";
 import { useEnvironmentQuery } from "../../state/query";
 import { serverEnvironment } from "../../state/server";
-import { replaceComposerContextReferences } from "@t3tools/shared/composerContextReferences";
+import { replaceComposerContextReferences } from "@t4tools/shared/composerContextReferences";
 import { memo, use, useState, type ReactNode } from "react";
 import {
   createMessageAttachmentPreviewProjector,
@@ -65,12 +65,12 @@ import {
 import {
   collectComposerContextReferences,
   formatComposerContextReference,
-} from "@t3tools/shared/composerContextReferences";
+} from "@t4tools/shared/composerContextReferences";
 import {
   COMPOSER_CONTEXT_CLIPBOARD_MIME,
   encodeComposerContextClipboardHtml,
   encodeComposerContextFragment,
-} from "@t3tools/shared/composerContextClipboard";
+} from "@t4tools/shared/composerContextClipboard";
 import { chatMarkdownClipboardPayload } from "../../markdown-clipboard";
 import type { ChatMarkdownContextReference } from "../ChatMarkdown";
 import { cn } from "~/lib/utils";
@@ -812,10 +812,10 @@ function UserTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "message" 
       className="group @container flex flex-col items-end gap-1"
       data-user-message-attribution={folded ? "agent" : undefined}
     >
-      {userMessage.attribution === "t3code" ? (
+      {userMessage.attribution === "T4CODE" ? (
         <p
           className="me-1 text-2xs text-muted-foreground/70"
-          data-user-message-attribution="t3code"
+          data-user-message-attribution="T4CODE"
         >
           Sent by T4 Code
         </p>

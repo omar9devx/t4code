@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect/atom-react";
-import type { EnvironmentId } from "@t3tools/contracts";
-import { isWindowsAbsolutePath } from "@t3tools/shared/path";
+import type { EnvironmentId } from "@t4tools/contracts";
+import { isWindowsAbsolutePath } from "@t4tools/shared/path";
 import { useState } from "react";
 
 import { primaryServerKeybindingsAtom } from "~/state/server";

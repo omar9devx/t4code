@@ -135,7 +135,7 @@ const withIdentity = <A, E, R>(
                     input.legacyPathExists === true && /T4 Code \((Alpha|Dev)\)/.test(path),
                   ),
             readFileString: () =>
-              Effect.succeed(input.packageJson ?? '{"t3codeCommitHash":"abcdef1234567890"}'),
+              Effect.succeed(input.packageJson ?? '{"T4CODECommitHash":"abcdef1234567890"}'),
           }),
         ),
         Layer.provideMerge(layerAssets(input.pngIconPath ?? Option.none())),
@@ -176,7 +176,7 @@ describe("DesktopAppIdentity", () => {
   );
 
   it.effect.each([
-    { stage: "Beta", environment: {} },
+    { stage: "Stable", environment: {} },
     {
       stage: "Nightly",
       environment: { appVersion: "0.0.43-nightly.20260929.2428" },

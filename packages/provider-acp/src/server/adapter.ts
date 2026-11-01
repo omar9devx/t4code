@@ -31,13 +31,13 @@ import {
   type ThreadTokenUsageSnapshot,
   type ThreadId,
   type TurnTokenUsage,
-} from "@t3tools/contracts";
-import { AgentScope, AgentScopeThreadId } from "@t3tools/shared/AgentScope";
-import { HTML_RENDER_TOOL_NAME } from "@t3tools/shared/htmlRender";
-import { modelSelectionsEqual } from "@t3tools/shared/model";
-import { type SelfInvocation, selfInvocationArgs } from "@t3tools/shared/nodeRuntime";
-import { resolveT3McpToolId } from "@t3tools/shared/t3McpToolPresentation";
-import { compactDynamicToolOutput, htmlRenderFromToolItem } from "@t3tools/shared/toolOutput";
+} from "@t4tools/contracts";
+import { AgentScope, AgentScopeThreadId } from "@t4tools/shared/AgentScope";
+import { HTML_RENDER_TOOL_NAME } from "@t4tools/shared/htmlRender";
+import { modelSelectionsEqual } from "@t4tools/shared/model";
+import { type SelfInvocation, selfInvocationArgs } from "@t4tools/shared/nodeRuntime";
+import { resolveT4McpToolId } from "@t4tools/shared/t4McpToolPresentation";
+import { compactDynamicToolOutput, htmlRenderFromToolItem } from "@t4tools/shared/toolOutput";
 import { FILE_HEADERS_ONLY, formatPatch, structuredPatch } from "diff";
 import * as Cause from "effect/Cause";
 import * as Crypto from "effect/Crypto";
@@ -62,12 +62,12 @@ import * as EffectAcpErrors from "effect-acp/errors";
 import type * as EffectAcpProtocol from "effect-acp/protocol";
 import type * as EffectAcpSchema from "effect-acp/compat";
 
-import { formatReadToolLabel, formatSearchToolLabel } from "@t3tools/shared/toolActivity";
-import * as ProviderHost from "@t3tools/provider-core/server/ProviderHost";
+import { formatReadToolLabel, formatSearchToolLabel } from "@t4tools/shared/toolActivity";
+import * as ProviderHost from "@t4tools/provider-core/server/ProviderHost";
 import { makeAcpMcpOverAcpBridge, type AcpMcpOverAcpBridge } from "./mcpOverAcpBridge.ts";
-import { mcpToolPresentation } from "@t3tools/provider-core/server/mcpToolPresentation";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
-import * as McpProviderSession from "@t3tools/provider-core/server/mcpSession";
+import { mcpToolPresentation } from "@t4tools/provider-core/server/mcpToolPresentation";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
+import * as McpProviderSession from "@t4tools/provider-core/server/mcpSession";
 import {
   applyAcpAgentTerminalUpdate,
   acpContentBlockDisplayText,
@@ -104,32 +104,32 @@ import {
 } from "./sessionConfig.ts";
 import * as AcpSessionRuntime from "./AcpSessionRuntime.ts";
 import {
-  t3AcpPromptWithInstructions,
-  type T3AcpInstructionState,
-} from "@t3tools/provider-core/server/orchestrationInstructions";
-import { buildRuntimeInstructions } from "@t3tools/provider-core/server/runtimeInstructions";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
-import type * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
+  t4AcpPromptWithInstructions,
+  type T4AcpInstructionState,
+} from "@t4tools/provider-core/server/orchestrationInstructions";
+import { buildRuntimeInstructions } from "@t4tools/provider-core/server/runtimeInstructions";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
+import type * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
 import {
   type BackgroundWork,
   type BackgroundWorkReport,
   backgroundWorkNotification,
-} from "@t3tools/provider-core/server/notification";
+} from "@t4tools/provider-core/server/notification";
 import {
   makeProviderFailure,
   makeProviderRetryTurnItem,
-} from "@t3tools/provider-core/server/failure";
-import { acpSelectionTransition } from "@t3tools/provider-core/server/selectionTransition";
+} from "@t4tools/provider-core/server/failure";
+import { acpSelectionTransition } from "@t4tools/provider-core/server/selectionTransition";
 import {
   isProviderNativeImageAttachment,
   providerMessageTextWithAttachmentPaths,
-} from "@t3tools/provider-core/server/attachmentPrompt";
+} from "@t4tools/provider-core/server/attachmentPrompt";
 import {
   makeSubagentChildThread,
   makeSubagentConversationArtifacts,
   subagentThreadTitle,
-} from "@t3tools/provider-core/server/subagentProjection";
-import * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
+} from "@t4tools/provider-core/server/subagentProjection";
+import * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
 
 export const ACP_PROTOCOL = "acp.ndjson-jsonrpc" as const;
 
@@ -663,23 +663,23 @@ function acpMcpContext(
   return {
     servers: [
       {
-        name: "t3-code",
+        name: "t4-code",
         command: self.command,
         args: [...selfInvocationArgs(self, ["acp-mcp-bridge"])],
         env: [
           { name: "ELECTRON_RUN_AS_NODE", value: "1" },
-          { name: "T3_ACP_MCP_ENDPOINT", value: session.endpoint },
-          { name: "T3_ACP_MCP_AUTHORIZATION", value: session.authorizationHeader },
+          { name: "T4_ACP_MCP_ENDPOINT", value: session.endpoint },
+          { name: "T4_ACP_MCP_AUTHORIZATION", value: session.authorizationHeader },
         ],
       },
     ],
-    acpServers: [{ type: "acp", name: "t3-code", serverId: "t3-code" }],
+    acpServers: [{ type: "acp", name: "t4-code", serverId: "t4-code" }],
     httpServers:
       mcpOverHttp === true
         ? [
             {
               type: "http",
-              name: "t3-code",
+              name: "t4-code",
               url: session.endpoint,
               headers: [{ name: "Authorization", value: session.authorizationHeader }],
             },
@@ -688,10 +688,10 @@ function acpMcpContext(
     endpoint: session.endpoint,
     authorization: session.authorizationHeader,
     processEnvironment: {
-      T3_ACP_MCP_ENDPOINT: session.endpoint,
-      T3_ACP_MCP_AUTHORIZATION: session.authorizationHeader,
-      T3_ACP_MCP_NODE: self.command,
-      ...(self.entrypoint === undefined ? {} : { T3_ACP_MCP_ENTRYPOINT: self.entrypoint }),
+      T4_ACP_MCP_ENDPOINT: session.endpoint,
+      T4_ACP_MCP_AUTHORIZATION: session.authorizationHeader,
+      T4_ACP_MCP_NODE: self.command,
+      ...(self.entrypoint === undefined ? {} : { T4_ACP_MCP_ENTRYPOINT: self.entrypoint }),
     },
   };
 }
@@ -1680,7 +1680,7 @@ export const makeAcpAdapterV2 = Effect.fn("makeAcpAdapterV2")(function* (
         });
         const activeSelection = yield* Ref.make<ModelSelection | null>(null);
         const activeInteractionMode = yield* Ref.make<ProviderInteractionMode | null>(null);
-        const promptInstructionStates = yield* Ref.make(new Map<string, T3AcpInstructionState>());
+        const promptInstructionStates = yield* Ref.make(new Map<string, T4AcpInstructionState>());
         // Unique markers keep delayed prompt completions from clearing later compactions.
         const compactionMarkers = yield* Ref.make(new Map<string, symbol>());
         const runtimeRestartRequired = yield* Ref.make(false);
@@ -2087,7 +2087,7 @@ export const makeAcpAdapterV2 = Effect.fn("makeAcpAdapterV2")(function* (
               elicitation: { form: {}, ...(flavor.onUrlElicitation ? { url: {} } : {}) },
               ...(flavor.clientCapabilitiesMeta ? { _meta: flavor.clientCapabilitiesMeta } : {}),
             },
-            clientInfo: { name: "t3-code", version: "0.0.0" },
+            clientInfo: { name: "t4-code", version: "0.0.0" },
             onTermination,
             onOutgoingResponseFailure: (requestId, error) =>
               Ref.modify(nativeResponseAcknowledgements, (current) => {
@@ -3768,7 +3768,7 @@ export const makeAcpAdapterV2 = Effect.fn("makeAcpAdapterV2")(function* (
             const input =
               mcpIdentity.input ?? unknownRecord(rawInputRecord?.arguments) ?? rawInputRecord ?? {};
             let output = rawOutput === undefined ? undefined : acpMcpToolCallOutput(rawOutput);
-            const isHtmlRender = resolveT3McpToolId(toolName) === HTML_RENDER_TOOL_NAME;
+            const isHtmlRender = resolveT4McpToolId(toolName) === HTML_RENDER_TOOL_NAME;
             const isError =
               compactDynamicToolOutput(output)?.isError === true ||
               compactDynamicToolOutput(rawOutputRecord?.result)?.isError === true;
@@ -7335,10 +7335,10 @@ export const makeAcpAdapterV2 = Effect.fn("makeAcpAdapterV2")(function* (
           const mcpSession = yield* mcpSessions.read(turnInput.threadId);
           const instructionState = {
             interactionMode: turnInput.runtimePolicy.interactionMode,
-            hasT3Mcp: mcpSession !== undefined,
+            hasT4Mcp: mcpSession !== undefined,
             hasDeviceTools: mcpSession?.capabilities?.has("device") === true,
             hasComputerUseTools: mcpSession?.capabilities?.has("computer-use") === true,
-          } satisfies T3AcpInstructionState;
+          } satisfies T4AcpInstructionState;
           const previousInstructionState = (yield* Ref.get(promptInstructionStates)).get(sessionId);
           const compactionMarker = (yield* Ref.get(compactionMarkers)).get(sessionId);
           const userText =
@@ -7359,7 +7359,7 @@ export const makeAcpAdapterV2 = Effect.fn("makeAcpAdapterV2")(function* (
             resolveExtractedTextPath: host.resolveExtractedTextPath,
           });
           const isNativeSlashCommand = userText.trimStart().startsWith("/");
-          const text = t3AcpPromptWithInstructions({
+          const text = t4AcpPromptWithInstructions({
             prompt: messageText,
             state: instructionState,
             ...(previousInstructionState === undefined || compactionMarker !== undefined

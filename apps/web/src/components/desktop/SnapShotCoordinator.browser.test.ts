@@ -1,5 +1,5 @@
-import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
-import { type DesktopBridge, EnvironmentId, ProjectId, ThreadId } from "@t3tools/contracts";
+import { scopeProjectRef, scopeThreadRef } from "@t4tools/client-runtime/environment";
+import { type DesktopBridge, EnvironmentId, ProjectId, ThreadId } from "@t4tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 
 import { DraftId, useComposerDraftStore } from "../../composerDraftStore";

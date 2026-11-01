@@ -6,7 +6,7 @@ import { afterEach, beforeEach, expect, it as test, vi } from "vite-plus/test";
 import { CaptureShortcutConfig } from "./CaptureShortcutConfig.ts";
 import { captureConfigBinding } from "./captureConfigEdit.ts";
 
-// oxlint-disable-next-line t3code/no-global-process-runtime -- Test collection checks the host before starting these Linux-native filesystem tests.
+// oxlint-disable-next-line T4CODE/no-global-process-runtime -- Test collection checks the host before starting these Linux-native filesystem tests.
 const it = test.runIf(process.platform === "linux");
 let directory: string;
 let path: string;
@@ -21,7 +21,7 @@ const appId = "com.vorynixal.T4Code";
 const install = { operation: "install", chooseFile: false } as const;
 const target = () => ({ desktop: "niri" as const, path, appId });
 beforeEach(async () => {
-  directory = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-capture-config-"));
+  directory = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-capture-config-"));
   path = NodePath.join(directory, "config.kdl");
   await NodeFSP.writeFile(path, "binds {\n    Mod+Q { quit; }\n}\n", { mode: 0o640 });
   tools.validateNiri.mockReset().mockResolvedValue(undefined);

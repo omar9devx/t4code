@@ -1,4 +1,4 @@
-import { EnvironmentId, ProviderInstanceId, ScheduledTaskId } from "@t3tools/contracts";
+import { EnvironmentId, ProviderInstanceId, ScheduledTaskId } from "@t4tools/contracts";
 import {
   createMemoryHistory,
   createRootRoute,
@@ -14,7 +14,7 @@ import { retainSettingsScope, validateSettingsRouteSearch } from "./settingsScop
 import { validateScheduledTasksSearch } from "./scheduledTasksSettings.logic";
 
 const checkoutSearch = {
-  project: "repository:t3code",
+  project: "repository:T4CODE",
   machine: "remote-server",
   checkout: "remote-server:/home/user/T4 Code",
 };
@@ -112,7 +112,7 @@ describe("settings scope navigation", () => {
       const router = createSettingsRouter();
       await router.navigate({ to, search: checkoutSearch });
 
-      const regroupedCheckout = { ...checkoutSearch, project: "separate:t3code" };
+      const regroupedCheckout = { ...checkoutSearch, project: "separate:T4CODE" };
       await router.navigate({
         from: "/settings",
         to: router.state.location.pathname,

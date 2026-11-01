@@ -1,5 +1,5 @@
-import { makeThreadRequestsResolvedAnnouncer } from "@t3tools/client-runtime/state/thread-requests";
-import { ApprovalRequestId, EnvironmentId, RuntimeRequestId, ThreadId } from "@t3tools/contracts";
+import { makeThreadRequestsResolvedAnnouncer } from "@t4tools/client-runtime/state/thread-requests";
+import { ApprovalRequestId, EnvironmentId, RuntimeRequestId, ThreadId } from "@t4tools/contracts";
 import { beforeEach, expect, it, vi } from "vite-plus/test";
 import { useComposerDraftStore } from "./composerDraftStore";
 import {

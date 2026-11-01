@@ -1,5 +1,5 @@
-import type { SnoozePresetSetting } from "@t3tools/contracts/settings";
-import { resolveSnoozePreset } from "@t3tools/client-runtime/state/thread-settled";
+import type { SnoozePresetSetting } from "@t4tools/contracts/settings";
+import { resolveSnoozePreset } from "@t4tools/client-runtime/state/thread-settled";
 import * as Equal from "effect/Equal";
 
 /**

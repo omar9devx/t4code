@@ -18,8 +18,8 @@ import {
   LOCAL_DEVICE_HOST_LABEL,
   ProviderInstanceId,
   ThreadId,
-} from "@t3tools/contracts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+} from "@t4tools/contracts";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -29,7 +29,7 @@ import * as Option from "effect/Option";
 import * as Path from "effect/Path";
 import * as References from "effect/References";
 import * as Schema from "effect/Schema";
-// oxlint-disable-next-line t3code/no-raw-mcp-registration -- the eval calls the device tools McpHttpServer registered and registers none.
+// oxlint-disable-next-line T4CODE/no-raw-mcp-registration -- the eval calls the device tools McpHttpServer registered and registers none.
 import { McpSchema, McpServer } from "effect/ai";
 
 import * as ServerConfig from "../../apps/server/src/config.ts";
@@ -537,7 +537,7 @@ const decodeDeviceError = Schema.decodeUnknownOption(DeviceError);
 export const deviceFailure = (mock: unknown) => Option.getOrUndefined(decodeDeviceError(mock));
 
 const Injected = Context.Reference<DeviceError | undefined>(
-  "@t3tools/evals/mcp-tool-use/devices/Injected",
+  "@t4tools/evals/mcp-tool-use/devices/Injected",
   { defaultValue: () => undefined },
 );
 const failing = <A, R>(effect: Effect.Effect<A, DeviceError, R>) =>
@@ -684,7 +684,7 @@ export const makeDeviceTools = Effect.fn("evaluateMcpToolUse.makeDeviceTools")(f
     const session = yield* agentDeviceSession(threadId, device.hostId, deviceId);
     owners.push({ deviceId, threadId, session });
   }
-  const config = ServerConfig.layerTest(environment.cwd, `${home}/.t3`);
+  const config = ServerConfig.layerTest(environment.cwd, `${home}/.t4`);
   const files = FileSystem.layerNoop({
     makeDirectory: () => Effect.void,
     writeFileString: () => Effect.void,
@@ -697,7 +697,7 @@ export const makeDeviceTools = Effect.fn("evaluateMcpToolUse.makeDeviceTools")(f
       const path = yield* Path.Path;
       const crypto = yield* Crypto.Crypto;
       const { stateDir } = yield* ServerConfig.ServerConfig;
-      const agentEntry = path.join(home, ".t3", "tools", "agent-device", "bin", "agent-device.mjs");
+      const agentEntry = path.join(home, ".t4", "tools", "agent-device", "bin", "agent-device.mjs");
       const hosts = new Map<DeviceHostId, DeviceHost.DeviceHost["Service"]>([
         [
           LOCAL_DEVICE_HOST_ID,

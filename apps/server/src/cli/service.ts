@@ -1,6 +1,6 @@
 import * as NodeUtil from "node:util";
 
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Console from "effect/Console";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -96,10 +96,10 @@ export const reconcileService = Effect.fn("cli.service.reconcile")(function* (op
     return { changed: false, status } satisfies ServiceReconcileResult;
   }
   if (status.supported && !status.installed) {
-    // A new service listens on this machine only, until `t3 up` opens the local network.
+    // A new service listens on this machine only, until `t4 up` opens the local network.
     const { entries } = yield* readServiceEnv(baseDir);
-    if (entries.T3CODE_LAN === undefined && entries.T3CODE_HOST === undefined) {
-      yield* writeServiceEnv(baseDir, { T3CODE_LAN: "false" });
+    if (entries.T4CODE_LAN === undefined && entries.T4CODE_HOST === undefined) {
+      yield* writeServiceEnv(baseDir, { T4CODE_LAN: "false" });
     }
   }
   if (
@@ -124,9 +124,9 @@ export function formatServiceChange(
   result: Extract<ServiceReconcileResult, { readonly changed: true }>,
 ): string {
   if (result.plan.handedOff === true) {
-    return `Service update to t3@${packageJson.version} queued. This session will disconnect.\nLog: ${result.plan.logPath}`;
+    return `Service update to t4@${packageJson.version} queued. This session will disconnect.\nLog: ${result.plan.logPath}`;
   }
-  return `Service ${result.previouslyInstalled ? "updated" : "installed"} · t3@${packageJson.version}\nLog: ${result.plan.logPath}`;
+  return `Service ${result.previouslyInstalled ? "updated" : "installed"} · t4@${packageJson.version}\nLog: ${result.plan.logPath}`;
 }
 
 function formatProtection(
@@ -135,8 +135,8 @@ function formatProtection(
   if (protection === undefined) return [];
   return [
     protection.unprotected === undefined
-      ? `  Memory protection: on${protection.setByProtect ? " (t3 service protect)" : ""}`
-      : `  Memory protection: off, ${protection.unprotected} grants none. Run \`t3 service protect\`.`,
+      ? `  Memory protection: on${protection.setByProtect ? " (t4 service protect)" : ""}`
+      : `  Memory protection: off, ${protection.unprotected} grants none. Run \`t4 service protect\`.`,
     ...(protection.oomScoreAdj === undefined ? [] : [`  OOM score: ${protection.oomScoreAdj}`]),
   ];
 }
@@ -150,7 +150,7 @@ function formatServiceStatus(
     return "T4 Code service\n  Status: unavailable on this machine\n  Supported on: Linux with systemd, macOS with launchd";
   }
   if (!status.installed) {
-    return "T4 Code service\n  Status: not installed\n  Next: Run `t3 service install`.";
+    return "T4 Code service\n  Status: not installed\n  Next: Run `t4 service install`.";
   }
   const installedVersion = status.installedVersion ?? cliVersion;
   const problems = (status.problems ?? []).map(
@@ -163,22 +163,22 @@ function formatServiceStatus(
   ) {
     return [
       "T4 Code service",
-      `  Status: installed · t3@${installedVersion} (newer than this t3@${cliVersion} CLI)`,
+      `  Status: installed · t4@${installedVersion} (newer than this t4@${cliVersion} CLI)`,
       `  Unit: ${status.unitPath}`,
       `  Logs: ${status.logPath}`,
       ...formatProtection(protection),
       ...problems,
-      `  Next: Run \`t3 update ${installedVersion}\` to match it, or pass \`--allow-downgrade\` to \`t3 service install\` explicitly.`,
+      `  Next: Run \`t4 update ${installedVersion}\` to match it, or pass \`--allow-downgrade\` to \`t4 service install\` explicitly.`,
     ].join("\n");
   }
   return [
     "T4 Code service",
-    `  Status: ${status.current ? `installed · t3@${installedVersion}` : "needs an update or repair"}`,
+    `  Status: ${status.current ? `installed · t4@${installedVersion}` : "needs an update or repair"}`,
     `  Unit: ${status.unitPath}`,
     `  Logs: ${status.logPath}`,
     ...formatProtection(protection),
     ...problems,
-    ...(status.current ? [] : ["  Next: Run `t3 service install` to repair it."]),
+    ...(status.current ? [] : ["  Next: Run `t4 service install` to repair it."]),
   ].join("\n");
 }
 
@@ -201,7 +201,7 @@ const serviceReconcileFlags = {
 
 const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pipe(
   Command.withDescription(
-    "Install T4 Code as a background service for this user. `t3 up` also chooses how your other devices reach it.",
+    "Install T4 Code as a background service for this user. `t4 up` also chooses how your other devices reach it.",
   ),
   Command.withHandler((flags) =>
     runServiceCommand(
@@ -210,13 +210,13 @@ const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pip
         const result = yield* reconcileService({ allowDowngrade: flags.allowDowngrade });
         if (!result.changed) {
           yield* Console.log(
-            `T4 Code service is already installed with t3@${packageJson.version} (${yield* resolveEntryPath}).`,
+            `T4 Code service is already installed with t4@${packageJson.version} (${yield* resolveEntryPath}).`,
           );
           return;
         }
         yield* Console.log(formatServiceChange(result));
         if (!result.previouslyInstalled) {
-          yield* Console.log("Run `t3 up` to choose how your other devices reach it.");
+          yield* Console.log("Run `t4 up` to choose how your other devices reach it.");
         }
       }),
     ),
@@ -224,19 +224,19 @@ const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pip
 );
 
 const serviceUpdateCommand = Command.make("update", serviceReconcileFlags).pipe(
-  Command.withDescription("Deprecated. Run `t3 update` to move to a newer release."),
+  Command.withDescription("Deprecated. Run `t4 update` to move to a newer release."),
   Command.unlisted,
   Command.withHandler((flags) =>
     runServiceCommand(
       flags,
       Effect.gen(function* () {
         yield* Console.log(
-          "`t3 service update` is deprecated: run `t3 update` to move to a newer release, or `t3 service install` to repair the service. Repairing now.",
+          "`t4 service update` is deprecated: run `t4 update` to move to a newer release, or `t4 service install` to repair the service. Repairing now.",
         );
         const result = yield* reconcileService({ allowDowngrade: flags.allowDowngrade });
         if (!result.changed) {
           yield* Console.log(
-            `T4 Code service is already using t3@${packageJson.version} (${yield* resolveEntryPath}).`,
+            `T4 Code service is already using t4@${packageJson.version} (${yield* resolveEntryPath}).`,
           );
           return;
         }
@@ -248,7 +248,7 @@ const serviceUpdateCommand = Command.make("update", serviceReconcileFlags).pipe(
 
 const serviceRestartCommand = Command.make("restart", projectLocationFlags).pipe(
   Command.withDescription(
-    "Restart the background service. Picks up a version installed by `t3 update` that was not restarted at the time.",
+    "Restart the background service. Picks up a version installed by `t4 update` that was not restarted at the time.",
   ),
   Command.withHandler((flags) =>
     runServiceCommand(
@@ -258,7 +258,7 @@ const serviceRestartCommand = Command.make("restart", projectLocationFlags).pipe
         const status = yield* service.status;
         const outcome = yield* service.restart;
         const onVersion =
-          status.installedVersion === undefined ? "" : ` on t3@${status.installedVersion}`;
+          status.installedVersion === undefined ? "" : ` on t4@${status.installedVersion}`;
         yield* Console.log(
           outcome === "restarted"
             ? `Restarted the T4 Code service${onVersion}.`
@@ -337,7 +337,7 @@ const serviceProtectCommand = Command.make("protect", {
       // Before resolving config, which creates T4 Code directories that root would then own.
       if ((yield* HostProcess.UserId) === 0) {
         return yield* Console.log(
-          "Run `t3 service protect` as the user that runs T4 Code, without sudo. It asks for sudo when it needs root.",
+          "Run `t4 service protect` as the user that runs T4 Code, without sudo. It asks for sudo when it needs root.",
         );
       }
       return yield* runServiceCommand(
@@ -374,7 +374,7 @@ const serviceProtectCommand = Command.make("protect", {
             if (!(yield* confirm(flags.yes, "Remove T4 Code service protection?"))) return;
             yield* ServiceProtection.removeProtection(installed);
             return yield* Console.log(
-              "Removed T4 Code service protection. The server's OOM score returns to normal after `t3 service restart`.",
+              "Removed T4 Code service protection. The server's OOM score returns to normal after `t4 service restart`.",
             );
           }
 
@@ -383,7 +383,7 @@ const serviceProtectCommand = Command.make("protect", {
               "Keeps T4 Code running when agents fill this machine's memory:",
               "  - reserves memory for the T4 Code server, so the kernel takes memory from agents first",
               "  - makes the out-of-memory killer pick agents before the server",
-              "It adds systemd drop-in files and changes nothing else. Undo with `t3 service protect --undo`.",
+              "It adds systemd drop-in files and changes nothing else. Undo with `t4 service protect --undo`.",
             ].join("\n"),
           );
           const names = remote.map((unit) => unit.replace(/\.service$/, "")).join(" and ");
@@ -409,7 +409,7 @@ const serviceProtectCommand = Command.make("protect", {
           if (!(yield* confirm(flags.yes, "Apply these settings?"))) return;
           yield* ServiceProtection.applyProtection(plan);
           yield* Console.log(
-            "Protected T4 Code. Memory protection applies now; the server takes its OOM score after `t3 service restart`. Undo with `t3 service protect --undo`.",
+            "Protected T4 Code. Memory protection applies now; the server takes its OOM score after `t4 service restart`. Undo with `t4 service protect --undo`.",
           );
         }).pipe(Effect.provide(ProcessRunner.layer)),
       );

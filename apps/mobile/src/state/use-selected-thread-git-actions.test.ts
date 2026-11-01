@@ -1,6 +1,6 @@
-import { AuthOrchestrationOperateScope, AuthSourceControlWriteScope } from "@t3tools/contracts";
-import type { VcsListRefsResult } from "@t3tools/contracts";
-import { resolveAutoFeatureBranchName } from "@t3tools/shared/git";
+import { AuthOrchestrationOperateScope, AuthSourceControlWriteScope } from "@t4tools/contracts";
+import type { VcsListRefsResult } from "@t4tools/contracts";
+import { resolveAutoFeatureBranchName } from "@t4tools/shared/git";
 import * as Cause from "effect/Cause";
 import { AsyncResult } from "effect/reactivity";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";

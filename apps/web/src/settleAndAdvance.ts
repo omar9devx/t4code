@@ -1,4 +1,4 @@
-import type { ScopedThreadRef } from "@t3tools/contracts";
+import type { ScopedThreadRef } from "@t4tools/contracts";
 
 type SettleAndAdvance = (threadRef: ScopedThreadRef) => void;
 

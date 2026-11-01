@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { EnvironmentId, ThreadId, type ScopedThreadRef } from "@t3tools/contracts";
+import { EnvironmentId, ThreadId, type ScopedThreadRef } from "@t4tools/contracts";
 
 import {
   formatThreadLink,
@@ -58,36 +58,36 @@ describe("thread link destinations", () => {
 
 describe("thread links", () => {
   it("takes the ids verbatim, percent escapes included", () => {
-    expect(parseThreadLinkHref("t3-thread://v1/mcp:1234")).toEqual(v1("mcp:1234"));
-    expect(parseThreadLinkHref("t3-thread://v1/thread:delegated-task:mcp%3A1")).toEqual(
+    expect(parseThreadLinkHref("t4-thread://v1/mcp:1234")).toEqual(v1("mcp:1234"));
+    expect(parseThreadLinkHref("t4-thread://v1/thread:delegated-task:mcp%3A1")).toEqual(
       v1("thread:delegated-task:mcp%3A1"),
     );
-    expect(parseThreadLinkHref("t3-thread://v2/env-1/thread:a/b%3A1")).toEqual(
+    expect(parseThreadLinkHref("t4-thread://v2/env-1/thread:a/b%3A1")).toEqual(
       ref("env-1", "thread:a/b%3A1"),
     );
   });
 
   it("rejects other links and an empty id", () => {
     expect(parseThreadLinkHref("https://t3.codes")).toBeNull();
-    expect(parseThreadLinkHref("t3-thread://v1/")).toBeNull();
-    expect(parseThreadLinkHref("t3-thread://v1/ ")).toBeNull();
-    expect(parseThreadLinkHref("t3-thread://v2/env-1")).toBeNull();
-    expect(parseThreadLinkHref("t3-thread://v2/env-1/")).toBeNull();
-    expect(parseThreadLinkHref("t3-thread://v2//chat-1")).toBeNull();
+    expect(parseThreadLinkHref("t4-thread://v1/")).toBeNull();
+    expect(parseThreadLinkHref("t4-thread://v1/ ")).toBeNull();
+    expect(parseThreadLinkHref("t4-thread://v2/env-1")).toBeNull();
+    expect(parseThreadLinkHref("t4-thread://v2/env-1/")).toBeNull();
+    expect(parseThreadLinkHref("t4-thread://v2//chat-1")).toBeNull();
   });
 
   it("resolves a percent-encoded id when the id as written names no thread", () => {
     const title = titlesIn({ local: { "thread:project:1": "Decoded", "provider%3A1": "Literal" } });
     expect(
       relabelThreadLinks(
-        "[a](t3-thread://v1/thread%3Aproject%3A1) [b](t3-thread://v1/provider%3A1)",
+        "[a](t4-thread://v1/thread%3Aproject%3A1) [b](t4-thread://v1/provider%3A1)",
         local,
         title,
       ),
-    ).toBe("[Decoded](t3-thread://v1/thread:project:1) [Literal](t3-thread://v1/provider%3A1)");
+    ).toBe("[Decoded](t4-thread://v1/thread:project:1) [Literal](t4-thread://v1/provider%3A1)");
     const untitled = titlesIn({ local: { "a%3A1": "", "a:1": "Other" } });
-    expect(relabelThreadLinks("[Kept](t3-thread://v1/a%3A1)", local, untitled)).toBe(
-      "[Kept](t3-thread://v1/a%3A1)",
+    expect(relabelThreadLinks("[Kept](t4-thread://v1/a%3A1)", local, untitled)).toBe(
+      "[Kept](t4-thread://v1/a%3A1)",
     );
   });
 
@@ -95,41 +95,41 @@ describe("thread links", () => {
     const title = titlesIn({ local: { t1: "Here" }, there: { t1: "There" } });
     expect(
       relabelThreadLinks(
-        "<t3-thread://v2/there/t1> and [old](t3-thread://v2/local/t1)",
+        "<t4-thread://v2/there/t1> and [old](t4-thread://v2/local/t1)",
         local,
         title,
       ),
-    ).toBe("[There](t3-thread://v2/there/t1) and [Here](t3-thread://v2/local/t1)");
+    ).toBe("[There](t4-thread://v2/there/t1) and [Here](t4-thread://v2/local/t1)");
   });
 
   it("turns a v2 link it cannot resolve into plain text, never the raw link", () => {
     expect(
       relabelThreadLinks(
-        "<t3-thread://v2/there/t1>, <t3-thread://v2/local/t1>, [Old title](t3-thread://v2/there/t1)",
+        "<t4-thread://v2/there/t1>, <t4-thread://v2/local/t1>, [Old title](t4-thread://v2/there/t1)",
         local,
         () => undefined,
       ),
     ).toBe("Thread on another machine, Thread no longer available, Old title");
-    expect(relabelThreadLinks("[Old](t3-thread://v1/t1)", local, () => undefined)).toBe(
-      "[Old](t3-thread://v1/t1)",
+    expect(relabelThreadLinks("[Old](t4-thread://v1/t1)", local, () => undefined)).toBe(
+      "[Old](t4-thread://v1/t1)",
     );
   });
 
   it("leaves links inside code spans and fences as written", () => {
     const markdown = [
-      "Live [old](t3-thread://v1/t1), literal `[old](t3-thread://v1/t1)`.",
+      "Live [old](t4-thread://v1/t1), literal `[old](t4-thread://v1/t1)`.",
       "```md",
-      "<t3-thread://v2/local/t1>",
+      "<t4-thread://v2/local/t1>",
       "```",
-      "After <t3-thread://v2/local/t1>",
+      "After <t4-thread://v2/local/t1>",
     ].join("\n");
     expect(relabelThreadLinks(markdown, local, () => "New")).toBe(
       [
-        "Live [New](t3-thread://v1/t1), literal `[old](t3-thread://v1/t1)`.",
+        "Live [New](t4-thread://v1/t1), literal `[old](t4-thread://v1/t1)`.",
         "```md",
-        "<t3-thread://v2/local/t1>",
+        "<t4-thread://v2/local/t1>",
         "```",
-        "After [New](t3-thread://v2/local/t1)",
+        "After [New](t4-thread://v2/local/t1)",
       ].join("\n"),
     );
   });
@@ -137,7 +137,7 @@ describe("thread links", () => {
   it("lists the threads a message's links can name, outside code", () => {
     expect(
       threadLinkRefs(
-        "<t3-thread://v2/there/t1> [a](t3-thread://v1/t%3A2) `<t3-thread://v2/code/t3>`",
+        "<t4-thread://v2/there/t1> [a](t4-thread://v1/t%3A2) `<t4-thread://v2/code/t4>`",
         local,
       ),
     ).toEqual([ref("there", "t1"), ref("local", "t%3A2"), ref("local", "t:2")]);
@@ -145,7 +145,7 @@ describe("thread links", () => {
 
   it("writes a titleless autolink that opens that exact thread", () => {
     const link = formatThreadLink(ref("env-1", "thread:delegated-task:mcp%3A1"));
-    expect(link).toBe("<t3-thread://v2/env-1/thread:delegated-task:mcp%3A1>");
+    expect(link).toBe("<t4-thread://v2/env-1/thread:delegated-task:mcp%3A1>");
     expect(parseThreadLinkHref(link.slice(1, -1))).toEqual(
       ref("env-1", "thread:delegated-task:mcp%3A1"),
     );
@@ -153,8 +153,8 @@ describe("thread links", () => {
 
   it("formats a label that would otherwise break the Markdown link", () => {
     expect(formatThreadLink(ref("e", "t1"), "Fix [ci] \\ build")).toBe(
-      "[Fix ci build](t3-thread://v2/e/t1)",
+      "[Fix ci build](t4-thread://v2/e/t1)",
     );
-    expect(formatThreadLink(ref("e", "t1"), " ] ")).toBe("<t3-thread://v2/e/t1>");
+    expect(formatThreadLink(ref("e", "t1"), " ] ")).toBe("<t4-thread://v2/e/t1>");
   });
 });

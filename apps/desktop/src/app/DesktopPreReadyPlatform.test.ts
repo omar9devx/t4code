@@ -1,5 +1,5 @@
 import { assert, describe, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -74,7 +74,7 @@ describe("DesktopPreReadyPlatform", () => {
   });
 
   it.effect("persists Linux scaling synchronously across relaunches and settings rewrites", () => {
-    vi.stubEnv("T3CODE_HOME", "/isolated");
+    vi.stubEnv("T4CODE_HOME", "/isolated");
     vi.stubEnv("VITE_DEV_SERVER_URL", "");
     const settingsPath = "/isolated/userdata/desktop-settings.json";
     const files = new Map([[settingsPath, "{}"]]);
@@ -127,7 +127,7 @@ describe("DesktopPreReadyPlatform", () => {
     vi.stubEnv("XDG_DATA_HOME", "/xdg");
     vi.stubEnv("APPIMAGE", "/Applications/current.AppImage");
     getSwitchValueMock.mockReturnValue("");
-    let desktopName = "t3code.desktop";
+    let desktopName = "T4CODE.desktop";
     let desktopEntry = previousEntry;
     let iconInstalled = false;
     copyFileSyncMock.mockImplementation((_source: string, destination: string) => {
@@ -155,8 +155,8 @@ describe("DesktopPreReadyPlatform", () => {
         const identity = yield* Effect.promise(() => portalIdentity);
         assert.equal(identity.desktopName, "com.vorynixal.T4Code.desktop");
         assert.include(identity.desktopEntry ?? "", "Exec=/Applications/current.AppImage %U");
-        assert.include(identity.desktopEntry ?? "", "Name=T4 Code (Beta)");
-        assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/t3code;");
+        assert.include(identity.desktopEntry ?? "", "Name=T4 Code (Stable)");
+        assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/T4CODE;");
         assert.include(
           identity.desktopEntry ?? "",
           "Icon=/xdg/icons/com.vorynixal.T4Code.desktop.png",
@@ -170,7 +170,7 @@ describe("DesktopPreReadyPlatform", () => {
     vi.stubEnv("VITE_DEV_SERVER_URL", "");
     vi.stubEnv("XDG_DATA_HOME", "/xdg");
     vi.stubEnv("APPIMAGE", "/Applications/current.AppImage");
-    vi.stubEnv("T3CODE_DESKTOP_LAUNCHER_PATH", " /opt/T4 Code/t3code ");
+    vi.stubEnv("T4CODE_DESKTOP_LAUNCHER_PATH", " /opt/T4 Code/T4CODE ");
     getSwitchValueMock.mockReturnValue("");
 
     return Effect.scoped(
@@ -183,7 +183,7 @@ describe("DesktopPreReadyPlatform", () => {
         const entry = writeFileSyncMock.mock.calls.find(
           ([path]) => path === "/xdg/applications/com.vorynixal.T4Code.desktop",
         )?.[1];
-        assert.include(entry, 'Exec="/opt/T4 Code/t3code" %U');
+        assert.include(entry, 'Exec="/opt/T4 Code/T4CODE" %U');
       }),
     ).pipe(Effect.ensuring(Effect.sync(() => vi.unstubAllEnvs())));
   });
@@ -193,7 +193,7 @@ describe("DesktopPreReadyPlatform", () => {
     () =>
       Effect.gen(function* () {
         class ClerkShaped extends Context.Service<ClerkShaped, { readonly ready: true }>()(
-          "@t3tools/desktop/app/DesktopPreReadyPlatform.test/ClerkShaped",
+          "@t4tools/desktop/app/DesktopPreReadyPlatform.test/ClerkShaped",
         ) {}
 
         const events: Array<string> = [];

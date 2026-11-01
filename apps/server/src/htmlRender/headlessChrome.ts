@@ -1,4 +1,4 @@
-import type { ThemeAppearance } from "@t3tools/shared/themePalettes";
+import type { ThemeAppearance } from "@t4tools/shared/themePalettes";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
@@ -48,7 +48,7 @@ const MAX_CAPTURE_HEIGHT = 4_000;
 const CAPTURE_TIMEOUT = "20 seconds";
 // Chrome blocks file access; images arrive inlined. Browser-only .localhost permits secure contexts and HTTP resources.
 // publicProxy blocks local networks; pinning the main frame and forbidding popups keeps captures on the page.
-const PAGE_ORIGIN = "http://t3-page.localhost";
+const PAGE_ORIGIN = "http://t4-page.localhost";
 const PAGE_URL = `${PAGE_ORIGIN}/page.html`;
 const PAGE_NAME = "page.html";
 const MEASURE_CONCURRENCY = 3;
@@ -536,7 +536,7 @@ const launchBrowser = Effect.fnUntraced(function* (input: {
 const scratchDirectory = Effect.gen(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   return yield* Effect.acquireRelease(
-    fileSystem.makeTempDirectory({ prefix: "t3-html-preview-" }),
+    fileSystem.makeTempDirectory({ prefix: "t4-html-preview-" }),
     (directory) => fileSystem.remove(directory, { recursive: true }).pipe(Effect.ignore),
   ).pipe(
     Effect.mapError(

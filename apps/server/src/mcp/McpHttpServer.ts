@@ -22,7 +22,7 @@ import {
   type RunId,
   RuntimeMode,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 
 import packageJson from "../../package.json" with { type: "json" };
 import * as ServerConfig from "../config.ts";
@@ -131,7 +131,7 @@ export class McpClientAuthenticator extends Context.Service<
       request: HttpServerRequest.HttpServerRequest,
     ) => Effect.Effect<McpInvocationContext.McpInvocationScope | undefined>;
   }
->()("t3/mcp/McpHttpServer/McpClientAuthenticator") {}
+>()("t4/mcp/McpHttpServer/McpClientAuthenticator") {}
 
 type AuthenticatedHttpEffect = Effect.Effect<
   HttpServerResponse.HttpServerResponse,
@@ -173,7 +173,7 @@ const parseModeLimit = (value: string) => {
 const invalidModeLimit = HttpServerResponse.jsonUnsafe(
   {
     error: "invalid_mode_limit",
-    message: "T3-Mode-Limit must be <runtimeMode>/<interactionMode>, e.g. auto/default.",
+    message: "T4-Mode-Limit must be <runtimeMode>/<interactionMode>, e.g. auto/default.",
   },
   { status: 400, headers: { "cache-control": "no-store" } },
 );
@@ -846,22 +846,22 @@ const registerHtmlPreview = Effect.fn("McpHttpServer.registerHtmlPreview")(funct
 const HANDOFF_TOOLS: ReadonlySet<string> = new Set([
   "delegate_task",
   "create_threads",
-  "t3_thread_launch",
-  "t3_thread_send",
-  "t3_thread_send_attachments",
+  "t4_thread_launch",
+  "t4_thread_send",
+  "t4_thread_send_attachments",
   "schedule_task",
   "run_scheduled_task_now",
 ]);
 
 /** Tool actions that hand work over with only a `{ sequence }` result; the input names the thread. */
 const INPUT_TARGET_ACTIONS: Readonly<Record<string, ReadonlySet<string>>> = {
-  t3_queue: new Set(["edit", "promote_to_steer"]),
-  t3_pending_request: new Set(["respond"]),
+  t4_queue: new Set(["edit", "promote_to_steer"]),
+  t4_pending_request: new Set(["respond"]),
 };
 
 /** Tool actions that hand work over and name the receiving thread in their result. */
 const RESULT_TARGET_ACTIONS: Readonly<Record<string, ReadonlySet<string>>> = {
-  t3_thread_transfer: new Set(["fork", "merge_back"]),
+  t4_thread_transfer: new Set(["fork", "merge_back"]),
 };
 
 const hasAction = (

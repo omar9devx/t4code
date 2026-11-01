@@ -1,0 +1,17 @@
+{
+  "name": "@t4tools/mobile-terminal-native",
+  "version": "0.0.0",
+  "private": true,
+  "expo-module": {
+    "ios": {
+      "modules": [
+        "T4TerminalModule"
+      ]
+    },
+    "android": {
+      "modules": [
+        "expo.modules.t4terminal.T4TerminalModule"
+      ]
+    }
+  }
+}

@@ -1,15 +1,15 @@
-import { tokenizeCliArgs } from "@t3tools/shared/cliArgs";
+import { tokenizeCliArgs } from "@t4tools/shared/cliArgs";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 
-import type { McpProviderSessionConfig } from "@t3tools/provider-core/server/mcpSession";
+import type { McpProviderSessionConfig } from "@t4tools/provider-core/server/mcpSession";
 import {
-  PI_T3_MCP_EXTENSION_FILENAME,
-  PI_T3_MCP_EXTENSION_SOURCE,
-  T3_MCP_BEARER_ENV,
-  T3_MCP_URL_ENV,
-  T3_PI_RUNTIME_MODE_ENV,
-  T3_PI_MCP_EXTENSION_PATH_ENV,
+  PI_t4_MCP_EXTENSION_FILENAME,
+  PI_t4_MCP_EXTENSION_SOURCE,
+  T4_MCP_BEARER_ENV,
+  T4_MCP_URL_ENV,
+  T4_PI_RUNTIME_MODE_ENV,
+  T4_PI_MCP_EXTENSION_PATH_ENV,
 } from "./mcpExtensionSource.ts";
 
 const RESERVED_PI_LAUNCH_ARGUMENTS = new Set([
@@ -220,19 +220,19 @@ function withoutToolSelectionArgs(args: ReadonlyArray<string>): ReadonlyArray<st
   return filtered;
 }
 
-function piT3McpExtensionDestPath(cacheDir: string): string {
-  return `${cacheDir.replace(/\\/g, "/")}/${PI_T3_MCP_EXTENSION_FILENAME}`;
+function piT4McpExtensionDestPath(cacheDir: string): string {
+  return `${cacheDir.replace(/\\/g, "/")}/${PI_t4_MCP_EXTENSION_FILENAME}`;
 }
 
-export const materializePiT3McpExtension = Effect.fn("materializePiT3McpExtension")(function* (
+export const materializePiT4McpExtension = Effect.fn("materializePiT4McpExtension")(function* (
   cacheDir: string,
 ) {
   const fs = yield* FileSystem.FileSystem;
   yield* fs.makeDirectory(cacheDir, { recursive: true });
-  const dest = piT3McpExtensionDestPath(cacheDir);
+  const dest = piT4McpExtensionDestPath(cacheDir);
   const existing = yield* fs.readFileString(dest).pipe(Effect.orElseSucceed(() => ""));
-  if (existing !== PI_T3_MCP_EXTENSION_SOURCE) {
-    yield* fs.writeFileString(dest, PI_T3_MCP_EXTENSION_SOURCE);
+  if (existing !== PI_t4_MCP_EXTENSION_SOURCE) {
+    yield* fs.writeFileString(dest, PI_t4_MCP_EXTENSION_SOURCE);
   }
   return dest;
 });
@@ -251,8 +251,8 @@ export function buildPiRpcLaunch(input: {
   readonly args: ReadonlyArray<string>;
   readonly env: NodeJS.ProcessEnv;
 } {
-  const hasT3Extension = input.disableExtensions !== true && input.extensionPath !== undefined;
-  const hasT3Mcp = hasT3Extension && input.mcpSession !== undefined;
+  const hasT4Extension = input.disableExtensions !== true && input.extensionPath !== undefined;
+  const hasT4Mcp = hasT4Extension && input.mcpSession !== undefined;
   const extensionSafeArgs =
     input.disableExtensions === true
       ? withoutExplicitExtensions(input.launchArgs)
@@ -273,7 +273,7 @@ export function buildPiRpcLaunch(input: {
     ...(input.disableTools === true ? ["--no-tools"] : []),
   ];
   if (
-    hasT3Extension &&
+    hasT4Extension &&
     input.extensionPath !== undefined &&
     !hasExplicitExtension(args, input.extensionPath)
   ) {
@@ -281,27 +281,27 @@ export function buildPiRpcLaunch(input: {
   }
   const environment = { ...input.environment };
   // MCP credentials belong to this T4 Code session; discard inherited server/parent credentials.
-  delete environment[T3_MCP_URL_ENV];
-  delete environment[T3_MCP_BEARER_ENV];
-  delete environment[T3_PI_MCP_EXTENSION_PATH_ENV];
+  delete environment[T4_MCP_URL_ENV];
+  delete environment[T4_MCP_BEARER_ENV];
+  delete environment[T4_PI_MCP_EXTENSION_PATH_ENV];
 
   return {
     args,
     env: {
       ...environment,
-      ...(hasT3Extension && input.extensionPath !== undefined
-        ? { [T3_PI_MCP_EXTENSION_PATH_ENV]: input.extensionPath }
+      ...(hasT4Extension && input.extensionPath !== undefined
+        ? { [T4_PI_MCP_EXTENSION_PATH_ENV]: input.extensionPath }
         : {}),
-      ...(hasT3Extension && input.runtimeMode !== undefined
+      ...(hasT4Extension && input.runtimeMode !== undefined
         ? {
-            [T3_PI_RUNTIME_MODE_ENV]:
+            [T4_PI_RUNTIME_MODE_ENV]:
               input.runtimeMode === "auto" ? "approval-required" : input.runtimeMode,
           }
         : {}),
-      ...(hasT3Mcp && input.mcpSession !== undefined
+      ...(hasT4Mcp && input.mcpSession !== undefined
         ? {
-            [T3_MCP_URL_ENV]: input.mcpSession.endpoint,
-            [T3_MCP_BEARER_ENV]: bearerTokenFromAuthorizationHeader(
+            [T4_MCP_URL_ENV]: input.mcpSession.endpoint,
+            [T4_MCP_BEARER_ENV]: bearerTokenFromAuthorizationHeader(
               input.mcpSession.authorizationHeader,
             ),
           }

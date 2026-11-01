@@ -15,38 +15,14 @@ a new browser.
 
 Prefer a container? See [Dev container](../internals/devcontainer.md) for VS Code and Codespaces setup.
 
-## GitCafe mirror (optional)
+## Git remotes and branches
 
-GitHub is the source of truth. [git.cafe/pingdotgg/t3code](https://git.cafe/pingdotgg/t3code) is a
-two-way synced mirror with much higher API rate limits, which helps when many agents work at once.
-You never need it to contribute.
+`origin` is the public T4 repository (`omar9devx/t4code`). `upstream` is the original T3 Code
+repository used only to fetch tagged releases for manual review and porting. Keep those roles
+separate: do not push T4 changes to `upstream` or merge an upstream release without reviewing it.
 
-Pushes, PRs, comments, reviews, labels, and issue edits made on GitCafe sync to GitHub within
-about a minute, and PR and issue numbers match. CI runs on GitHub, and its checks show up on
-GitCafe.
-
-```sh
-git remote set-url origin https://git.cafe/pingdotgg/t3code.git
-git remote add github https://github.com/pingdotgg/t3code.git
-gh repo set-default pingdotgg/t3code   # `gh` is still used for merging
-bun install -g @gitcafe/cli@latest   # `cafe` needs Bun 1.2 or newer
-cafe auth login && cafe auth http setup
-cafe skills install --global  # optional: cafe-* skills for coding agents
-```
-
-With `origin` on git.cafe, work through GitCafe and leave GitHub's API alone:
-
-- Push to `origin`, open PRs with `cafe pr create` (`--head owner/repo:branch` from a fork) or
-  `cafe stack submit`, and use `cafe` for everything after that. Link the git.cafe PR URL, not the
-  github.com one, wherever a tool tracks the PR, so polling stays on GitCafe.
-- Read checks with `cafe pr status <n>`, and GitHub Actions logs with `cafe ci logs <run>` (run ids
-  from `cafe ci list --pr <n>`). `cafe ci rerun <run>` reruns one. These need `cafe` 0.11 or newer.
-- Write closing references as `Fixes pingdotgg/t3code#<n>`. GitCafe turns a bare `#<n>` in text it
-  syncs to GitHub into a git.cafe link, and GitHub does not close issues from those.
-- Merge with `gh pr merge <n> --match-head-commit <sha>`, because `cafe pr merge` cannot pin the
-  commit you reviewed.
-- `cafe` commands differ from `gh`: `cafe issue comments <n>` not `--comments`, `cafe pr status`
-  not `pr checks`.
+Use `main` as the T4 release base and work on short-lived `codex/*` or topic branches. The
+upstream comparison tool fetches exact tags from `upstream`; see [upstream review](upstream-review.md).
 
 ## Choosing a dev process
 
@@ -54,23 +30,24 @@ Use `vp run dev` for server and web, or `vp run dev:desktop` for the Electron cl
 `dev:server` and `dev:web` start those processes separately.
 See the [mobile README](../../apps/mobile/README.md) for native builds and Metro.
 
-Flags go directly after the task name, for example `vp run dev --home-dir /tmp/t3code-dev`.
+Flags go directly after the task name, for example `vp run dev --home-dir /tmp/T4CODE-dev`.
 Add `--browser` to open a browser automatically.
 
 ### State and ports
 
-Linked worktrees default to their own `.t3/userdata`, even when `T3CODE_HOME` is set.
-The main checkout defaults to `~/.t3/dev`. An explicit `--home-dir` wins in both cases.
+Linked worktrees default to their own `.t4/userdata`, even when `T4CODE_HOME` is set.
+Existing data under `.t3` is reused when no `.t4` home exists; it is not moved automatically.
+The main checkout defaults to `~/.t4/dev`; if only a legacy `~/.t3` home exists, T4 reuses it. An explicit `--home-dir` wins in both cases.
 The first start in a worktree seeds its empty database from a read-only copy of
-`~/.t3/userdata/statev2.sqlite` if the source is at most 500 MiB. Larger sources warn
-and dev starts with an empty database. `--no-seed` or `T3CODE_DEV_SEED=0` skips seeding.
+`~/.t4/userdata/statev2.sqlite` if the source is at most 500 MiB. Larger sources warn
+and dev starts with an empty database. `--no-seed` or `T4CODE_DEV_SEED=0` skips seeding.
 To copy a larger source, run `vp run migrate-dev-db` with dev stopped. It may use
 substantial disk space before pruning.
-Never run a development server against the live `~/.t3/userdata`.
+Never run a development server against the live `~/.t4/userdata`.
 See [test data](../../AGENTS.md#test-data) for copying a consistent database snapshot.
 
 Read ports from the `[dev-runner]` output. Worktrees derive stable preferences from their paths,
-but occupied ports can shift them. `T3CODE_PORT_OFFSET` or `T3CODE_DEV_INSTANCE` can select a
+but occupied ports can shift them. `T4CODE_PORT_OFFSET` or `T4CODE_DEV_INSTANCE` can select a
 different preference when needed.
 
 ### Replay provider
@@ -96,7 +73,7 @@ Leave `VITE_HTTP_URL` and `VITE_WS_URL` unset. Vite proxies the backend through 
 origin so the same build works over localhost and remote connections.
 
 Shared runs enable bundled dev to avoid a network round trip for each import level.
-`T3CODE_BUNDLED_DEV=0` opts out when debugging bundler differences. Two reload traps matter
+`T4CODE_BUNDLED_DEV=0` opts out when debugging bundler differences. Two reload traps matter
 when changing this setup:
 
 - The web entry must dynamically import the app so React refresh initializes before application
@@ -136,16 +113,16 @@ openssl rand -hex 32
 Put that value in the main checkout's gitignored `.env`:
 
 ```dotenv
-T3CODE_DEV_AUTH_TOKEN=<the value generated above>
+T4CODE_DEV_AUTH_TOKEN=<the value generated above>
 ```
 
-The `t3.json` Setup Worktree action links that file to each worktree's `.env`. The dev runner reads repository env files at startup. `.env.local` and inherited process
+The `t4.json` Setup Worktree action links that file to each worktree's `.env`. The dev runner reads repository env files at startup. `.env.local` and inherited process
 environment values override `.env`, so no per-worktree export is needed after setup.
 
 For a manual worktree or launcher without that link, export the same fixed value instead:
 
 ```sh
-export T3CODE_DEV_AUTH_TOKEN="<the value generated above>"
+export T4CODE_DEV_AUTH_TOKEN="<the value generated above>"
 ```
 
 Do not generate a new value at startup. Start or restart `vp run dev --share` after configuration,

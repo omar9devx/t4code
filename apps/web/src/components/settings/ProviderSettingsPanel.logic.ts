@@ -1,4 +1,4 @@
-import type { EnvironmentConnectionPhase } from "@t3tools/client-runtime/connection";
+import type { EnvironmentConnectionPhase } from "@t4tools/client-runtime/connection";
 import {
   AuthProvidersManageScope,
   type EnvironmentId,
@@ -8,7 +8,7 @@ import {
   sessionGrantsScope,
   type ServerSettings,
   type SessionGrantInput,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 
 export interface ProviderEnvironmentOptionLike {
   readonly environmentId: EnvironmentId;

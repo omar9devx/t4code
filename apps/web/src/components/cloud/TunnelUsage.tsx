@@ -1,4 +1,4 @@
-import { T3CHAT_PLAN_TUNNEL_LIMITS } from "@t3tools/contracts/relay";
+import { T4CHAT_PLAN_TUNNEL_LIMITS } from "@t4tools/contracts/relay";
 import { TriangleAlertIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -10,17 +10,17 @@ import { Button } from "../ui/button";
 // Above this, one slot per tunnel is too thin to read, so the bar fills instead.
 const MAX_SEGMENTS = 10;
 
-export const T3CHAT_SUBSCRIPTION_URL = "https://t3.chat/settings/subscription";
+export const T4CHAT_SUBSCRIPTION_URL = "https://t4.chat/settings/subscription";
 
 export function tunnelUpgradeCopy(upgrade: Exclude<ManagedTunnelUpgrade, null>): string {
-  const { pro, premier } = T3CHAT_PLAN_TUNNEL_LIMITS;
+  const { pro, premier } = T4CHAT_PLAN_TUNNEL_LIMITS;
   switch (upgrade) {
     case "link":
-      return `Link T3 Chat Pro for up to ${pro} tunnels, or Premier for up to ${premier}.`;
+      return `Link T4 Chat Pro for up to ${pro} tunnels, or Premier for up to ${premier}.`;
     case "pro":
-      return `Upgrade to T3 Chat Pro for up to ${pro} tunnels, or Premier for up to ${premier}.`;
+      return `Upgrade to T4 Chat Pro for up to ${pro} tunnels, or Premier for up to ${premier}.`;
     case "premier":
-      return `Upgrade to T3 Chat Premier for up to ${premier} tunnels.`;
+      return `Upgrade to T4 Chat Premier for up to ${premier} tunnels.`;
   }
 }
 
@@ -48,7 +48,7 @@ export function TunnelUsageMeter({
       </div>
       <div
         role="meter"
-        aria-label="T3 Connect tunnels in use"
+        aria-label="T4 Connect tunnels in use"
         aria-valuemin={0}
         aria-valuemax={limit}
         aria-valuenow={used}
@@ -77,24 +77,24 @@ export function TunnelUsageMeter({
 /** Shown when the relay refuses a new tunnel because the account is at its cap. */
 export function TunnelLimitAlert({
   upgrade,
-  onLinkT3Chat,
+  onLinkT4Chat,
   onManageTunnels,
 }: {
   readonly upgrade: ManagedTunnelUpgrade;
-  readonly onLinkT3Chat: (() => void) | null;
+  readonly onLinkT4Chat: (() => void) | null;
   readonly onManageTunnels: (() => void) | null;
 }) {
   const action =
-    upgrade === "link" && onLinkT3Chat ? (
-      <Button size="sm" onClick={onLinkT3Chat}>
-        Link T3 Chat
+    upgrade === "link" && onLinkT4Chat ? (
+      <Button size="sm" onClick={onLinkT4Chat}>
+        Link T4 Chat
       </Button>
     ) : upgrade === "pro" || upgrade === "premier" ? (
       <Button
         size="sm"
-        render={<a href={T3CHAT_SUBSCRIPTION_URL} target="_blank" rel="noopener noreferrer" />}
+        render={<a href={T4CHAT_SUBSCRIPTION_URL} target="_blank" rel="noopener noreferrer" />}
       >
-        Upgrade on T3 Chat
+        Upgrade on T4 Chat
       </Button>
     ) : onManageTunnels ? (
       <Button size="sm" variant="outline" onClick={onManageTunnels}>
@@ -107,9 +107,9 @@ export function TunnelLimitAlert({
       <AlertTitle>You&apos;re out of tunnels (they cost us money).</AlertTitle>
       <AlertDescription>
         {upgrade === "link"
-          ? "Switch to Tailscale or get more tunnels by linking your T3 Chat sub (sorry!)"
+          ? "Switch to Tailscale or get more tunnels by linking your T4 Chat sub (sorry!)"
           : upgrade
-            ? "Switch to Tailscale or get more tunnels by upgrading your T3 Chat sub (sorry!)"
+            ? "Switch to Tailscale or get more tunnels by upgrading your T4 Chat sub (sorry!)"
             : "Switch to Tailscale or deregister an environment you no longer use (sorry!)"}
       </AlertDescription>
       {action ? <AlertAction>{action}</AlertAction> : null}

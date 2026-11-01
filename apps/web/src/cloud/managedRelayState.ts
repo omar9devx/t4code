@@ -1,25 +1,25 @@
 import { useAtomValue } from "@effect/atom-react";
 import {
   createManagedRelayQueryManager,
-  createManagedRelayT3ChatLinkRequest,
+  createManagedRelayT4ChatLinkRequest,
   deregisterManagedRelayEnvironment,
   ManagedRelay,
   managedRelaySessionAtom,
   readManagedRelaySnapshotState,
-  unlinkManagedRelayT3Chat,
-} from "@t3tools/client-runtime/relay";
+  unlinkManagedRelayT4Chat,
+} from "@t4tools/client-runtime/relay";
 import {
   createAtomCommandScheduler,
   createRuntimeCommand,
-} from "@t3tools/client-runtime/state/runtime";
+} from "@t4tools/client-runtime/state/runtime";
 import {
   DEFAULT_MANAGED_TUNNEL_LIMIT,
-  T3CHAT_PLAN_TUNNEL_LIMITS,
+  T4CHAT_PLAN_TUNNEL_LIMITS,
   type RelayClientDeviceRecord,
   type RelayClientEnvironmentRecord,
-  type RelayT3ChatLinkResponse,
-} from "@t3tools/contracts/relay";
-import type { EnvironmentId } from "@t3tools/contracts";
+  type RelayT4ChatLinkResponse,
+} from "@t4tools/contracts/relay";
+import type { EnvironmentId } from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -60,39 +60,39 @@ const accountSerial = {
   key: (input: { readonly accountId: string }) => input.accountId,
 } as const;
 
-export const createManagedRelayT3ChatLinkRequestCommand = createRuntimeCommand(
+export const createManagedRelayT4ChatLinkRequestCommand = createRuntimeCommand(
   managedRelayAtomRuntime,
   {
-    label: "web:managed-relay:create-t3chat-link-request",
+    label: "web:managed-relay:create-t4chat-link-request",
     scheduler: managedRelayMutationScheduler,
     concurrency: accountSerial,
     execute: (input: { readonly accountId: string }, registry) =>
-      createManagedRelayT3ChatLinkRequest(registry, input),
+      createManagedRelayT4ChatLinkRequest(registry, input),
   },
 );
 
-export const unlinkManagedRelayT3ChatCommand = createRuntimeCommand(managedRelayAtomRuntime, {
-  label: "web:managed-relay:unlink-t3chat",
+export const unlinkManagedRelayT4ChatCommand = createRuntimeCommand(managedRelayAtomRuntime, {
+  label: "web:managed-relay:unlink-t4chat",
   scheduler: managedRelayMutationScheduler,
   concurrency: accountSerial,
   execute: (input: { readonly accountId: string }, registry) =>
-    unlinkManagedRelayT3Chat(registry, input),
+    unlinkManagedRelayT4Chat(registry, input),
 });
 
-const EMPTY_T3CHAT_LINK_ATOM = Atom.make(
-  AsyncResult.success<RelayT3ChatLinkResponse>({ available: false, link: null }),
-).pipe(Atom.keepAlive, Atom.withLabel("managed-relay:web:t3chat-link:null"));
+const EMPTY_T4CHAT_LINK_ATOM = Atom.make(
+  AsyncResult.success<RelayT4ChatLinkResponse>({ available: false, link: null }),
+).pipe(Atom.keepAlive, Atom.withLabel("managed-relay:web:t4chat-link:null"));
 
-export function useManagedRelayT3ChatLink() {
+export function useManagedRelayT4ChatLink() {
   const session = useAtomValue(managedRelaySessionAtom);
   const accountId = session?.accountId ?? null;
   const atom = accountId
-    ? managedRelayQueryManager.t3ChatLinkAtom(accountId)
-    : EMPTY_T3CHAT_LINK_ATOM;
+    ? managedRelayQueryManager.t4ChatLinkAtom(accountId)
+    : EMPTY_T4CHAT_LINK_ATOM;
   const snapshot = readManagedRelaySnapshotState(useAtomValue(atom));
   const refresh = () => {
     if (accountId) {
-      managedRelayQueryManager.refreshT3ChatLink(appAtomRegistry, accountId);
+      managedRelayQueryManager.refreshT4ChatLink(appAtomRegistry, accountId);
     }
   };
 
@@ -147,23 +147,23 @@ export function useManagedRelayDevices() {
   };
 }
 
-/** How this account can raise its tunnel cap: link T3 Chat, or upgrade the linked plan. */
+/** How this account can raise its tunnel cap: link T4 Chat, or upgrade the linked plan. */
 export type ManagedTunnelUpgrade = "link" | "pro" | "premier" | null;
 
-// Mirrors the relay's cap: a manual override is exact, otherwise the T3 Chat plan raises the default.
-function managedTunnelCap(t3Chat: RelayT3ChatLinkResponse): {
+// Mirrors the relay's cap: a manual override is exact, otherwise the T4 Chat plan raises the default.
+function managedTunnelCap(t4Chat: RelayT4ChatLinkResponse): {
   readonly limit: number;
   readonly upgrade: ManagedTunnelUpgrade;
 } {
-  if (t3Chat.maxTunnelsOverride !== undefined) {
-    return { limit: t3Chat.maxTunnelsOverride, upgrade: null };
+  if (t4Chat.maxTunnelsOverride !== undefined) {
+    return { limit: t4Chat.maxTunnelsOverride, upgrade: null };
   }
-  if (!t3Chat.available) return { limit: DEFAULT_MANAGED_TUNNEL_LIMIT, upgrade: null };
-  switch (t3Chat.link?.plan) {
+  if (!t4Chat.available) return { limit: DEFAULT_MANAGED_TUNNEL_LIMIT, upgrade: null };
+  switch (t4Chat.link?.plan) {
     case "premier":
-      return { limit: T3CHAT_PLAN_TUNNEL_LIMITS.premier, upgrade: null };
+      return { limit: T4CHAT_PLAN_TUNNEL_LIMITS.premier, upgrade: null };
     case "pro":
-      return { limit: T3CHAT_PLAN_TUNNEL_LIMITS.pro, upgrade: "premier" };
+      return { limit: T4CHAT_PLAN_TUNNEL_LIMITS.pro, upgrade: "premier" };
     case "free":
       return { limit: DEFAULT_MANAGED_TUNNEL_LIMIT, upgrade: "pro" };
     case undefined:
@@ -171,25 +171,25 @@ function managedTunnelCap(t3Chat: RelayT3ChatLinkResponse): {
   }
 }
 
-/** Refetches the account's environments and T3 Chat plan after a tunnel changes. */
+/** Refetches the account's environments and T4 Chat plan after a tunnel changes. */
 export function refreshManagedTunnelUsage() {
   const accountId = appAtomRegistry.get(managedRelaySessionAtom)?.accountId;
   if (!accountId) return;
   managedRelayQueryManager.refreshEnvironments(appAtomRegistry, accountId);
-  managedRelayQueryManager.refreshT3ChatLink(appAtomRegistry, accountId);
+  managedRelayQueryManager.refreshT4ChatLink(appAtomRegistry, accountId);
 }
 
 /** Managed tunnels on this account and its cap. Null fields are still loading or failed. */
 export function useManagedTunnelUsage() {
   const environments = useManagedRelayEnvironments();
-  const t3Chat = useManagedRelayT3ChatLink();
+  const t4Chat = useManagedRelayT4ChatLink();
   const used =
     environments.accountId === null
       ? null
       : (environments.data?.filter(
           (environment) => environment.endpoint.providerKind === "cloudflare_tunnel",
         ).length ?? null);
-  const cap = t3Chat.accountId !== null && t3Chat.data ? managedTunnelCap(t3Chat.data) : null;
+  const cap = t4Chat.accountId !== null && t4Chat.data ? managedTunnelCap(t4Chat.data) : null;
   return {
     used,
     limit: cap?.limit ?? null,

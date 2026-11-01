@@ -1,0 +1,4 @@
+{
+  "platforms": ["android"],
+  "android": { "modules": ["expo.modules.t4agentnotifications.T4AgentNotificationsModule"] }
+}

@@ -15,11 +15,11 @@ import {
   RunId,
   ThreadId,
   TurnItemId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";
-import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
+import type * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as FileSystem from "effect/FileSystem";
@@ -87,7 +87,7 @@ const layerConnect = Layer.mock(CloudManagedEndpointRuntime)({
 const layerProviders = Layer.mock(ProviderRegistry.ProviderRegistry)({
   getProviders: Effect.succeed([]),
 });
-const layerConfig = ServerConfig.layerTest(process.cwd(), { prefix: "t3-guest-share-" });
+const layerConfig = ServerConfig.layerTest(process.cwd(), { prefix: "t4-guest-share-" });
 // The real cleanup also closes terminals and previews; these tests only need the files gone.
 const layerCleanup = Layer.effect(
   ResourceCleanupService.ResourceCleanupService,
@@ -113,7 +113,7 @@ const layerCleanup = Layer.effect(
 class RecordedAnalytics extends Context.Service<
   RecordedAnalytics,
   Ref.Ref<ReadonlyArray<Readonly<Record<string, unknown>>>>
->()("t3/guest/GuestShareService.test/RecordedAnalytics") {}
+>()("t4/guest/GuestShareService.test/RecordedAnalytics") {}
 const layerAnalytics = Layer.effectContext(
   Effect.gen(function* () {
     const recorded = yield* Ref.make<ReadonlyArray<Readonly<Record<string, unknown>>>>([]);
@@ -297,7 +297,7 @@ it.effect("redeems only a short invite whose signature and share id are both cur
   }).pipe(Effect.provide(layerTest)),
 );
 
-it.effect("refuses guest requests once T3 Connect no longer serves the link's host", () =>
+it.effect("refuses guest requests once T4 Connect no longer serves the link's host", () =>
   Effect.gen(function* () {
     const { guestShares, credential } = yield* shareThread;
     const { token: session } = yield* guestShares.redeem({ credential, name: "Sam" });
@@ -312,7 +312,7 @@ it.effect("refuses guest requests once T3 Connect no longer serves the link's ho
   }).pipe(Effect.provide(layerTest)),
 );
 
-it.effect("closes an open guest stream when T3 Connect stops serving the link's host", () =>
+it.effect("closes an open guest stream when T4 Connect stops serving the link's host", () =>
   Effect.gen(function* () {
     const { guestShares, credential } = yield* shareThread;
     const { token: session } = yield* guestShares.redeem({ credential, name: "Sam" });

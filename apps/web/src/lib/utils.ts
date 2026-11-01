@@ -1,5 +1,5 @@
-import { MessageId, ProjectId, ThreadId } from "@t3tools/contracts";
-import { isMacPlatform } from "@t3tools/shared/keybindings";
+import { MessageId, ProjectId, ThreadId } from "@t4tools/contracts";
+import { isMacPlatform } from "@t4tools/shared/keybindings";
 import { type CxOptions, cx } from "class-variance-authority";
 import * as Hex from "effect/encoding/Hex";
 import { extendTailwindMerge } from "tailwind-merge";

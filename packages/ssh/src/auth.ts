@@ -1,4 +1,4 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -43,7 +43,7 @@ export interface SshPasswordPromptShape {
 }
 
 export class SshPasswordPrompt extends Context.Service<SshPasswordPrompt, SshPasswordPromptShape>()(
-  "@t3tools/ssh/auth/SshPasswordPrompt",
+  "@t4tools/ssh/auth/SshPasswordPrompt",
 ) {
   static readonly disabledLayer = Layer.succeed(
     SshPasswordPrompt,
@@ -63,7 +63,7 @@ export interface SshChildEnvironmentOptions {
   readonly authSecret?: string | null;
 }
 
-const SSH_ASKPASS_DIR_NAME = "t3code-ssh-askpass";
+const SSH_ASKPASS_DIR_NAME = "T4CODE-ssh-askpass";
 
 function joinSshAskpassPath(
   directory: string,
@@ -77,12 +77,12 @@ function joinSshAskpassPath(
 const ASKPASS_POSIX_SCRIPT = `#!/bin/sh
 # Invoked by ssh via SSH_ASKPASS when T4 Code re-runs ssh with a cached password
 # from the renderer's in-app prompt. We never expose a native dialog here - if
-# T3_SSH_AUTH_SECRET is missing, that's a caller bug and we fail loudly.
-if [ "\${T3_SSH_AUTH_SECRET+x}" = "x" ]; then
-  printf "%s\\n" "$T3_SSH_AUTH_SECRET"
+# T4_SSH_AUTH_SECRET is missing, that's a caller bug and we fail loudly.
+if [ "\${T4_SSH_AUTH_SECRET+x}" = "x" ]; then
+  printf "%s\\n" "$T4_SSH_AUTH_SECRET"
   exit 0
 fi
-printf 'T4 Code ssh-askpass invoked without T3_SSH_AUTH_SECRET.\\n' >&2
+printf 'T4 Code ssh-askpass invoked without T4_SSH_AUTH_SECRET.\\n' >&2
 exit 1
 `;
 
@@ -92,13 +92,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0ssh-askpass.ps1" %*\r
 
 const ASKPASS_WINDOWS_SCRIPT = `# Invoked by ssh via SSH_ASKPASS (through ssh-askpass.cmd) when T4 Code re-runs\r
 # ssh with a cached password from the renderer's in-app prompt. We never expose\r
-# a native dialog here - if T3_SSH_AUTH_SECRET is missing, that's a caller bug\r
+# a native dialog here - if T4_SSH_AUTH_SECRET is missing, that's a caller bug\r
 # and we fail loudly.\r
-if ($null -ne $env:T3_SSH_AUTH_SECRET) {\r
-  [Console]::Out.WriteLine($env:T3_SSH_AUTH_SECRET)\r
+if ($null -ne $env:T4_SSH_AUTH_SECRET) {\r
+  [Console]::Out.WriteLine($env:T4_SSH_AUTH_SECRET)\r
   exit 0\r
 }\r
-[Console]::Error.WriteLine("T4 Code ssh-askpass invoked without T3_SSH_AUTH_SECRET.")\r
+[Console]::Error.WriteLine("T4 Code ssh-askpass invoked without T4_SSH_AUTH_SECRET.")\r
 exit 1\r
 `;
 
@@ -190,7 +190,7 @@ const ensureDefaultSshAskpassHelpers = Effect.fn("ssh/auth.ensureDefaultSshAskpa
       }
     }
     runtimeDirectory ??= yield* fs.realPath(
-      yield* fs.makeTempDirectory({ prefix: "t3code-ssh-runtime-" }),
+      yield* fs.makeTempDirectory({ prefix: "T4CODE-ssh-runtime-" }),
     );
     const launcherPath = yield* ensureSshAskpassHelpers({
       directory: path.join(runtimeDirectory, SSH_ASKPASS_DIR_NAME),
@@ -230,8 +230,8 @@ export const buildSshChildEnvironment = Effect.fn("ssh/auth.buildSshChildEnviron
     ...baseEnv,
     SSH_ASKPASS: sshAskpass,
     SSH_ASKPASS_REQUIRE: "force",
-    ...(input.authSecret === undefined ? {} : { T3_SSH_AUTH_SECRET: input.authSecret ?? "" }),
-    ...(platform === "win32" || baseEnv.DISPLAY || hostDisplay ? {} : { DISPLAY: "t3code" }),
+    ...(input.authSecret === undefined ? {} : { T4_SSH_AUTH_SECRET: input.authSecret ?? "" }),
+    ...(platform === "win32" || baseEnv.DISPLAY || hostDisplay ? {} : { DISPLAY: "T4CODE" }),
   };
 });
 

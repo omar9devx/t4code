@@ -1,4 +1,4 @@
-import { ThreadId, type WorktreeSetupSnapshot } from "@t3tools/contracts";
+import { ThreadId, type WorktreeSetupSnapshot } from "@t4tools/contracts";
 import {
   CheckpointRef,
   NodeId,
@@ -10,7 +10,7 @@ import {
   RuntimeRequestId,
   type OrchestrationV2ProjectedTurnItem,
   type OrchestrationV2TurnItem,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as DateTime from "effect/DateTime";
 import {
   deriveTimelineEntriesFromVisibleTurnItems,
@@ -21,8 +21,8 @@ import {
 import { makeStreamingTimelineFixture } from "../../test-fixtures";
 import type { TurnDiffSummary } from "../../types";
 import { describe, expect, it } from "vite-plus/test";
-import { EnvironmentId, MessageId, RunId } from "@t3tools/contracts";
-import { serializeAssistantCitation } from "@t3tools/shared/assistantCitations";
+import { EnvironmentId, MessageId, RunId } from "@t4tools/contracts";
+import { serializeAssistantCitation } from "@t4tools/shared/assistantCitations";
 import {
   computeStableMessagesTimelineRows,
   deriveMessagesTimelineRows,
@@ -3210,7 +3210,7 @@ describe("streaming v2 row projection", () => {
         {
           runId: source.historyRunId,
           checkpointTurnCount: 1,
-          checkpointRef: CheckpointRef.make("refs/t3/checkpoints/history"),
+          checkpointRef: CheckpointRef.make("refs/t4/checkpoints/history"),
           status: "ready",
           files: [],
           assistantMessageId: MessageId.make("history-assistant"),
@@ -3562,7 +3562,7 @@ describe("linked timeline resources", () => {
               runId,
               type: "dynamic_tool",
               status: failed ? "failed" : status,
-              toolName: "t3-code.delegate_task",
+              toolName: "t4-code.delegate_task",
               input: { task: taskId === "b" ? "a" : taskId, role },
               ...(status === "completed"
                 ? {

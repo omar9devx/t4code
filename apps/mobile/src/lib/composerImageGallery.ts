@@ -1,5 +1,5 @@
-import { imageMimeType } from "@t3tools/shared/image";
-import type { EnvironmentId } from "@t3tools/contracts";
+import { imageMimeType } from "@t4tools/shared/image";
+import type { EnvironmentId } from "@t4tools/contracts";
 import type { FilePreviewItem } from "../components/FilePreviewModal.types";
 import { isFileBackedComposerAttachment, type DraftComposerAttachment } from "./composerImages";
 

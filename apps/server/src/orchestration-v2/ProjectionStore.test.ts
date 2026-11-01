@@ -27,14 +27,14 @@ import {
   TurnItemId,
   type ThreadPullRequestLink,
   isLiveSubagentShell,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
 import * as Tracer from "effect/Tracer";
 import * as SqlClient from "effect/sql/SqlClient";
-import { projectThreadAwarenessV2 } from "@t3tools/shared/agentAwareness";
+import { projectThreadAwarenessV2 } from "@t4tools/shared/agentAwareness";
 
 import * as SqlitePersistence from "../persistence/Sqlite.ts";
 import { CodexProviderCapabilitiesV2 } from "./Adapters/CodexAdapterV2.ts";
@@ -372,7 +372,7 @@ it.effect("SQL shells flag only an active turn blocked solely on T4 Code thread 
       id: TurnItemId.make("item:thread-wait:active"),
       runId: run.id,
       type: "dynamic_tool" as const,
-      toolName: "mcp__t3_code__t3_thread_wait",
+      toolName: "mcp__t4_code__t4_thread_wait",
       input: { threadId: "child-thread" },
       status: "running" as const,
     };
@@ -386,7 +386,7 @@ it.effect("SQL shells flag only an active turn blocked solely on T4 Code thread 
     const foreign = {
       ...wait,
       id: TurnItemId.make("item:thread-wait:foreign"),
-      toolName: "weather.t3_thread_wait",
+      toolName: "weather.t4_thread_wait",
     };
     yield* updateItem(foreign);
     yield* assertBlocked(false);
@@ -468,7 +468,7 @@ it.effect("SQL shells flag only an active turn blocked solely on T4 Code thread 
     const delegation = {
       ...wait,
       id: TurnItemId.make("item:thread-wait:delegation"),
-      toolName: "t3-code-thread_opencode2-adapter_delegate_task",
+      toolName: "t4-code-thread_opencode2-adapter_delegate_task",
       input: { task: "Review", mode: "async" },
     };
     yield* updateItem(delegation);
@@ -2012,7 +2012,7 @@ it.layer(layerTest)("ProjectionStoreV2", (it) => {
           parentCheckpointId: null,
           ordinalWithinScope: 0,
           appRunOrdinal: null,
-          ref: CheckpointRef.make("refs/t3/bounded-sql-history/0"),
+          ref: CheckpointRef.make("refs/t4/bounded-sql-history/0"),
           status: "ready",
           files: [],
           capturedAt: now,
@@ -2302,7 +2302,7 @@ it.layer(layerTest)("ProjectionStoreV2", (it) => {
         workCursor = page.nextCursor;
       }
       assert.strictEqual(workIds.size, 999);
-      for (const toolName of ["t3-code.delegate_task", "mcp__t3_code__delegate_task"]) {
+      for (const toolName of ["t4-code.delegate_task", "mcp__t4_code__delegate_task"]) {
         yield* sql`UPDATE orchestration_v2_projection_turn_items SET type = 'dynamic_tool',
           payload_json = json_set(payload_json, '$.type', 'dynamic_tool', '$.toolName', ${toolName})
           WHERE thread_id = ${threadId} AND ordinal = 2`;
@@ -6855,9 +6855,9 @@ it.layer(layerTest)("ProjectionStoreV2", (it) => {
       });
       const link = {
         host: "github.com",
-        repository: "pingdotgg/t3code",
+        repository: "omar9devx/t4code",
         number: 7,
-        url: "https://github.com/pingdotgg/t3code/pull/7",
+        url: "https://github.com/omar9devx/t4code/pull/7",
         source: "agent" as const,
         linkedAt: DateTime.formatIso(at),
         snapshot: null,
@@ -6901,7 +6901,7 @@ it.layer(layerTest)("ProjectionStoreV2", (it) => {
       ]);
       assert.deepEqual((yield* store.getThreadShell(threadId))?.pendingBackgroundTasks, [
         {
-          taskId: "pull-request-watch:github.com/pingdotgg/t3code#7",
+          taskId: "pull-request-watch:github.com/omar9devx/t4code#7",
           description: "Watching pull request #7",
           kind: "monitor",
           awaited: true,

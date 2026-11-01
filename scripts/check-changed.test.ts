@@ -38,9 +38,9 @@ describe("check:changed", () => {
   it("runs the server tests for the one guide they read and leaves other docs inert", () => {
     const packages = readWorkspace();
     assert.isTrue(
-      decide(["docs/user/t3-connect-troubleshooting.md"], packages, false).outputs.test_server,
+      decide(["docs/user/t4-connect-troubleshooting.md"], packages, false).outputs.test_server,
     );
-    assert.deepStrictEqual(docReaderTests(["docs/user/t3-connect-troubleshooting.md"]), [
+    assert.deepStrictEqual(docReaderTests(["docs/user/t4-connect-troubleshooting.md"]), [
       "apps/server/src/cloud/ConnectReachability.test.ts",
     ]);
     assert.deepStrictEqual(decide(["docs/user/install.md"], packages, false).affected, []);
@@ -202,7 +202,7 @@ const env = {
 // History A -> B -> C, with HEAD at C. Each remote's main points at A or B.
 function fixture(remotes: Record<string, "A" | "B">) {
   const root = NodeFS.realpathSync(
-    NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t3-check-changed-")),
+    NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t4-check-changed-")),
   );
   const commits: Record<string, string> = {};
   try {

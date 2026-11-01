@@ -50,7 +50,7 @@ import {
   RunAttemptId,
   RunId,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import { assert, describe, it } from "@effect/vitest";
 import * as Context from "effect/Context";
 import * as DateTime from "effect/DateTime";
@@ -70,18 +70,18 @@ import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 import * as TestClock from "effect/testing/TestClock";
 import { Tool } from "effect/ai";
-import { formatClaudeResumeCompactionQuestion } from "@t3tools/shared/claudeCompaction";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { getModelSelectionStringOptionValue } from "@t3tools/shared/model";
-import { SpawnExecutableResolution } from "@t3tools/shared/shell";
+import { formatClaudeResumeCompactionQuestion } from "@t4tools/shared/claudeCompaction";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import { getModelSelectionStringOptionValue } from "@t4tools/shared/model";
+import { SpawnExecutableResolution } from "@t4tools/shared/shell";
 
 import * as PortScanner from "../../preview/PortScanner.ts";
 import { attachmentRelativePath } from "../../attachmentStore.ts";
 import { WorkflowAgentTranscriptReadObserver } from "../workflowAgentTranscript.ts";
 import * as ServerConfig from "../../config.ts";
-import * as McpProviderSession from "@t3tools/provider-core/server/mcpSession";
-import { T3_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH } from "@t3tools/provider-core/server/orchestrationInstructions";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
+import * as McpProviderSession from "@t4tools/provider-core/server/mcpSession";
+import { T4_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH } from "@t4tools/provider-core/server/orchestrationInstructions";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
 import { PreviewControlsToolkit } from "../../mcp/toolkits/previewControls/tools.ts";
 import { HtmlToolkit } from "../../mcp/toolkits/html/tools.ts";
 import { EnvironmentToolkit } from "../../mcp/toolkits/environment/tools.ts";
@@ -90,12 +90,12 @@ import { WorktreeToolkit } from "../../mcp/toolkits/worktree/tools.ts";
 import { ThreadToolkit } from "../../mcp/toolkits/thread/tools.ts";
 import { OrchestratorToolkit } from "../../mcp/toolkits/orchestrator/tools.ts";
 import { ClaudeExecutableFileCheck } from "../../provider/Drivers/ClaudeExecutable.ts";
-import * as ProviderEventLoggers from "@t3tools/provider-core/server/ProviderEventLoggers";
-import * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
-import type * as ProviderContinuationRequests from "@t3tools/provider-core/server/ProviderContinuationRequests";
-import { makeProviderFailure } from "@t3tools/provider-core/server/failure";
+import * as ProviderEventLoggers from "@t4tools/provider-core/server/ProviderEventLoggers";
+import * as ProviderAdapter from "@t4tools/provider-core/server/ProviderAdapter";
+import type * as ProviderContinuationRequests from "@t4tools/provider-core/server/ProviderContinuationRequests";
+import { makeProviderFailure } from "@t4tools/provider-core/server/failure";
 import * as ClaudeAdapterV2 from "./ClaudeAdapterV2.ts";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
 import { ClaudeOrchestratorReplayHarness } from "./ClaudeAdapterV2.testkit.ts";
 import { provideDeterministicTestRuntime } from "../testkit/DeterministicRuntime.ts";
 import { runOrchestratorV2Scenario } from "../testkit/OrchestratorScenario.ts";
@@ -499,14 +499,14 @@ describe("ClaudeAdapterV2 runtime query policy", () => {
 });
 
 describe("ClaudeAdapterV2 MCP query overrides", () => {
-  const T3_MCP_SERVERS = {
-    "t3-code": {
+  const T4_MCP_SERVERS = {
+    "t4-code": {
       type: "http",
       url: "http://127.0.0.1:43123/mcp",
       headers: {
         Authorization: "Bearer secret-claude-token",
       },
-      timeout: ClaudeAdapterV2.CLAUDE_T3_MCP_TOOL_TIMEOUT_MS,
+      timeout: ClaudeAdapterV2.CLAUDE_t4_MCP_TOOL_TIMEOUT_MS,
     },
   } as const;
 
@@ -523,7 +523,7 @@ describe("ClaudeAdapterV2 MCP query overrides", () => {
     browserToolsAvailable: true,
   });
 
-  it("pre-approves only read-only t3-code tools in a read-only sandbox", () => {
+  it("pre-approves only read-only t4-code tools in a read-only sandbox", () => {
     const threadId = ThreadId.make("thread-claude-mcp-read-only");
     const mcpSession = mcpSessionFor(threadId);
     const overrides = ClaudeAdapterV2.claudeMcpQueryOverrides({
@@ -535,11 +535,11 @@ describe("ClaudeAdapterV2 MCP query overrides", () => {
     assert.deepEqual(overrides, {
       allowedTools: [
         ...ClaudeAdapterV2.CLAUDE_READ_ONLY_ALLOWED_TOOLS,
-        ...ClaudeAdapterV2.CLAUDE_READ_ONLY_T3_MCP_ALLOWED_TOOLS,
+        ...ClaudeAdapterV2.CLAUDE_READ_ONLY_t4_MCP_ALLOWED_TOOLS,
       ],
-      mcpServers: T3_MCP_SERVERS,
+      mcpServers: T4_MCP_SERVERS,
     });
-    assert.isFalse(overrides.allowedTools?.includes(ClaudeAdapterV2.CLAUDE_T3_MCP_TOOL_WILDCARD));
+    assert.isFalse(overrides.allowedTools?.includes(ClaudeAdapterV2.CLAUDE_t4_MCP_TOOL_WILDCARD));
   });
 
   it("invalidates live-query reuse when MCP credentials rotate", () => {
@@ -578,11 +578,11 @@ describe("ClaudeAdapterV2 MCP query overrides", () => {
       ...Object.values(HtmlToolkit.tools),
     ]
       .filter((tool) => Context.get(tool.annotations, Tool.Readonly))
-      .map((tool) => `mcp__t3-code__${tool.name}`)
+      .map((tool) => `mcp__t4-code__${tool.name}`)
       .sort();
 
     assert.deepEqual(
-      [...ClaudeAdapterV2.CLAUDE_READ_ONLY_T3_MCP_ALLOWED_TOOLS].sort(),
+      [...ClaudeAdapterV2.CLAUDE_READ_ONLY_t4_MCP_ALLOWED_TOOLS].sort(),
       readOnlyToolNames,
     );
   });
@@ -607,15 +607,15 @@ describe("ClaudeAdapterV2 native protocol logging", () => {
       allowedTools: ["Read"],
     });
     assert.deepEqual(overrides, {
-      allowedTools: ["Read", "mcp__t3-code__*"],
+      allowedTools: ["Read", "mcp__t4-code__*"],
       mcpServers: {
-        "t3-code": {
+        "t4-code": {
           type: "http",
           url: "http://127.0.0.1:43123/mcp",
           headers: {
             Authorization: "Bearer secret-claude-token",
           },
-          timeout: ClaudeAdapterV2.CLAUDE_T3_MCP_TOOL_TIMEOUT_MS,
+          timeout: ClaudeAdapterV2.CLAUDE_t4_MCP_TOOL_TIMEOUT_MS,
         },
       },
     });
@@ -641,7 +641,7 @@ describe("ClaudeAdapterV2 native protocol logging", () => {
     assert.equal(systemPrompt.type, "preset");
     assert.equal(systemPrompt.preset, "claude_code");
     assert.include(systemPrompt.append ?? "", "Use `delegate_task`");
-    assert.include(systemPrompt.append ?? "", "call `t3_background_wait`");
+    assert.include(systemPrompt.append ?? "", "call `T4_background_wait`");
     assert.notInclude(systemPrompt.append ?? "", "## T4 Code devices");
     const logged = ClaudeAdapterV2.loggedClaudeQueryOptions(options);
     assert.equal(logged.hasMcpServers, true);
@@ -673,7 +673,7 @@ describe("ClaudeAdapterV2 device instructions", () => {
       resume: false,
       cwd: "/workspace",
       ...(input.mcp
-        ? { mcpServers: { "t3-code": { type: "http" as const, url: "http://127.0.0.1/mcp" } } }
+        ? { mcpServers: { "t4-code": { type: "http" as const, url: "http://127.0.0.1/mcp" } } }
         : {}),
       deviceToolsAvailable: input.deviceToolsAvailable,
       environment: {},
@@ -683,7 +683,7 @@ describe("ClaudeAdapterV2 device instructions", () => {
 
   it("gives a session with device access the device block and the ToolSearch line to load it", () => {
     const text = append({ mcp: true, deviceToolsAvailable: true });
-    assert.include(text, T3_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH);
+    assert.include(text, T4_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH);
     assert.include(text, "Use `delegate_task`");
   });
 
@@ -720,7 +720,7 @@ describe("ClaudeAdapterV2 device instructions", () => {
       {
         hookSpecificOutput: {
           hookEventName: "SubagentStart",
-          additionalContext: T3_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH,
+          additionalContext: T4_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH,
         },
       },
     ]);
@@ -835,7 +835,7 @@ describe("ClaudeAdapterV2 session permissions", () => {
 
   it("adds a whole-tool session rule when Claude offers no suggestion", () => {
     const result = ClaudeAdapterV2.permissionResultFromDecision({
-      toolName: "mcp__t3__custom_tool",
+      toolName: "mcp__t4__custom_tool",
       decision: "acceptForSession",
       toolInput: {},
       toolUseID: "tool-2",
@@ -848,7 +848,7 @@ describe("ClaudeAdapterV2 session permissions", () => {
     assert.deepEqual(result.updatedPermissions, [
       {
         type: "addRules",
-        rules: [{ toolName: "mcp__t3__custom_tool" }],
+        rules: [{ toolName: "mcp__t4__custom_tool" }],
         behavior: "allow",
         destination: "session",
       },
@@ -863,7 +863,7 @@ describe("ClaudeAdapterV2 Auto-accept edits", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-accept-edits-",
+          prefix: "t4-claude-accept-edits-",
         });
         let openedOptions: ClaudeAdapterV2.ClaudeAgentSdkQueryOptions | undefined;
         const adapter = yield* ClaudeAdapterV2.makeClaudeAdapterV2({
@@ -987,7 +987,7 @@ describe("ClaudeAdapterV2 append-system-prompt-file launch argument", () => {
       instanceId: ClaudeAdapterV2.CLAUDE_DEFAULT_INSTANCE_ID,
       settings: { ...DEFAULT_CLAUDE_SETTINGS, launchArgs },
       environment: {},
-      attachmentsDir: yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-append-" }),
+      attachmentsDir: yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-append-" }),
       fileSystem,
       path: yield* Path.Path,
       crypto: yield* Crypto.Crypto,
@@ -1054,7 +1054,7 @@ describe("ClaudeAdapterV2 append-system-prompt-file launch argument", () => {
     Effect.scoped(
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
-        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-append-cwd-" });
+        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-append-cwd-" });
         yield* fileSystem.writeFileString(NodePath.join(cwd, "rules.md"), "File sentinel\n");
         const plain = yield* startTurnWithLaunchArgs("", cwd);
         const { exit, opened } = yield* startTurnWithLaunchArgs(
@@ -1086,7 +1086,7 @@ describe("ClaudeAdapterV2 append-system-prompt-file launch argument", () => {
     Effect.scoped(
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
-        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-settings-" });
+        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-settings-" });
         yield* fileSystem.writeFileString(
           NodePath.join(cwd, "user-settings.json"),
           '{"skillOverrides":{"lint":"off"},"showThinkingSummaries":false}',
@@ -1153,7 +1153,7 @@ describe("ClaudeAdapterV2 append-system-prompt-file launch argument", () => {
     Effect.scoped(
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
-        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-append-cwd-" });
+        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-append-cwd-" });
         const { exit, opened } = yield* startTurnWithLaunchArgs(launchArgs, cwd);
         assert.lengthOf(opened, 0);
         assert.isTrue(Exit.isFailure(exit));
@@ -1282,7 +1282,7 @@ const captureSdkExecutablePaths = Effect.fn("captureSdkExecutablePaths")(functio
   ).pipe(
     Effect.provide(
       ServerConfig.layerTest(process.cwd(), {
-        prefix: "t3-claude-binary-path-",
+        prefix: "t4-claude-binary-path-",
       }),
     ),
     Effect.provideService(ClaudeAdapterV2.ClaudeAgentSdkQueryRunner, {
@@ -1362,7 +1362,7 @@ describe("ClaudeAdapterV2 resumeThread", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
         const configDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-empty-session-",
+          prefix: "t4-claude-empty-session-",
         });
         const projectDir = path.join(configDir, "projects", "-workspace");
         yield* fileSystem.makeDirectory(projectDir, { recursive: true });
@@ -1451,7 +1451,7 @@ describe("ClaudeAdapterV2 resume compaction", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-resume-",
+          prefix: "t4-claude-resume-",
         });
         let openedOptions: ClaudeAdapterV2.ClaudeAgentSdkQueryOptions | undefined;
         const adapter = yield* ClaudeAdapterV2.makeClaudeAdapterV2({
@@ -1716,7 +1716,7 @@ describe("ClaudeAdapterV2 attachments", () => {
           const idAllocator = yield* IdAllocator.IdAllocatorV2;
           const path = yield* Path.Path;
           const claudeHome = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-v2-skills-home-",
+            prefix: "t4-claude-v2-skills-home-",
           });
           yield* fileSystem.makeDirectory(path.join(claudeHome, "skills", "implement"), {
             recursive: true,
@@ -1730,7 +1730,7 @@ describe("ClaudeAdapterV2 attachments", () => {
             options: ultrathink ? CLAUDE_TEST_MODEL_SELECTION.options : [],
           };
           const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-v2-attachments-",
+            prefix: "t4-claude-v2-attachments-",
           });
           const offeredMessages: Array<SDKUserMessage> = [];
           let failOpen = false;
@@ -2265,7 +2265,7 @@ describe("ClaudeAdapterV2 native fork", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-v2-fork-attachments-",
+          prefix: "t4-claude-v2-fork-attachments-",
         });
         const openedQueries: Array<ClaudeAdapterV2.ClaudeAgentSdkQueryOpenInput> = [];
         const forkCalls: Array<ClaudeAdapterV2.ClaudeAgentSdkSessionForkInput> = [];
@@ -2489,7 +2489,7 @@ function makeFakeClaudeCli(answerSetServers = true) {
 }
 
 describe("ClaudeAdapterV2 MCP credential channel", () => {
-  const t3McpServer = {
+  const t4McpServer = {
     type: "http" as const,
     url: "http://127.0.0.1:43123/mcp",
     headers: { Authorization: "Bearer dummy-mcp-credential" },
@@ -2510,7 +2510,7 @@ describe("ClaudeAdapterV2 MCP credential channel", () => {
             resume: false,
             cwd: null,
             environment: { PATH: "/usr/bin" },
-            mcpServers: { "t3-code": t3McpServer },
+            mcpServers: { "t4-code": t4McpServer },
           }),
           pathToClaudeCodeExecutable: "/opt/claude/cli.js",
           spawnClaudeCodeProcess: cli.spawn,
@@ -2559,7 +2559,7 @@ describe("ClaudeAdapterV2 MCP credential channel", () => {
 
       assert.deepInclude(cli.controlRequests, {
         subtype: "mcp_set_servers",
-        servers: { "t3-code": t3McpServer },
+        servers: { "t4-code": t4McpServer },
       });
       const spawned = JSON.stringify(cli.spawns);
       assert.notInclude(spawned, "--mcp-config");
@@ -2575,7 +2575,7 @@ describe("ClaudeAdapterV2 native session identity", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-v2-session-identity-",
+          prefix: "t4-claude-v2-session-identity-",
         });
         const openedQueries: Array<ClaudeAdapterV2.ClaudeAgentSdkQueryOpenInput> = [];
         const adapter = yield* ClaudeAdapterV2.makeClaudeAdapterV2({
@@ -2886,7 +2886,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
       const fileSystem = yield* FileSystem.FileSystem;
       const idAllocator = yield* IdAllocator.IdAllocatorV2;
       const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "t3-claude-v2-wake-",
+        prefix: "t4-claude-v2-wake-",
       });
       const sdkMessages = yield* Queue.unbounded<SDKMessage>();
       const processQueues: Array<Queue.Queue<SDKMessage>> = [];
@@ -3526,8 +3526,8 @@ describe("ClaudeAdapterV2 background wake turns", () => {
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
-        const home = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-remote-" });
-        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-remote-cwd-" });
+        const home = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-remote-" });
+        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-remote-cwd-" });
         const remoteFile = path.join(home, "remote-settings.json");
         const sdk = yield* Effect.promise(() =>
           vi.importActual<typeof ClaudeSdk>("@anthropic-ai/claude-agent-sdk"),
@@ -3617,8 +3617,8 @@ describe("ClaudeAdapterV2 background wake turns", () => {
     it.effect("drops false bypass switches from --settings before they reach the SDK", () =>
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
-        const home = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-launch-" });
-        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-launch-cwd-" });
+        const home = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-launch-" });
+        const cwd = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-launch-cwd-" });
         const sdk = yield* Effect.promise(() =>
           vi.importActual<typeof ClaudeSdk>("@anthropic-ai/claude-agent-sdk"),
         );
@@ -3955,7 +3955,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const home = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-policy-home-",
+            prefix: "t4-claude-policy-home-",
           });
           yield* fileSystem.makeDirectory(path.join(home, "profile"));
           yield* fileSystem.writeFileString(
@@ -4004,7 +4004,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const home = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-policy-failure-",
+            prefix: "t4-claude-policy-failure-",
           });
           const settingsFile = path.join(home, "settings.json");
           const open = Effect.scoped(
@@ -4087,7 +4087,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
         const home = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-tool-search-",
+          prefix: "t4-claude-tool-search-",
         });
         const openedToolSearch = (
           settingsJson: string,
@@ -4136,8 +4136,8 @@ describe("ClaudeAdapterV2 background wake turns", () => {
 
         // Claude Code keeps the local file at the repository root, the main checkout's root in a
         // worktree, and that file beats the user's settings.
-        const repo = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-repo-" });
-        const worktree = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-wt-" });
+        const repo = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-repo-" });
+        const worktree = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-wt-" });
         const worktreeGitDir = path.join(repo, ".git", "worktrees", "wt");
         yield* fileSystem.makeDirectory(worktreeGitDir, { recursive: true });
         yield* fileSystem.writeFileString(path.join(worktreeGitDir, "commondir"), "../..\n");
@@ -4160,7 +4160,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
         assert.isUndefined(yield* openedToolSearch(userAuto, path.join(repo, "packages", "app")));
 
         // Project settings beat user settings, and the process env applies only when no file sets it.
-        const project = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-project-" });
+        const project = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-project-" });
         yield* fileSystem.makeDirectory(path.join(project, ".claude"));
         yield* fileSystem.writeFileString(
           path.join(project, ".claude", "settings.json"),
@@ -4393,7 +4393,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
-        const homePath = yield* fs.makeTempDirectoryScoped({ prefix: "t3-claude-skill-dispatch-" });
+        const homePath = yield* fs.makeTempDirectoryScoped({ prefix: "t4-claude-skill-dispatch-" });
         for (const [name, userOnly] of [
           ["interrogate", true],
           ["implement", true],
@@ -7627,7 +7627,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
   const makeTaskToolHarnessWithOptions = (environment: NodeJS.ProcessEnv = {}) =>
     Effect.gen(function* () {
       const configDir = yield* (yield* FileSystem.FileSystem).makeTempDirectoryScoped({
-        prefix: "t3-claude-tasks-",
+        prefix: "t4-claude-tasks-",
       });
       const path = yield* Path.Path;
       const harness = yield* makeWakeHarnessWithOptions({
@@ -8620,7 +8620,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const path = yield* Path.Path;
           const root = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-task-output-cwd-",
+            prefix: "t4-claude-task-output-cwd-",
           });
           const physicalCwd = path.join(root, "real", "project");
           const launchCwd = path.join(root, "link");
@@ -8923,7 +8923,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-v2-settled-stop-replaced-",
+          prefix: "t4-claude-v2-settled-stop-replaced-",
         });
         const processQueues: Array<Queue.Queue<SDKMessage>> = [];
         const firstCloseRequested = yield* Deferred.make<void>();
@@ -9107,7 +9107,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const idAllocator = yield* IdAllocator.IdAllocatorV2;
           const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-v2-sibling-replace-",
+            prefix: "t4-claude-v2-sibling-replace-",
           });
           const nativeIds = ["native-thread-roster-a", "native-thread-roster-b"] as const;
           let allocateIndex = 0;
@@ -13187,7 +13187,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-v2-process-reset-",
+          prefix: "t4-claude-v2-process-reset-",
         });
         const processQueues: Array<Queue.Queue<SDKMessage>> = [];
         const events: Array<ProviderAdapter.ProviderAdapterV2Event> = [];
@@ -13356,7 +13356,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const idAllocator = yield* IdAllocator.IdAllocatorV2;
           const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-v2-buffer-replace-",
+            prefix: "t4-claude-v2-buffer-replace-",
           });
           const processQueues: Array<Queue.Queue<SDKMessage>> = [];
           const events: Array<ProviderAdapter.ProviderAdapterV2Event> = [];
@@ -13535,7 +13535,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
         const fileSystem = yield* FileSystem.FileSystem;
         const idAllocator = yield* IdAllocator.IdAllocatorV2;
         const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-v2-model-change-running-subagent-",
+          prefix: "t4-claude-v2-model-change-running-subagent-",
         });
         const processQueues: Array<Queue.Queue<SDKMessage>> = [];
         const events: Array<ProviderAdapter.ProviderAdapterV2Event> = [];
@@ -13717,7 +13717,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
       Effect.gen(function* () {
         const fileSystem = yield* FileSystem.FileSystem;
         const cwd = yield* fileSystem.makeTempDirectoryScoped({
-          prefix: "t3-claude-append-replacement-",
+          prefix: "t4-claude-append-replacement-",
         });
         const appendFile = NodePath.join(cwd, "rules.md");
         yield* fileSystem.writeFileString(appendFile, "File sentinel\n");
@@ -13732,7 +13732,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           },
           environment: {},
           attachmentsDir: yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-append-replacement-attachments-",
+            prefix: "t4-claude-append-replacement-attachments-",
           }),
           fileSystem,
           path: yield* Path.Path,
@@ -13851,7 +13851,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
           const fileSystem = yield* FileSystem.FileSystem;
           const idAllocator = yield* IdAllocator.IdAllocatorV2;
           const attachmentsDir = yield* fileSystem.makeTempDirectoryScoped({
-            prefix: "t3-claude-v2-replace-open-fail-",
+            prefix: "t4-claude-v2-replace-open-fail-",
           });
           let openCount = 0;
           const processQueues: Array<Queue.Queue<SDKMessage>> = [];
@@ -13978,7 +13978,7 @@ describe("ClaudeAdapterV2 background wake turns", () => {
   ) =>
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
-      const configDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-claude-wf-" });
+      const configDir = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t4-claude-wf-" });
       const transcriptDir = NodePath.join(configDir, "projects", "workflow");
       yield* fileSystem.makeDirectory(transcriptDir, { recursive: true });
       yield* fileSystem.writeFileString(

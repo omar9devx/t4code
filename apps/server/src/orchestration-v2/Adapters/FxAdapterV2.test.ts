@@ -10,15 +10,15 @@ import {
   RunId,
   type RuntimeMode,
   ThreadId,
-} from "@t3tools/contracts";
-import { ACP_PROTOCOL } from "@t3tools/provider-acp/server/adapter";
-import { FxSettings } from "@t3tools/provider-fx/settings";
-import { FX_DRIVER_KIND, makeFxAdapterV2 } from "@t3tools/provider-fx/testing";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
-import * as McpProviderSessions from "@t3tools/provider-core/server/McpProviderSessions";
-import { ProviderAdapterV2RuntimePolicy } from "@t3tools/provider-core/server/ProviderAdapter";
-import * as TestProviderHost from "@t3tools/provider-testing/TestProviderHost";
-import { resolveSelfInvocation } from "@t3tools/shared/nodeRuntime";
+} from "@t4tools/contracts";
+import { ACP_PROTOCOL } from "@t4tools/provider-acp/server/adapter";
+import { FxSettings } from "@t4tools/provider-fx/settings";
+import { FX_DRIVER_KIND, makeFxAdapterV2 } from "@t4tools/provider-fx/testing";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
+import * as McpProviderSessions from "@t4tools/provider-core/server/McpProviderSessions";
+import { ProviderAdapterV2RuntimePolicy } from "@t4tools/provider-core/server/ProviderAdapter";
+import * as TestProviderHost from "@t4tools/provider-testing/TestProviderHost";
+import { resolveSelfInvocation } from "@t4tools/shared/nodeRuntime";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -156,7 +156,7 @@ const openFxSession = Effect.fn("openFxSession")(function* (input: {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const replayDir = yield* fileSystem.makeTempDirectoryScoped({
-    prefix: `t3-fx-${input.scenario}-`,
+    prefix: `t4-fx-${input.scenario}-`,
   });
   const statusPath = path.join(replayDir, "status.json");
   const transcript = yield* decodeAcpReplayTranscript(

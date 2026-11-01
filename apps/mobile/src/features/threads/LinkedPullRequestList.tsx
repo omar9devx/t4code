@@ -1,14 +1,14 @@
-import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
+import type { EnvironmentThreadShell } from "@t4tools/client-runtime/state/shell";
 import {
   capitalizeTerm,
   sourceControlClients,
-} from "@t3tools/client-runtime/source-control-clients";
+} from "@t4tools/client-runtime/source-control-clients";
 import {
   pullRequestListLines,
   resolveThreadPullRequestChains,
   threadPullRequestKeyOf,
   type PullRequestListLine,
-} from "@t3tools/client-runtime/thread-pull-requests";
+} from "@t4tools/client-runtime/thread-pull-requests";
 import { memo, useMemo } from "react";
 import { Pressable, useWindowDimensions, View } from "react-native";
 
@@ -157,7 +157,7 @@ export const LinkedPullRequestRow = memo(function LinkedPullRequestRow(props: {
           ) : null}
         </View>
         <Text
-          className="text-base leading-5 font-t3-medium text-foreground"
+          className="text-base leading-5 font-t4-medium text-foreground"
           numberOfLines={2}
           ellipsizeMode="tail"
         >

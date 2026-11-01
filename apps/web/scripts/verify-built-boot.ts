@@ -7,7 +7,7 @@ import * as NodeURL from "node:url";
 import { chromium } from "playwright";
 
 const distDir = NodeURL.fileURLToPath(new URL("../dist/", import.meta.url));
-const origin = "http://t3-boot.test";
+const origin = "http://t4-boot.test";
 // With no server, the client retries its session for about 25s before it renders.
 const timeoutMs = 60_000;
 

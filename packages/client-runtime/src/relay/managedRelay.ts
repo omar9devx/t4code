@@ -22,19 +22,19 @@ import {
   RelayMobileRegistrationScope,
   type RelayOkResponse,
   type RelayPublicClientId,
-  type RelayT3ChatLinkRequestResponse,
-  type RelayT3ChatLinkResponse,
+  type RelayT4ChatLinkRequestResponse,
+  type RelayT4ChatLinkResponse,
   RelayRegisterDeviceEndpoint,
   RelayAgentActivitySnapshotEndpoint,
   RelayRegisterLiveActivityEndpoint,
   RelayProtectedError,
   type RelayProtectedError as RelayProtectedErrorType,
   RelayUnregisterDeviceEndpoint,
-} from "@t3tools/contracts/relay";
-import { encodeOAuthScope, oauthScopeSetEquals } from "@t3tools/shared/oauthScope";
-import { decodeRelayJwt } from "@t3tools/shared/relayJwt";
-import { withRelayClientTracing } from "@t3tools/shared/relayTracing";
-import { normalizeSecureRelayUrl } from "@t3tools/shared/relayUrl";
+} from "@t4tools/contracts/relay";
+import { encodeOAuthScope, oauthScopeSetEquals } from "@t4tools/shared/oauthScope";
+import { decodeRelayJwt } from "@t4tools/shared/relayJwt";
+import { withRelayClientTracing } from "@t4tools/shared/relayTracing";
+import { normalizeSecureRelayUrl } from "@t4tools/shared/relayUrl";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
@@ -98,9 +98,9 @@ export const ManagedRelayRequestAction = Schema.Literals([
   "unregister relay mobile device",
   "register relay live activity",
   "read relay agent activity snapshot",
-  "read linked T3 Chat account",
-  "start T3 Chat linking",
-  "unlink T3 Chat account",
+  "read linked T4 Chat account",
+  "start T4 Chat linking",
+  "unlink T4 Chat account",
 ]);
 export type ManagedRelayRequestAction = typeof ManagedRelayRequestAction.Type;
 
@@ -117,9 +117,9 @@ export const ManagedRelayRequestActivity = Schema.Literals([
   "Relay mobile device unregistration",
   "Relay Live Activity registration",
   "Relay agent activity snapshot",
-  "Relay T3 Chat link lookup",
-  "Relay T3 Chat link request",
-  "Relay T3 Chat unlinking",
+  "Relay T4 Chat link lookup",
+  "Relay T4 Chat link request",
+  "Relay T4 Chat unlinking",
 ]);
 export type ManagedRelayRequestActivity = typeof ManagedRelayRequestActivity.Type;
 
@@ -226,7 +226,7 @@ export class ManagedRelayDpopSigner extends Context.Service<
       input: ManagedRelayDpopProofInput,
     ) => Effect.Effect<string, ManagedRelayDpopProofCreationError>;
   }
->()("@t3tools/client-runtime/relay/managedRelay/ManagedRelayDpopSigner") {}
+>()("@t4tools/client-runtime/relay/managedRelay/ManagedRelayDpopSigner") {}
 
 export const MANAGED_RELAY_REQUEST_TIMEOUT_MS = 10_000;
 
@@ -280,13 +280,13 @@ export class ManagedRelayClient extends Context.Service<
       readonly clerkToken: string;
       readonly environmentId: RelayClientEnvironmentRecord["environmentId"];
     }) => Effect.Effect<RelayOkResponse, ManagedRelayClientError>;
-    readonly getT3ChatLink: (input: {
+    readonly getT4ChatLink: (input: {
       readonly clerkToken: string;
-    }) => Effect.Effect<RelayT3ChatLinkResponse, ManagedRelayClientError>;
-    readonly createT3ChatLinkRequest: (input: {
+    }) => Effect.Effect<RelayT4ChatLinkResponse, ManagedRelayClientError>;
+    readonly createT4ChatLinkRequest: (input: {
       readonly clerkToken: string;
-    }) => Effect.Effect<RelayT3ChatLinkRequestResponse, ManagedRelayClientError>;
-    readonly unlinkT3Chat: (input: {
+    }) => Effect.Effect<RelayT4ChatLinkRequestResponse, ManagedRelayClientError>;
+    readonly unlinkT4Chat: (input: {
       readonly clerkToken: string;
     }) => Effect.Effect<RelayOkResponse, ManagedRelayClientError>;
     readonly getEnvironmentStatus: (input: {
@@ -317,7 +317,7 @@ export class ManagedRelayClient extends Context.Service<
     }) => Effect.Effect<RelayAgentActivitySnapshotResponse, ManagedRelayClientError>;
     readonly resetTokenCache: Effect.Effect<void>;
   }
->()("@t3tools/client-runtime/relay/managedRelay/ManagedRelayClient") {}
+>()("@t4tools/client-runtime/relay/managedRelay/ManagedRelayClient") {}
 
 const isRelayProtectedError = Schema.is(RelayProtectedError);
 
@@ -443,9 +443,9 @@ function disabledManagedRelayClient(relayUrl: string): ManagedRelayClient["Servi
     ),
     linkEnvironment: unavailable("clientRuntime.managedRelay.linkEnvironment"),
     unlinkEnvironment: unavailable("clientRuntime.managedRelay.unlinkEnvironment"),
-    getT3ChatLink: unavailable("clientRuntime.managedRelay.getT3ChatLink"),
-    createT3ChatLinkRequest: unavailable("clientRuntime.managedRelay.createT3ChatLinkRequest"),
-    unlinkT3Chat: unavailable("clientRuntime.managedRelay.unlinkT3Chat"),
+    getT4ChatLink: unavailable("clientRuntime.managedRelay.getT4ChatLink"),
+    createT4ChatLinkRequest: unavailable("clientRuntime.managedRelay.createT4ChatLinkRequest"),
+    unlinkT4Chat: unavailable("clientRuntime.managedRelay.unlinkT4Chat"),
     getEnvironmentStatus: unavailable("clientRuntime.managedRelay.getEnvironmentStatus"),
     connectEnvironment: unavailable("clientRuntime.managedRelay.connectEnvironment"),
     registerDevice: unavailable("clientRuntime.managedRelay.registerDevice"),
@@ -811,40 +811,40 @@ export const make = Effect.fn("ManagedRelayClient.make")(function* (
       Effect.withSpan("clientRuntime.managedRelay.unlinkEnvironment"),
       withRelayClientTracing,
     ),
-    getT3ChatLink: Effect.fnUntraced(
+    getT4ChatLink: Effect.fnUntraced(
       function* (input) {
         return yield* client.client
-          .getT3ChatLink({ headers: bearerHeaders(input.clerkToken) })
+          .getT4ChatLink({ headers: bearerHeaders(input.clerkToken) })
           .pipe(
-            Effect.mapError(relayRequestError("read linked T3 Chat account")),
-            timeoutRelayRequest("Relay T3 Chat link lookup"),
+            Effect.mapError(relayRequestError("read linked T4 Chat account")),
+            timeoutRelayRequest("Relay T4 Chat link lookup"),
           );
       },
-      Effect.withSpan("clientRuntime.managedRelay.getT3ChatLink"),
+      Effect.withSpan("clientRuntime.managedRelay.getT4ChatLink"),
       withRelayClientTracing,
     ),
-    createT3ChatLinkRequest: Effect.fnUntraced(
+    createT4ChatLinkRequest: Effect.fnUntraced(
       function* (input) {
         return yield* client.client
-          .createT3ChatLinkRequest({ headers: bearerHeaders(input.clerkToken) })
+          .createT4ChatLinkRequest({ headers: bearerHeaders(input.clerkToken) })
           .pipe(
-            Effect.mapError(relayRequestError("start T3 Chat linking")),
-            timeoutRelayRequest("Relay T3 Chat link request"),
+            Effect.mapError(relayRequestError("start T4 Chat linking")),
+            timeoutRelayRequest("Relay T4 Chat link request"),
           );
       },
-      Effect.withSpan("clientRuntime.managedRelay.createT3ChatLinkRequest"),
+      Effect.withSpan("clientRuntime.managedRelay.createT4ChatLinkRequest"),
       withRelayClientTracing,
     ),
-    unlinkT3Chat: Effect.fnUntraced(
+    unlinkT4Chat: Effect.fnUntraced(
       function* (input) {
         return yield* client.client
-          .unlinkT3Chat({ headers: bearerHeaders(input.clerkToken) })
+          .unlinkT4Chat({ headers: bearerHeaders(input.clerkToken) })
           .pipe(
-            Effect.mapError(relayRequestError("unlink T3 Chat account")),
-            timeoutRelayRequest("Relay T3 Chat unlinking"),
+            Effect.mapError(relayRequestError("unlink T4 Chat account")),
+            timeoutRelayRequest("Relay T4 Chat unlinking"),
           );
       },
-      Effect.withSpan("clientRuntime.managedRelay.unlinkT3Chat"),
+      Effect.withSpan("clientRuntime.managedRelay.unlinkT4Chat"),
       withRelayClientTracing,
     ),
     getEnvironmentStatus: Effect.fnUntraced(

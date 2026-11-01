@@ -282,7 +282,7 @@ function runAgent(): void {
             promptCapabilities: { image: false, audio: false, embeddedContext: true },
           },
           authMethods: [],
-          agentInfo: { name: "t3-dev-replay", version: "1" },
+          agentInfo: { name: "t4-dev-replay", version: "1" },
         };
       case "session/new":
       case "session/load": {

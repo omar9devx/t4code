@@ -1,0 +1,17 @@
+{
+  "name": "@t4tools/mobile-highlights-native",
+  "version": "0.0.0",
+  "private": true,
+  "expo-module": {
+    "ios": {
+      "modules": [
+        "T4HighlightsModule"
+      ]
+    },
+    "android": {
+      "modules": [
+        "expo.modules.t4highlights.T4HighlightsModule"
+      ]
+    }
+  }
+}

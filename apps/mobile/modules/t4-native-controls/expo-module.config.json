@@ -1,0 +1,19 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["T4NativeControlsModule", "T4KeyboardCommandsModule"],
+    "appDelegateSubscribers": [
+      "T4WorkspaceOrientationSubscriber",
+      "T4MenuDismissTouchGateSubscriber",
+      "T4BackgroundGraceSubscriber"
+    ]
+  },
+  "android": {
+    "modules": [
+      "expo.modules.t4nativecontrols.T4NativeControlsModule",
+      "expo.modules.t4nativecontrols.T4WorkspaceNavigationModule",
+      "expo.modules.t4nativecontrols.T4KeyboardCommandsModule",
+      "expo.modules.t4nativecontrols.T4FoldPostureModule"
+    ]
+  }
+}

@@ -10,13 +10,13 @@ import {
   TurnItemId,
   type OrchestrationV2AppThread,
   type OrchestrationV2TurnItem,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 
 import * as ContextHandoffService from "./ContextHandoffService.ts";
-import * as IdAllocator from "@t3tools/provider-core/server/IdAllocator";
+import * as IdAllocator from "@t4tools/provider-core/server/IdAllocator";
 import { ProjectionStoreThreadNotFoundError } from "./ProjectionStore.ts";
 
 const layerTest = ContextHandoffService.layer.pipe(Layer.provide(IdAllocator.layer));
@@ -199,7 +199,7 @@ it.effect("caps the side chat context block without summarizing discarded parent
     assert.isAtMost(context.length, 8_000);
     assert.isTrue(
       context.endsWith(
-        `Use t3_thread_read on thread ${parentThreadId} to see the main thread's live state.`,
+        `Use t4_thread_read on thread ${parentThreadId} to see the main thread's live state.`,
       ),
     );
 

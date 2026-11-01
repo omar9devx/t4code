@@ -48,12 +48,12 @@ cat >"$wrapper_tmp" <<'EOF'
 set -eu
 
 app="$HOME/.local/opt/vorynixal/t4-code-nightly/T4 Code Nightly.AppImage"
-cli="$HOME/.local/share/vorynixal/t4-code-nightly/home/bin/t3"
-export T3CODE_HOME="$HOME/.local/share/vorynixal/t4-code-nightly/home"
-export T3CODE_DESKTOP_LAUNCHER_PATH="$HOME/.local/bin/t4"
+cli="$HOME/.local/share/vorynixal/t4-code-nightly/home/bin/t4"
+export T4CODE_HOME="$HOME/.local/share/vorynixal/t4-code-nightly/home"
+export T4CODE_DESKTOP_LAUNCHER_PATH="$HOME/.local/bin/t4"
 
 case "${1-}" in
-  t3code:*|t3code-dev:*) exec "$app" "$@" ;;
+  T4CODE:*|T4CODE-dev:*) exec "$app" "$@" ;;
 esac
 
 if [ "$#" -eq 0 ]; then

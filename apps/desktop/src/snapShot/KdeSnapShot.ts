@@ -6,7 +6,7 @@ import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
 import * as NodeURL from "node:url";
 import * as Schema from "effect/Schema";
-import type { DesktopCaptureHelperState } from "@t3tools/contracts";
+import type { DesktopCaptureHelperState } from "@t4tools/contracts";
 
 import { escapeDesktopEntryExecArgument } from "../app/DesktopLinuxUrlHandler.ts";
 import type { LinuxWindowSnapshot } from "./LinuxSnapShot.ts";
@@ -14,9 +14,9 @@ import { CaptureSetupRequiredError, readPortalPng } from "./linuxCaptureSession.
 import { startNativeCaptureFeedback } from "./NativeCaptureFeedback.ts";
 export { isKdeCaptureSession } from "./linuxCaptureSession.ts";
 
-export const KDE_CAPTURE_EXECUTABLE = "t3-kde-snap-shot";
+export const KDE_CAPTURE_EXECUTABLE = "t4-kde-snap-shot";
 const DESKTOP_FILE = "com.vorynixal.T4Code.KdeCapture.desktop";
-const MARKER = "X-T3Code-Capture-Helper=true";
+const MARKER = "X-T4CODE-Capture-Helper=true";
 const decodeCapabilities = Schema.decodeUnknownSync(
   Schema.fromJsonString(Schema.Struct({ feedbackAvailable: Schema.optional(Schema.Boolean) })),
 );
@@ -24,7 +24,7 @@ export type KdeCapturePaths = { readonly bundle: string; readonly dataHome: stri
 
 export function kdeCapturePaths(paths: KdeCapturePaths) {
   return {
-    executable: NodePath.join(paths.dataHome, "t3code", "kde-capture", KDE_CAPTURE_EXECUTABLE),
+    executable: NodePath.join(paths.dataHome, "T4CODE", "kde-capture", KDE_CAPTURE_EXECUTABLE),
     desktop: NodePath.join(paths.dataHome, "applications", DESKTOP_FILE),
   };
 }
@@ -217,7 +217,7 @@ export async function captureKdeWindow(
   const state = await new KdeCaptureSetup(paths).state();
   if (state.status !== "ready") throw new CaptureSetupRequiredError(state.message);
   const { executable } = kdeCapturePaths(paths);
-  const directory = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t3-kde-capture-"));
+  const directory = await NodeFSP.mkdtemp(NodePath.join(NodeOS.tmpdir(), "t4-kde-capture-"));
   let retained = false;
   const cleanup = () => NodeFSP.rm(directory, { recursive: true, force: true });
   try {
@@ -251,7 +251,7 @@ export async function captureKdeWindow(
         activate: async (title) => {
           targetTitle = title;
           const activation = await NodeFSP.mkdtemp(
-            NodePath.join(NodeOS.tmpdir(), "t3-kde-activate-"),
+            NodePath.join(NodeOS.tmpdir(), "t4-kde-activate-"),
           );
           try {
             await run(

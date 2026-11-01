@@ -1,14 +1,14 @@
 import { HOSTED_APP_CHANNEL } from "~/branding";
 import { isElectron, isSecretsFeatureEnabled } from "~/env";
 import { isMacPlatform, isWindowsPlatform, normalizeSearchText } from "~/lib/utils";
-import { STATIC_KEYBINDING_COMMANDS, type KeybindingCommand } from "@t3tools/contracts";
-import type { EnvironmentId } from "@t3tools/contracts";
-import type { EnvironmentConnectionPhase } from "@t3tools/client-runtime/connection";
+import { STATIC_KEYBINDING_COMMANDS, type KeybindingCommand } from "@t4tools/contracts";
+import type { EnvironmentId } from "@t4tools/contracts";
+import type { EnvironmentConnectionPhase } from "@t4tools/client-runtime/connection";
 import {
   sourceControlClients,
   type SourceControlDefinition,
-} from "@t3tools/client-runtime/source-control-clients";
-import { DEFAULT_KEYBINDINGS } from "@t3tools/shared/keybindings";
+} from "@t4tools/client-runtime/source-control-clients";
+import { DEFAULT_KEYBINDINGS } from "@t4tools/shared/keybindings";
 import * as Schema from "effect/Schema";
 import { TYPOGRAPHY_ADVANCED_STORAGE_KEY } from "../../appearanceFonts";
 import { writeLocalStorageValue } from "../../hooks/useLocalStorage";
@@ -468,7 +468,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     title: "Guest links",
     to: "/settings/labs",
     scope: "environment",
-    searchTerms: ["beta share guest invite link teammate watch t3 connect tunnel"],
+    searchTerms: ["beta share guest invite link teammate watch t4 connect tunnel"],
   },
   {
     id: "linked-environments-beta",
@@ -635,7 +635,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     title: "Submodules",
     to: "/settings/worktrees",
     scope: "project-defaults",
-    searchTerms: ["git submodule init recursive top-level none worktree t3.json"],
+    searchTerms: ["git submodule init recursive top-level none worktree t4.json"],
   },
   {
     id: "start-from-origin",
@@ -705,7 +705,7 @@ export const SETTINGS_SEARCH_ITEMS = [
   },
   {
     id: "cli-command",
-    title: "t3 command",
+    title: "t4 command",
     to: "/settings/about",
     searchTerms: ["cli terminal shell path install command line"],
     desktopOnly: true,
@@ -1069,7 +1069,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     id: "project-actions",
     title: "Actions",
     to: "/settings/projects",
-    searchTerms: ["commands scripts setup run dev server checkout worktree t3.json import"],
+    searchTerms: ["commands scripts setup run dev server checkout worktree t4.json import"],
   },
   {
     id: "environment-icon",
@@ -1115,12 +1115,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     wslAvailableOnly: true,
   },
   {
-    id: "t3-connect",
+    id: "t4-connect",
     localEnvironmentOnly: true,
-    title: "T3 Connect",
+    title: "T4 Connect",
     to: "/settings/access",
     targetId: "connections-environment",
-    searchTerms: ["managed tunnel cloud other devices remote tunnels limit t3 chat"],
+    searchTerms: ["managed tunnel cloud other devices remote tunnels limit t4 chat"],
     desktopOnly: true,
     cloudOnly: true,
   },
@@ -1130,7 +1130,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     title: "Hold webhooks while offline",
     to: "/settings/access",
     targetId: "connections-environment",
-    searchTerms: ["webhook automations offline queue mailbox t3 connect"],
+    searchTerms: ["webhook automations offline queue mailbox t4 connect"],
     cloudOnly: true,
     managedTunnelOnly: true,
   },
@@ -1163,7 +1163,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     id: "remote-environments",
     title: "Environments",
     to: "/settings/connections",
-    searchTerms: ["add pair backend host code ssh config agent tunnel saved t3 connect"],
+    searchTerms: ["add pair backend host code ssh config agent tunnel saved t4 connect"],
   },
   {
     id: "load-balancing",

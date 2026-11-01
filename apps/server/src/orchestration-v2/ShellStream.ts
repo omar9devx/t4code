@@ -10,15 +10,15 @@ import type {
   OrchestrationV2StoredEvent,
   ProjectId,
   ThreadId,
-} from "@t3tools/contracts";
+} from "@t4tools/contracts";
 import {
   isListedThreadLineage,
   isLiveSubagentShell,
   isOlderSettledThreadShell,
   OrchestrationProjectShell as ProjectShellSchema,
   OrchestrationV2ThreadShell as ThreadShellSchema,
-} from "@t3tools/contracts";
-import * as NodeSqliteClient from "@t3tools/shared/nodeSqliteClient";
+} from "@t4tools/contracts";
+import * as NodeSqliteClient from "@t4tools/shared/nodeSqliteClient";
 import type * as Arr from "effect/Array";
 import type * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";

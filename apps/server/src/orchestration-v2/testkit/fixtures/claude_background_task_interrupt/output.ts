@@ -1,5 +1,5 @@
 import { assert } from "@effect/vitest";
-import type { ProviderReplayTranscript } from "@t3tools/contracts";
+import type { ProviderReplayTranscript } from "@t4tools/contracts";
 
 import type { OrchestratorV2ScenarioResult } from "../../OrchestratorScenario.ts";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../shared.ts";
 import { CLAUDE_BACKGROUND_TASK_INTERRUPT_PROMPT } from "./input.ts";
 
-const BACKGROUND_TASK_ID = "bt3kw2qpn";
+const BACKGROUND_TASK_ID = "bt4kw2qpn";
 
 export function assertClaudeBackgroundTaskInterruptOutput(
   result: OrchestratorV2ScenarioResult,

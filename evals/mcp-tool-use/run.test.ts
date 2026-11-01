@@ -4,8 +4,8 @@ import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import { assert, expect, it } from "@effect/vitest";
-import { ComposerContextId, EnvironmentId, ThreadId } from "@t3tools/contracts";
-import { projectComposerContextForProvider } from "@t3tools/shared/composerContextReferences";
+import { ComposerContextId, EnvironmentId, ThreadId } from "@t4tools/contracts";
+import { projectComposerContextForProvider } from "@t4tools/shared/composerContextReferences";
 
 import {
   buildBase,
@@ -23,8 +23,8 @@ import {
   shellOutput,
   shellRequest,
   summarize,
-  t3SystemAppend,
-  t3SubagentContext,
+  t4SystemAppend,
+  t4SubagentContext,
   withDevices,
 } from "./run.ts";
 import { briefRoute, gradeDevice, shellInvocations } from "./device-grading.ts";
@@ -34,7 +34,7 @@ it("grades Codex shell and subagent calls with the shared rules", () => {
   const calls = [
     { name: "exec_command", input: { cmd: "sleep 60" } },
     { name: "collaboration.spawn_agent", input: { task: "review" } },
-    { name: "mcp__t3_code__delegate_task", input: {} },
+    { name: "mcp__t4_code__delegate_task", input: {} },
   ].map(({ name, input }) => ({
     step: 0,
     tool: normalizeToolName(name),
@@ -107,13 +107,13 @@ it("passes a good run and names every rule a bad run breaks", () => {
   const expect = {
     calls: [{ tool: "delegate_task", args: { task: "~FINDING", "target.options": "~max" } }],
     callsMustNot: [{ tool: "delegate_task", args: { runtimeMode: "approval-required" } }],
-    notCalls: ["t3_thread_send"],
+    notCalls: ["t4_thread_send"],
     order: ["orchestrator_capabilities", "delegate_task"],
     minCalls: { orchestrator_capabilities: 1 },
     maxCalls: { task_status: 0 },
     endsTurnAfter: "delegate_task",
     shellMustNot: ["\\bsleep\\b"],
-    textMust: ["t3-thread://v2/"],
+    textMust: ["t4-thread://v2/"],
     textMustNot: ["Paste .*token"],
     linked: ["~/pull/124"],
     linkedNumbers: [124],
@@ -127,7 +127,7 @@ it("passes a good run and names every rule a bad run breaks", () => {
         input: { task: "Prior findings: ...", target: { options: { reasoningEffort: "max" } } },
       },
     ],
-    text: "Started <t3-thread://v2/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/11111111-1111-4111-8111-111111111111>. Do not paste a token.",
+    text: "Started <t4-thread://v2/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/11111111-1111-4111-8111-111111111111>. Do not paste a token.",
     stopReason: "end_turn",
     linked: ["https://github.com/acme/app/pull/124"],
   };
@@ -140,7 +140,7 @@ it("passes a good run and names every rule a bad run breaks", () => {
         tool: "delegate_task",
         input: { task: "Review again", runtimeMode: "approval-required" },
       },
-      { step: 1, tool: "t3_thread_send", input: {} },
+      { step: 1, tool: "t4_thread_send", input: {} },
       { step: 2, tool: "Monitor", input: { command: "sleep 60" } },
       { step: 3, tool: "task_status", input: { taskId: "task-1" } },
     ],
@@ -150,13 +150,13 @@ it("passes a good run and names every rule a bad run breaks", () => {
   assert.deepEqual(failed(expect, bad), [
     'calls delegate_task {"task":"~FINDING","target.options":"~max"}',
     'callsMustNot delegate_task {"runtimeMode":"approval-required"}',
-    "notCalls t3_thread_send",
+    "notCalls t4_thread_send",
     "order orchestrator_capabilities > delegate_task",
     "minCalls orchestrator_capabilities >= 1",
     "maxCalls task_status <= 0",
     "endsTurnAfter delegate_task",
     "shellMustNot /\\bsleep\\b/",
-    "textMust /t3-thread://v2//",
+    "textMust /t4-thread://v2//",
     "textMustNot /Paste .*token/",
     "linked ~/pull/124",
     "linkedNumbers",
@@ -166,13 +166,13 @@ it("passes a good run and names every rule a bad run breaks", () => {
 it("bounds numbers and reads target.options in either schema form", () => {
   const expect = {
     calls: [
-      { tool: "t3_thread_read", args: { limit: "<=20" } },
+      { tool: "t4_thread_read", args: { limit: "<=20" } },
       { tool: "delegate_task", args: { "target.options.effort": "max", timeoutMs: ">=60000" } },
     ],
   };
   const run = (limit: unknown, options: unknown, timeoutMs: number): SampleRun => ({
     calls: [
-      { step: 0, tool: "t3_thread_read", input: { limit } },
+      { step: 0, tool: "t4_thread_read", input: { limit } },
       { step: 0, tool: "delegate_task", input: { target: { options }, timeoutMs } },
     ],
     text: "",
@@ -210,14 +210,14 @@ const template = {
     {
       role: "system",
       content:
-        "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5.\n\nThe following deferred tools are now available via ToolSearch. Load them first:\nMonitor\nmcp__t3-code__retired_tool\n\nAfter the list.",
+        "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5.\n\nThe following deferred tools are now available via ToolSearch. Load them first:\nMonitor\nmcp__t4-code__retired_tool\n\nAfter the list.",
     },
     { role: "assistant", content: [{ type: "text", text: "A later turn." }] },
   ],
   tools: [
     { name: "mcp__host__term_Bash", input_schema: { type: "object" } },
     { name: "mcp__host__clown_ToolSearch", input_schema: { type: "object" } },
-    { name: "mcp__t3-code__retired_tool", input_schema: { type: "object" }, defer_loading: true },
+    { name: "mcp__t4-code__retired_tool", input_schema: { type: "object" }, defer_loading: true },
   ],
 };
 
@@ -248,26 +248,26 @@ it("rebuilds the template from this checkout and sends a child T4 Code's task pr
   const system = base.system.map((block) => String(block.text));
   assert.deepEqual(system.slice(0, 2), [
     "You are Claude Code.",
-    `Main prompt.\n - Primary working directory: /home/user/app\n\n${t3SystemAppend("claude-sonnet-5-5")}`,
+    `Main prompt.\n - Primary working directory: /home/user/app\n\n${t4SystemAppend("claude-sonnet-5-5")}`,
   ]);
   // The eval offers the device tools, so Claude's append carries the device block.
-  assert.include(t3SystemAppend("claude-sonnet-5-5"), "## T4 Code devices");
+  assert.include(t4SystemAppend("claude-sonnet-5-5"), "## T4 Code devices");
   assert.equal(base.environment.cwd, "/home/user/app");
   assert.include(system[2], "model named Sonnet 5.5. The exact model ID is claude-sonnet-5-5.");
   const deferred = system[2]?.split("Load them first:\n")[1]?.split("\n\n")[0]?.split("\n") ?? [];
-  assert.includeMembers(deferred, ["Monitor", "mcp__t3-code__delegate_task"]);
-  assert.notInclude(deferred, "mcp__t3-code__retired_tool");
+  assert.includeMembers(deferred, ["Monitor", "mcp__t4-code__delegate_task"]);
+  assert.notInclude(deferred, "mcp__t4-code__retired_tool");
   // A delegated child is never offered the tools T4 Code hides from subagents.
-  assert.include(deferred, "mcp__t3-code__watch_pull_request");
+  assert.include(deferred, "mcp__t4-code__watch_pull_request");
   const child = buildBase(template, {
     model: "claude-sonnet-5-5",
     keepUserInstructions: false,
     subagent: true,
   });
-  assert.notInclude(String(child.system[2]?.text), "mcp__t3-code__watch_pull_request");
+  assert.notInclude(String(child.system[2]?.text), "mcp__t4-code__watch_pull_request");
   assert.notInclude(
     child.t3.map((tool) => tool.name),
-    "mcp__t3-code__unwatch_pull_request",
+    "mcp__t4-code__unwatch_pull_request",
   );
   const reminders = buildMessages(makeSample(childCase, base))[0]?.content.map((b) => b.text);
   assert.equal(reminders?.[0], "<system-reminder>\n# currentDate\n</system-reminder>");
@@ -288,17 +288,17 @@ it("lists link tools only while a case turns the beta on, and sends chips as T4 
   });
   assert.notInclude(
     off.t3.map((tool) => tool.name),
-    "mcp__t3-code__t3_environment_link",
+    "mcp__t4-code__t4_environment_link",
   );
   assert.include(
     on.t3.map((tool) => tool.name),
-    "mcp__t3-code__t3_environment_link",
+    "mcp__t4-code__t4_environment_link",
   );
 
   const testCase: McpToolUseCase = {
     ...childCase,
     setup: { role: "top", linkedEnvironments: true },
-    prompt: "Continue [Deploy](t3-context://v1/thread/thread_deploy)",
+    prompt: "Continue [Deploy](t4-context://v1/thread/thread_deploy)",
     promptContext: {
       records: [
         {
@@ -350,7 +350,7 @@ it("does not record a deferred tool called before it was loaded", () => {
   const sample = makeSample(childCase, base);
   const use = (name: string) => ({ type: "tool_use" as const, id: name, name, input: {} });
   const ran = ranCalls(sample, 0, [
-    use("mcp__t3-code__link_pull_request"),
+    use("mcp__t4-code__link_pull_request"),
     use("mcp__host__term_Bash"),
   ]);
   assert.deepEqual(
@@ -521,7 +521,7 @@ it.each([
 });
 
 it("rejects a bypass mutation in every delegated or launched child brief", () => {
-  const good = ["delegate_task", "delegate_task", "t3_thread_launch"].map((tool, step) => ({
+  const good = ["delegate_task", "delegate_task", "t4_thread_launch"].map((tool, step) => ({
     step,
     tool,
     input: {
@@ -639,7 +639,7 @@ it("shares failed device attempts across tools and launcher steps, resetting onl
     failed: true,
     input:
       tool === "Bash"
-        ? { command: "/home/user/.t3/device/bin/agent-device snapshot -i --session t3-eval" }
+        ? { command: "/home/user/.t3/device/bin/agent-device snapshot -i --session t4-eval" }
         : {},
   });
   const calls = [
@@ -737,7 +737,7 @@ it.each([
       if (form === "suffix") return `${launcher}-unbound record ${step}`;
       if (form === "var") return `AD=${launcher}; "$AD" record ${step} /tmp/demo/voice.mp4`;
       if (form === "other") return `AD=${launcher}-unbound; $AD record ${step} /tmp/demo/voice.mp4`;
-      return `${launcher} record ${operation} /tmp/demo/voice.mp4 --session t3-eval`;
+      return `${launcher} record ${operation} /tmp/demo/voice.mp4 --session t4-eval`;
     };
     const calls = operations.map((operation, step) => ({
       step,
@@ -767,9 +767,9 @@ it("gives native children hook context while excluding the parent's T4 Code appe
   });
   assert.notInclude(
     child.system.map((block) => block.text).join("\n"),
-    t3SystemAppend("claude-sonnet-5-5"),
+    t4SystemAppend("claude-sonnet-5-5"),
   );
-  const subagentContext = await t3SubagentContext("claude-sonnet-5-5");
+  const subagentContext = await t4SubagentContext("claude-sonnet-5-5");
   const messages = buildMessages(makeSample(testCase, { ...child, subagentContext }));
   const shown = messages
     .flatMap((message) => message.content)
@@ -1404,14 +1404,14 @@ it.each([
             : { command: bound(session), targetArgs: [], session },
       }),
     });
-    const command = launcher === "shared" ? shared : bound(launcher === "spare" ? "t3-b" : "t3-a");
+    const command = launcher === "shared" ? shared : bound(launcher === "spare" ? "t4-b" : "t4-a");
     const run = {
       calls: [
-        open(0, primary, "t3-a"),
-        open(1, spare, "t3-b"),
+        open(0, primary, "t4-a"),
+        open(1, spare, "t4-b"),
         { step: 2, tool: "Bash", input: { command: `${command} ${operation}` }, failed: false },
       ],
-      launchers: launcher === "shared" ? [shared] : [bound("t3-a"), bound("t3-b")],
+      launchers: launcher === "shared" ? [shared] : [bound("t4-a"), bound("t4-b")],
       text: "",
       finalText: "Done",
       stopReason: "end_turn",
@@ -1735,8 +1735,8 @@ it("OWN-03 passes a reported conflict and fails reuse or close of the owner's se
     hostId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     deviceId: "BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB",
   };
-  const launcher = "/home/user/.t3/userdata/device/targets/t3-acme/agent-device";
-  const owner = "t3-a062c547ef0b6bf8ee839b67";
+  const launcher = "/home/user/.t3/userdata/device/targets/t4-acme/agent-device";
+  const owner = "t4-a062c547ef0b6bf8ee839b67";
   const trace = (command: string, finalText: string): SampleRun => ({
     calls: [
       {
@@ -1952,7 +1952,7 @@ it.each([
   );
 });
 
-const r6Launcher = "/home/user/.t3/userdata/device/targets/t3-proof/agent-device";
+const r6Launcher = "/home/user/.t3/userdata/device/targets/t4-proof/agent-device";
 it.each([
   ["false and", "false && LAUNCHER record start /tmp/raw.mp4; LAUNCHER record stop", false],
   ["dead subshell", "false && (LAUNCHER record start /tmp/raw.mp4; LAUNCHER record stop)", false],
@@ -2124,7 +2124,7 @@ it("R6 separates ORC device routing from unrelated thread links", () => {
   const c = deviceCases().find((c) => c.id === "ORC-01")!;
   const calls = [0, 1, 2].map((step) => ({
     step,
-    tool: "t3_thread_launch",
+    tool: "t4_thread_launch",
     input: { message: "Use device_open and its returned launcher for screenshots." },
   }));
   assert.isTrue(
@@ -2138,7 +2138,7 @@ it("R6 separates ORC device routing from unrelated thread links", () => {
   assert.isFalse(
     gradeSample(c.expect, {
       calls: [{ step: 0, tool: "orchestrator_capabilities", input: {} }, ...calls],
-      text: "t3-thread://v1/example",
+      text: "t4-thread://v1/example",
       stopReason: "end_turn",
     }).every((c) => c.pass),
   );
@@ -2486,7 +2486,7 @@ const fleetTrace = (id: string): SampleRun => {
     hostId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     deviceId: "BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB",
   };
-  const launcher = "/home/user/.t3/userdata/device/targets/t3-acme/agent-device";
+  const launcher = "/home/user/.t3/userdata/device/targets/t4-acme/agent-device";
   const reports: Record<string, string> = {
     "DISC-01": "build-mac discovery failed. Used spare-mac. /tmp/proof/discovery-settings.png",
     "SESS-01": "Acme Settings: /tmp/proof/app-settings.png",
@@ -2662,7 +2662,7 @@ it("fleet OWN-01 allows contention discovery but forbids reusing the occupied se
           step: 4,
           tool: "Bash",
           input: {
-            command: "agent-device --session t3-a062c547ef0b6bf8ee839b67 screenshot /tmp/a.png",
+            command: "agent-device --session t4-a062c547ef0b6bf8ee839b67 screenshot /tmp/a.png",
           },
           failed: false,
         },
@@ -2838,7 +2838,7 @@ it.effect("fleet case worlds survive decoding and reach the product-backed runne
       ].join(" ");
       const error = tools.sessionError(sample.shell, command) ?? "";
       assert.include(error, id === "OWN-01" ? "DEVICE_IN_USE" : "SESSION_NOT_FOUND");
-      if (id === "OWN-01") assert.equal(tools.owners[0]!.session, "t3-a062c547ef0b6bf8ee839b67");
+      if (id === "OWN-01") assert.equal(tools.owners[0]!.session, "t4-a062c547ef0b6bf8ee839b67");
     }
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
@@ -2892,7 +2892,7 @@ it.each(["bound", "shared"])(
       form === "bound" ? good.launchers![0]! : "/home/user/.t3/userdata/device/bin/agent-device";
     const flags =
       form === "shared"
-        ? " --platform ios --udid BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB --config /home/user/host.json --session t3-acme"
+        ? " --platform ios --udid BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB --config /home/user/host.json --session t4-acme"
         : "";
     const open = `${launcher} open --relaunch --metro-port 8095 --wait 100 com.acme.app${flags}`;
     const shot = `${launcher} screenshot /tmp/proof/app-settings.png${flags}`;
@@ -3062,7 +3062,7 @@ const capRun6 = [
         tool: "Bash",
         input: {
           command:
-            'D=$(mktemp -d); /home/user/.t3/userdata/device/bin/agent-device screenshot $D/shot.png --platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-2b48b357cf96fdad64f0dd3f; echo "exit=$?"; ls -l $D; file $D/shot.png 2>/dev/null',
+            'D=$(mktemp -d); /home/user/.t3/userdata/device/bin/agent-device screenshot $D/shot.png --platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-2b48b357cf96fdad64f0dd3f; echo "exit=$?"; ls -l $D; file $D/shot.png 2>/dev/null',
           description: "Retry screenshot via agent-device CLI",
         },
         failed: false,
@@ -3083,7 +3083,7 @@ const capRun6 = [
         tool: "Bash",
         input: {
           command:
-            "mkdir -p /tmp/acme-shot && /home/user/.t3/userdata/device/bin/agent-device screenshot /tmp/acme-shot/settings.png --platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-2b48b357cf96fdad64f0dd3f; ls -l /tmp/acme-shot/; file /tmp/acme-shot/settings.png",
+            "mkdir -p /tmp/acme-shot && /home/user/.t3/userdata/device/bin/agent-device screenshot /tmp/acme-shot/settings.png --platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-2b48b357cf96fdad64f0dd3f; ls -l /tmp/acme-shot/; file /tmp/acme-shot/settings.png",
           description: "Capture screenshot via agent-device",
         },
         failed: false,
@@ -3104,7 +3104,7 @@ const capRun6 = [
         tool: "Bash",
         input: {
           command:
-            'A="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-2b48b357cf96fdad64f0dd3f"; $A screenshot /tmp/acme-settings.png $F; ls -l /tmp/acme-settings.png; file /tmp/acme-settings.png',
+            'A="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-2b48b357cf96fdad64f0dd3f"; $A screenshot /tmp/acme-settings.png $F; ls -l /tmp/acme-settings.png; file /tmp/acme-settings.png',
           description: "Retry screenshot via agent-device",
         },
         failed: false,
@@ -3125,7 +3125,7 @@ const capRun6 = [
         tool: "Bash",
         input: {
           command:
-            'AD="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-2b48b357cf96fdad64f0dd3f"; $AD screenshot /tmp/acme-settings.png $F; ls -l /tmp/acme-settings.png; file /tmp/acme-settings.png',
+            'AD="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-2b48b357cf96fdad64f0dd3f"; $AD screenshot /tmp/acme-settings.png $F; ls -l /tmp/acme-settings.png; file /tmp/acme-settings.png',
           description: "Retry screenshot via agent-device",
         },
         failed: false,
@@ -3146,7 +3146,7 @@ const capRun6 = [
         tool: "Bash",
         input: {
           command:
-            'A="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-2b48b357cf96fdad64f0dd3f"; mkdir -p /tmp/acme-shot && $A screenshot /tmp/acme-shot/settings.png $F; ls -l /tmp/acme-shot; file /tmp/acme-shot/settings.png',
+            'A="/home/user/.t3/userdata/device/bin/agent-device"; F="--platform android --serial emulator-5580 --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-2b48b357cf96fdad64f0dd3f"; mkdir -p /tmp/acme-shot && $A screenshot /tmp/acme-shot/settings.png $F; ls -l /tmp/acme-shot; file /tmp/acme-shot/settings.png',
           description: "Retry screenshot via agent-device",
         },
         failed: false,
@@ -3160,14 +3160,14 @@ const capRun6 = [
   },
   {
     ref: "api-dec6-cand-claude-opus-5-5#36",
-    launchers: ["/home/user/.t3/userdata/device/targets/t3-2b48b357cf96fdad64f0dd3f/agent-device"],
+    launchers: ["/home/user/.t3/userdata/device/targets/t4-2b48b357cf96fdad64f0dd3f/agent-device"],
     calls: [
       {
         step: 4,
         tool: "Bash",
         input: {
           command:
-            'A=/home/user/.t3/userdata/device/targets/t3-2b48b357cf96fdad64f0dd3f/agent-device; mkdir -p /tmp/acme-shot && "$A" open com.acme.app && "$A" screenshot /tmp/acme-shot/settings.png; echo "exit=$?"; ls -la /tmp/acme-shot/ 2>&1; file /tmp/acme-shot/settings.png 2>&1',
+            'A=/home/user/.t3/userdata/device/targets/t4-2b48b357cf96fdad64f0dd3f/agent-device; mkdir -p /tmp/acme-shot && "$A" open com.acme.app && "$A" screenshot /tmp/acme-shot/settings.png; echo "exit=$?"; ls -la /tmp/acme-shot/ 2>&1; file /tmp/acme-shot/settings.png 2>&1',
           description: "Open Acme app and capture screenshot via agent-device",
         },
         failed: false,
@@ -3254,7 +3254,7 @@ it.each(["bound", "shared"])(
       form === "bound" ? good.launchers![0]! : "/home/user/.t3/userdata/device/bin/agent-device";
     const flags =
       form === "shared"
-        ? " --platform ios --udid BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB --config /home/user/host.json --session t3-acme"
+        ? " --platform ios --udid BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB --config /home/user/host.json --session t4-acme"
         : "";
     const appOpen = {
       step: 2,

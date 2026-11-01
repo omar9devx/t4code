@@ -1,4 +1,4 @@
-import { stripDisplayedPlanMarkdown, proposedPlanTitle } from "@t3tools/shared/proposedPlanText";
+import { stripDisplayedPlanMarkdown, proposedPlanTitle } from "@t4tools/shared/proposedPlanText";
 
 export function buildCollapsedProposedPlanPreviewMarkdown(
   planMarkdown: string,

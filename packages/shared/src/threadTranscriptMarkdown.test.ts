@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import type { OrchestrationV2ThreadTranscript } from "@t3tools/contracts";
+import type { OrchestrationV2ThreadTranscript } from "@t4tools/contracts";
 import { threadTranscriptMarkdown } from "./threadTranscriptMarkdown.ts";
 
 describe("threadTranscriptMarkdown", () => {

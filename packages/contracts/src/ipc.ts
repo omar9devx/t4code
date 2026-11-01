@@ -78,7 +78,7 @@ export type DesktopUpdateStatus =
 export type DesktopRuntimeArch = "arm64" | "x64" | "other";
 export type DesktopTheme = "light" | "dark" | "system";
 export type DesktopUpdateChannel = "latest" | "nightly";
-export type DesktopAppStageLabel = "Alpha" | "Beta" | "Dev" | "Nightly";
+export type DesktopAppStageLabel = "Alpha" | "Beta" | "Dev" | "Nightly" | "Stable";
 
 export const DesktopUpdateStatusSchema = Schema.Literals([
   "disabled",
@@ -93,7 +93,13 @@ export const DesktopUpdateStatusSchema = Schema.Literals([
 export const DesktopRuntimeArchSchema = Schema.Literals(["arm64", "x64", "other"]);
 export const DesktopThemeSchema = Schema.Literals(["light", "dark", "system"]);
 export const DesktopUpdateChannelSchema = Schema.Literals(["latest", "nightly"]);
-export const DesktopAppStageLabelSchema = Schema.Literals(["Alpha", "Beta", "Dev", "Nightly"]);
+export const DesktopAppStageLabelSchema = Schema.Literals([
+  "Alpha",
+  "Beta",
+  "Dev",
+  "Nightly",
+  "Stable",
+]);
 
 export interface DesktopAppBranding {
   baseName: string;
@@ -330,7 +336,7 @@ export const DesktopCliCommandStateSchema = Schema.Struct({
   installedPath: Schema.NullOr(Schema.String),
   onPath: Schema.Boolean,
   shadowedBy: Schema.optionalKey(Schema.String),
-  /** The app's bundled `t3` launcher, which runs without Node or a PATH entry. */
+  /** The app's bundled `t4` launcher, which runs without Node or a PATH entry. */
   launcherPath: Schema.NullOr(Schema.String),
 });
 export type DesktopCliCommandState = typeof DesktopCliCommandStateSchema.Type;
@@ -1134,7 +1140,7 @@ export interface DesktopBridge {
 }
 
 /** Renderer callback invoked by Electron with a fresh user gesture before display-media capture. */
-export const DESKTOP_PREVIEW_RECORDING_CAPTURE_TRIGGER = "__t3DesktopPreviewRecordingCapture";
+export const DESKTOP_PREVIEW_RECORDING_CAPTURE_TRIGGER = "__t4DesktopPreviewRecordingCapture";
 
 export interface DesktopPreviewBridge {
   setForwardedShortcuts: (shortcuts: ReadonlyArray<PreviewForwardedShortcut>) => Promise<void>;

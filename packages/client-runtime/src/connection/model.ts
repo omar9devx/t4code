@@ -1,5 +1,5 @@
-import { EnvironmentId } from "@t3tools/contracts";
-import { RelayEnvironmentEndpointFailure } from "@t3tools/contracts/relay";
+import { EnvironmentId } from "@t4tools/contracts";
+import { RelayEnvironmentEndpointFailure } from "@t4tools/contracts/relay";
 import * as Schema from "effect/Schema";
 
 const ConnectionTargetBase = {
@@ -75,7 +75,7 @@ export const ConnectionBlockedReason = Schema.Literals([
 ]);
 export type ConnectionBlockedReason = typeof ConnectionBlockedReason.Type;
 
-/** A part of the path to an environment: this device, T3 Connect, the host's tunnel, or T4 Code on the host. */
+/** A part of the path to an environment: this device, T4 Connect, the host's tunnel, or T4 Code on the host. */
 export const ConnectionHop = Schema.Literals(["device", "relay", "tunnel", "server"]);
 export type ConnectionHop = typeof ConnectionHop.Type;
 

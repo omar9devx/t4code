@@ -24,11 +24,11 @@ import {
   makeSample,
   McpToolUseCase,
   shellRequest,
-  t3SubagentContext,
-  t3SystemAppend,
+  t4SubagentContext,
+  t4SystemAppend,
   withDevices,
 } from "./run.ts";
-import { DeviceOperationError, LOCAL_DEVICE_HOST_ID } from "@t3tools/contracts";
+import { DeviceOperationError, LOCAL_DEVICE_HOST_ID } from "@t4tools/contracts";
 
 const MAC = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const IPHONE = "BBBBBBBB-BBBB-4BBB-8BBB-BBBBBBBBBBBB";
@@ -157,15 +157,15 @@ it.effect(
   "gives a native subagent T4 Code's SubagentStart context instead of T4 Code's append",
   () =>
     Effect.gen(function* () {
-      const subagentContext = yield* Effect.promise(() => t3SubagentContext(model));
+      const subagentContext = yield* Effect.promise(() => t4SubagentContext(model));
       const native = {
         ...buildBase(capture, { model, keepUserInstructions: false, nativeSubagent: true }),
         subagentContext,
       };
       const system = (blocks: typeof base.system) =>
         blocks.map((block) => String(block.text)).join("");
-      assert.include(system(base.system), t3SystemAppend(model));
-      assert.notInclude(system(native.system), t3SystemAppend(model));
+      assert.include(system(base.system), t4SystemAppend(model));
+      assert.notInclude(system(native.system), t4SystemAppend(model));
       const testCase = deviceCase({ role: "native-subagent" });
       const shown = (sample: typeof native) =>
         buildMessages(makeSample(testCase, sample))[0]?.content.map((block) => String(block.text));
@@ -226,14 +226,14 @@ it("prints agent-device's own help for a lone help command on a returned launche
       ?.trimEnd();
   // Commands from the paired runs. The simulator once answered the first with a placeholder.
   const launcher = "/home/user/.t3/userdata/device/bin/agent-device";
-  const target = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t3-4c43aa31e607633b85e9ff2f`;
+  const target = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/303617b9730210ef3c86c52d.json --session t4-4c43aa31e607633b85e9ff2f`;
   const asked = (command: string) => launcherHelp([launcher], command);
   assert.match(help("") ?? "", /^agent-device <command> \[args\] \[--json\]\n/);
   assert.equal(asked(`${launcher} help ${target}`), help(""));
   assert.equal(asked(`${launcher} record --help ${target}`), help("record"));
   assert.equal(asked(`${launcher} help open ${target}`), help("open"));
   assert.equal(asked(`${launcher} --help 2>&1`), help(""));
-  assert.equal(asked(`${launcher} help settings --session=t3-1`), help("settings"));
+  assert.equal(asked(`${launcher} help settings --session=t4-1`), help("settings"));
   // Anything else stays with the simulator: other topics, pipes, aliases, other commands.
   assert.isUndefined(asked(`${launcher} metro --help ${target}`));
   assert.isUndefined(asked(`${launcher} help record 2>&1 | head -40`));
@@ -339,8 +339,8 @@ const shared = (session: string): LauncherTarget => ({
   iosSimulator: true,
 });
 const boundTarget: LauncherTarget = {
-  command: "/home/user/.t3/userdata/device/targets/t3-bound/agent-device",
-  session: "t3-bound",
+  command: "/home/user/.t3/userdata/device/targets/t4-bound/agent-device",
+  session: "t4-bound",
   bound: true,
   deviceId: IPHONE,
   ios: true,
@@ -359,22 +359,22 @@ const errorCode = (
 
 it("names the session on either ref: the bound launcher's own, or the shared one's --session", () => {
   const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json`;
-  const sharedTargets = [shared("t3-a"), shared("t3-b")];
+  const sharedTargets = [shared("t4-a"), shared("t4-b")];
   // The shared launcher answers each session its flags name; without one, its own check (not
   // modelled) refuses before agent-device runs.
-  const opened = [bash(`${sharedTargets[0]!.command} open com.acme.app ${flags} --session t3-a`)];
+  const opened = [bash(`${sharedTargets[0]!.command} open com.acme.app ${flags} --session t4-a`)];
   assert.isUndefined(
     errorCode(
       sharedTargets,
       opened,
-      `${sharedTargets[0]!.command} screenshot ${flags} --session t3-a`,
+      `${sharedTargets[0]!.command} screenshot ${flags} --session t4-a`,
     ),
   );
   assert.equal(
     errorCode(
       sharedTargets,
       opened,
-      `${sharedTargets[0]!.command} screenshot ${flags} --session=t3-b`,
+      `${sharedTargets[0]!.command} screenshot ${flags} --session=t4-b`,
     ),
     "SESSION_NOT_FOUND",
   );
@@ -398,14 +398,14 @@ it("names the session on either ref: the bound launcher's own, or the shared one
   // Without a selector, agent-device's record and close refuse a missing named session with
   // other text; that stays with the simulator.
   assert.isUndefined(
-    errorCode(sharedTargets, [], `${sharedTargets[0]!.command} record start --session t3-a`),
+    errorCode(sharedTargets, [], `${sharedTargets[0]!.command} record start --session t4-a`),
   );
 });
 
 it("follows the session through aliases, compound calls, snapshots and whole-screen recordings", () => {
   const launcher = boundTarget.command;
   const after = (...history: ReadonlyArray<ShellCall>) =>
-    agentDeviceSessions([boundTarget], {}, history).get("t3-bound");
+    agentDeviceSessions([boundTarget], {}, history).get("t4-bound");
   assert.deepEqual(after(bash(`AD=${launcher}; "$AD" open com.acme.app`)), { app: true });
   // A failed lone open starts nothing; an open in a failed compound call still counts.
   assert.isUndefined(after(bash(`${launcher} open com.acme.app`, "Exit code 1\nError (X): no")));
@@ -422,7 +422,7 @@ it("follows the session through aliases, compound calls, snapshots and whole-scr
   assert.isUndefined(after(bash(`${launcher} snapshot -i`)));
   const android = { ...boundTarget, ios: false, iosSimulator: false };
   assert.deepEqual(
-    agentDeviceSessions([android], {}, [bash(`${launcher} snapshot -i`)]).get("t3-bound"),
+    agentDeviceSessions([android], {}, [bash(`${launcher} snapshot -i`)]).get("t4-bound"),
     { app: false },
   );
   // A whole-screen recording holds a session only until it stops.
@@ -443,10 +443,10 @@ it("follows the session through aliases, compound calls, snapshots and whole-scr
 
 it("follows the shared launcher's session through flags held in a variable or an array", () => {
   // Forms Sonnet used with the shared launcher in a live sample.
-  const target = shared("t3-a");
-  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t3-a`;
+  const target = shared("t4-a");
+  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t4-a`;
   const after = (history: ShellCall, targets = [target]) =>
-    agentDeviceSessions(targets, {}, [history]).get("t3-a");
+    agentDeviceSessions(targets, {}, [history]).get("t4-a");
   const opened = bash(
     `AD=${target.command}; A="${flags}"; $AD open com.acme.app $A 2>&1 | tail -5; sleep 5; $AD snapshot -i $A 2>&1 | head -60`,
     "Opened: com.acme.app",
@@ -455,7 +455,7 @@ it("follows the shared launcher's session through flags held in a variable or an
   const array = bash(`A=(${flags}); ${target.command} open "\${A[@]}" 2>&1 | head -60`);
   assert.deepEqual(after(array), { app: false });
   // With two sessions behind the shared launcher, unread flags name neither.
-  assert.isUndefined(after(array, [target, shared("t3-b")]));
+  assert.isUndefined(after(array, [target, shared("t4-b")]));
   // agent-device still sees no session for a plain command after a failed open in a variable.
   const failed = bash(
     `AD=${target.command}; A="${flags}"; $AD open $A`,
@@ -539,9 +539,9 @@ it.effect(
 
 it("keeps a redirection's descriptor out of the app an open names, on either launcher", () => {
   // Sol R10 B1: `open 2>&1` once read as `open 2`, an app the real shell never passes.
-  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t3-a`;
+  const flags = `--platform ios --udid ${IPHONE} --config /home/user/.t3/userdata/device/hosts/x.json --session t4-a`;
   for (const [target, args] of [
-    [shared("t3-a"), ` ${flags}`],
+    [shared("t4-a"), ` ${flags}`],
     [boundTarget, ""],
   ] as const) {
     for (const redirect of ["2>&1", "2>&1 | tail -5", "2>/dev/null"]) {
@@ -566,7 +566,7 @@ it("follows opens the parser cannot prove ran, in calls that did not fail", () =
   // Opus R10 B1(b): shapes from run 5, where `&&` before `;` leaves an open uncertain.
   const launcher = boundTarget.command;
   const after = (command: string, output = "Opened: com.acme.app") =>
-    agentDeviceSessions([boundTarget], {}, [bash(command, output)]).get("t3-bound");
+    agentDeviceSessions([boundTarget], {}, [bash(command, output)]).get("t4-bound");
   assert.deepEqual(
     after(`mkdir -p /tmp/p && ${launcher} open com.acme.app 2>&1 | tail -3; echo done`),
     { app: true },
@@ -585,7 +585,7 @@ it("follows opens the parser cannot prove ran, in calls that did not fail", () =
     agentDeviceSessions([boundTarget], {}, [
       bash(`cd /tmp && AD=${launcher}; echo ready`),
       bash("$AD open com.acme.app"),
-    ]).get("t3-bound"),
+    ]).get("t4-bound"),
     { app: true },
   );
   // A failed call credits only what certainly ran.
@@ -672,7 +672,7 @@ it.effect("denies every device tool with T4 Code's own error when agent device a
       );
     }
     // T4 Code drops its device text for a thread without the capability, on refs that have it.
-    assert.notInclude(t3SystemAppend(model, false), "## T4 Code devices");
+    assert.notInclude(t4SystemAppend(model, false), "## T4 Code devices");
   }).pipe(Effect.scoped, Effect.provide(NodeServices.layer)),
 );
 
@@ -697,7 +697,7 @@ it.effect("refuses an open on a device another thread's agent-device session hol
   Effect.gen(function* () {
     const tools = yield* deviceTools({ deviceOwners: { [IPHONE]: "acme-design-review" } });
     // T4 Code names the owner's session as it names every thread's.
-    const owner = "t3-a062c547ef0b6bf8ee839b67";
+    const owner = "t4-a062c547ef0b6bf8ee839b67";
     assert.deepEqual(tools.owners, [
       { deviceId: IPHONE, threadId: "acme-design-review", session: owner },
     ]);
@@ -797,7 +797,7 @@ it.effect(
     Effect.gen(function* () {
       // Opus R11-B3(a): in run 6 the simulator gave the free spare's plain open the owner's
       // DEVICE_IN_USE twice. It could not tell which device a flagless bound launcher drives.
-      const owner = "t3-a062c547ef0b6bf8ee839b67";
+      const owner = "t4-a062c547ef0b6bf8ee839b67";
       const sample = makeSample(
         deviceCase({ world: { ...twoMacs, deviceOwners: { [IPHONE]: "acme-design-review" } } }),
         base,
@@ -920,7 +920,7 @@ it("tells the simulator 0.21.31's --foreground and session list behaviour", () =
     assert.isUndefined(
       agentDeviceSessionError(
         [boundTarget],
-        new Map([["t3-bound", undefined]]),
+        new Map([["t4-bound", undefined]]),
         `${boundTarget.command} ${args}`,
       ),
       args,

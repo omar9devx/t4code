@@ -1,6 +1,6 @@
 // T4 Code ingest retains events and forwards to PostHog; UUIDs deduplicate retries there.
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import type { ClientOs } from "@t3tools/contracts";
+import * as HostProcess from "@t4tools/shared/HostProcess";
+import type { ClientOs } from "@t4tools/contracts";
 import * as Clock from "effect/Clock";
 import * as Config from "effect/Config";
 import * as Context from "effect/Context";
@@ -61,15 +61,15 @@ function retryDelayMs(failures: number, random: number): number {
 }
 
 const TelemetryEnvConfig = Config.all({
-  posthogKey: Config.String("T3CODE_POSTHOG_KEY").pipe(
+  posthogKey: Config.String("T4CODE_POSTHOG_KEY").pipe(
     Config.withDefault("phc_XOWci4oZP4VvLiEyrFqkFjP4CZn55mjYYBMREK5Wd6m"),
   ),
-  posthogHost: Config.String("T3CODE_POSTHOG_HOST").pipe(
+  posthogHost: Config.String("T4CODE_POSTHOG_HOST").pipe(
     Config.withDefault("https://ingest.t3.codes"),
   ),
-  enabled: Config.Boolean("T3CODE_TELEMETRY_ENABLED").pipe(Config.withDefault(true)),
-  flushBatchSize: Config.Number("T3CODE_TELEMETRY_FLUSH_BATCH_SIZE").pipe(Config.withDefault(20)),
-  maxBufferedEvents: Config.Number("T3CODE_TELEMETRY_MAX_BUFFERED_EVENTS").pipe(
+  enabled: Config.Boolean("T4CODE_TELEMETRY_ENABLED").pipe(Config.withDefault(true)),
+  flushBatchSize: Config.Number("T4CODE_TELEMETRY_FLUSH_BATCH_SIZE").pipe(Config.withDefault(20)),
+  maxBufferedEvents: Config.Number("T4CODE_TELEMETRY_MAX_BUFFERED_EVENTS").pipe(
     Config.withDefault(1_000),
   ),
   wslDistroName: Config.String("WSL_DISTRO_NAME").pipe(Config.option),
@@ -95,7 +95,7 @@ export class AnalyticsService extends Context.Service<
       observedBy: "server" | "client",
     ) => Effect.Effect<void>;
   }
->()("t3/telemetry/AnalyticsService") {}
+>()("t4/telemetry/AnalyticsService") {}
 
 function serverOsFromNodePlatform(platform: string): ClientOs {
   switch (platform) {
@@ -187,7 +187,7 @@ export const make = Effect.gen(function* () {
           platform: hostPlatform,
           wsl: Option.getOrUndefined(telemetryConfig.wslDistroName),
           arch: hostArchitecture,
-          t3CodeVersion: packageJson.version,
+          T4CODEVersion: packageJson.version,
           telemetryChannel: ServerConfig.telemetryChannel,
           clientType,
           serverOs: serverOsFromNodePlatform(hostPlatform),

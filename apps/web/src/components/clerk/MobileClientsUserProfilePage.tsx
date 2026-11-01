@@ -1,4 +1,4 @@
-import type { RelayClientDeviceRecord } from "@t3tools/contracts/relay";
+import type { RelayClientDeviceRecord } from "@t4tools/contracts/relay";
 import { SmartphoneIcon } from "lucide-react";
 
 import { useManagedRelayDevices } from "../../cloud/managedRelayState";
@@ -94,7 +94,7 @@ function EmptyMobileClients() {
       <EmptyHeader>
         <EmptyTitle>No mobile clients</EmptyTitle>
         <EmptyDescription>
-          Install T4 Code on your phone and sign in to T3 Connect to get push notifications and Live
+          Install T4 Code on your phone and sign in to T4 Connect to get push notifications and Live
           Activities.
         </EmptyDescription>
       </EmptyHeader>

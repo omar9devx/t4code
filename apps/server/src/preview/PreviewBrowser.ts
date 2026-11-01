@@ -1,6 +1,6 @@
 // @effect-diagnostics nodeBuiltinImport:off - Effect has no incremental digest.
 import * as EffectNodeStream from "@effect/platform-node/NodeStream";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Cause from "effect/Cause";
 import * as Clock from "effect/Clock";
 import * as Context from "effect/Context";
@@ -133,7 +133,7 @@ export class PreviewBrowser extends Context.Service<
     >;
     readonly installed: Effect.Effect<Option.Option<string>>;
   }
->()("t3/preview/PreviewBrowser") {}
+>()("t4/preview/PreviewBrowser") {}
 
 export interface PreviewBrowserOptions {
   readonly baseDir: string;
@@ -299,7 +299,7 @@ export const makePreviewBrowser = Effect.fn("PreviewBrowser.make")(function* (
     },
     Effect.scoped,
     Effect.mapError(
-      wrapFailure("Could not unpack the browser. Check free disk space in T3 home directory."),
+      wrapFailure("Could not unpack the browser. Check free disk space in T4 home directory."),
     ),
   );
 
@@ -350,7 +350,7 @@ export const makePreviewBrowser = Effect.fn("PreviewBrowser.make")(function* (
       );
       return path.join(installRoot, release.version, executableName);
     },
-    Effect.mapError(wrapFailure("Could not save the browser in T3 home directory.")),
+    Effect.mapError(wrapFailure("Could not save the browser in T4 home directory.")),
   );
 
   const join = (release: PreviewBrowserRelease) =>

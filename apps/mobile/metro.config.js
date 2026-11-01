@@ -29,12 +29,13 @@ config.resolver = {
         ? [config.resolver.blockList]
         : []),
     new RegExp(`${escapedWorkspaceRoot}[/\\\\]\\.t3[/\\\\].*`),
+    new RegExp(`${escapedWorkspaceRoot}[/\\\\]\\.t4[/\\\\].*`),
   ],
   extraNodeModules: {
     ...config.resolver?.extraNodeModules,
-    "@t3tools/mobile-third-party-licenses": generatedLicenseModuleRoot,
-    "@t3tools/mobile-device-stream": generatedDeviceStreamRoot,
-    "@t3tools/mobile-preview-stream": generatedPreviewStreamRoot,
+    "@t4tools/mobile-third-party-licenses": generatedLicenseModuleRoot,
+    "@t4tools/mobile-device-stream": generatedDeviceStreamRoot,
+    "@t4tools/mobile-preview-stream": generatedPreviewStreamRoot,
   },
 };
 

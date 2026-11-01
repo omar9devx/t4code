@@ -1,6 +1,6 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { afterEach, beforeEach, expect, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import * as HostProcess from "@t4tools/shared/HostProcess";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
@@ -58,8 +58,8 @@ const fakePowerShell = (initial: string) => {
       const env = options.env ?? {};
       let exitCode = 0;
       let stdout = "";
-      if (env.T3_SET === "1") {
-        registry.path = env.T3_PATH ?? "";
+      if (env.T4_SET === "1") {
+        registry.path = env.T4_PATH ?? "";
         registry.writes += 1;
       } else if (registry.failReads) {
         exitCode = 1;
@@ -99,7 +99,7 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
       const path = yield* Path.Path;
       const home = yield* fs.makeTempDirectoryScoped();
       const command = yield* commandIn({ home });
-      const link = path.join(home, ".local", "bin", "t3");
+      const link = path.join(home, ".local", "bin", "t4");
 
       expect(yield* command.state).toEqual({
         supported: true,
@@ -109,91 +109,91 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
       });
       const installed = yield* command.install;
       expect(installed.installedPath).toBe(link);
-      expect(installed.launcherPath).toBe(path.join(home, ".t3", "bin", "t3"));
-      expect(yield* fs.readLink(link)).toBe(path.join(home, ".t3", "bin", "t3"));
+      expect(installed.launcherPath).toBe(path.join(home, ".t3", "bin", "t4"));
+      expect(yield* fs.readLink(link)).toBe(path.join(home, ".t3", "bin", "t4"));
       expect((yield* command.install).installedPath).toBe(link);
 
       expect((yield* command.uninstall).installedPath).toBeNull();
       expect(yield* fs.exists(link)).toBe(false);
-      expect(yield* fs.exists(path.join(home, ".t3", "bin", "t3"))).toBe(true);
+      expect(yield* fs.exists(path.join(home, ".t3", "bin", "t4"))).toBe(true);
     }).pipe(Effect.scoped),
   );
 
-  it.effect("never replaces or removes a t3 it did not create", () =>
+  it.effect("never replaces or removes a t4 it did not create", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const home = yield* fs.makeTempDirectoryScoped();
       const command = yield* commandIn({ home });
-      const theirs = path.join(home, ".local", "bin", "t3");
+      const theirs = path.join(home, ".local", "bin", "t4");
       yield* fs.makeDirectory(path.dirname(theirs), { recursive: true });
-      yield* fs.writeFileString(theirs, "npm's t3\n");
+      yield* fs.writeFileString(theirs, "npm's t4\n");
       yield* fs.makeDirectory(path.join(home, "bin"), { recursive: true });
-      yield* fs.symlink(path.join(home, "gone"), path.join(home, "bin", "t3"));
+      yield* fs.symlink(path.join(home, "gone"), path.join(home, "bin", "t4"));
 
       const error = yield* Effect.flip(command.install);
-      expect(error.message).toContain("Another t3 command is already installed");
+      expect(error.message).toContain("Another t4 command is already installed");
       yield* command.uninstall;
-      expect(yield* fs.readFileString(theirs)).toBe("npm's t3\n");
-      expect(yield* fs.readLink(path.join(home, "bin", "t3"))).toBe(path.join(home, "gone"));
+      expect(yield* fs.readFileString(theirs)).toBe("npm's t4\n");
+      expect(yield* fs.readLink(path.join(home, "bin", "t4"))).toBe(path.join(home, "gone"));
 
-      const launcher = path.join(home, ".t3", "bin", "t3");
-      yield* fs.writeFileString(launcher, "npm's t3\n");
+      const launcher = path.join(home, ".t3", "bin", "t4");
+      yield* fs.writeFileString(launcher, "npm's t4\n");
       process.env.PATH = path.dirname(launcher);
       expect(yield* command.state).toMatchObject({ onPath: false, shadowedBy: launcher });
       expect((yield* Effect.flip(command.install)).message).toContain("Could not set up");
       yield* command.uninstall;
-      expect(yield* fs.readFileString(launcher)).toBe("npm's t3\n");
+      expect(yield* fs.readFileString(launcher)).toBe("npm's t4\n");
     }).pipe(Effect.scoped),
   );
 
-  it.effect("finds and removes a link left by a previous T3 home", () =>
+  it.effect("finds and removes a link left by a previous T4 home", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const home = yield* fs.makeTempDirectoryScoped();
-      const before = yield* commandIn({ home, baseDir: path.join(home, "old-t3") });
+      const before = yield* commandIn({ home, baseDir: path.join(home, "old-t4") });
       const link = (yield* before.install).installedPath;
 
-      const after = yield* commandIn({ home, baseDir: path.join(home, "new-t3") });
+      const after = yield* commandIn({ home, baseDir: path.join(home, "new-t4") });
       expect((yield* after.state).installedPath).toBe(link);
       expect((yield* after.install).installedPath).toBe(link);
-      expect(yield* fs.readLink(link!)).toBe(path.join(home, "new-t3", "bin", "t3"));
+      expect(yield* fs.readLink(link!)).toBe(path.join(home, "new-t4", "bin", "t4"));
       yield* after.uninstall;
-      expect(yield* fs.exists(path.join(home, ".local", "bin", "t3"))).toBe(false);
-      expect(yield* fs.exists(path.join(home, "bin", "t3"))).toBe(false);
+      expect(yield* fs.exists(path.join(home, ".local", "bin", "t4"))).toBe(false);
+      expect(yield* fs.exists(path.join(home, "bin", "t4"))).toBe(false);
     }).pipe(Effect.scoped),
   );
 
-  it.effect("refuses to install behind another t3 that runs first", () =>
+  it.effect("refuses to install behind another t4 that runs first", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const home = yield* fs.makeTempDirectoryScoped();
       const shadow = path.join(home, "shadow");
       yield* fs.makeDirectory(shadow);
-      yield* fs.writeFileString(path.join(shadow, "t3"), "#!/bin/sh\n", { mode: 0o755 });
+      yield* fs.writeFileString(path.join(shadow, "t4"), "#!/bin/sh\n", { mode: 0o755 });
       process.env.PATH = [shadow, path.join(home, ".local", "bin")].join(":");
 
       const command = yield* commandIn({ home });
-      const theirs = path.join(shadow, "t3");
+      const theirs = path.join(shadow, "t4");
       expect((yield* command.state).shadowedBy).toBe(theirs);
       const error = yield* Effect.flip(command.install);
       expect(error.message).toContain(theirs);
-      expect(yield* fs.exists(path.join(home, ".local", "bin", "t3"))).toBe(false);
+      expect(yield* fs.exists(path.join(home, ".local", "bin", "t4"))).toBe(false);
 
       yield* fs.remove(theirs);
       const installed = yield* command.install;
       expect(installed).toMatchObject({
         onPath: true,
-        installedPath: path.join(home, ".local", "bin", "t3"),
+        installedPath: path.join(home, ".local", "bin", "t4"),
       });
       expect(installed.shadowedBy).toBeUndefined();
     }).pipe(Effect.scoped),
   );
 
   it.effect.skipIf(HostProcess.Platform.defaultValue() === "win32")(
-    "skips a t3 directory or a file this user cannot execute",
+    "skips a t4 directory or a file this user cannot execute",
     () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
@@ -202,35 +202,35 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
         const folder = path.join(home, "folder");
         const plain = path.join(home, "plain");
         const shadow = path.join(home, "shadow");
-        yield* fs.makeDirectory(path.join(folder, "t3"), { recursive: true });
+        yield* fs.makeDirectory(path.join(folder, "t4"), { recursive: true });
         yield* fs.makeDirectory(plain);
-        yield* fs.writeFileString(path.join(plain, "t3"), "notes\n");
+        yield* fs.writeFileString(path.join(plain, "t4"), "notes\n");
         // Root can execute mode 0o601; other users must honor the owner permissions.
-        yield* fs.chmod(path.join(plain, "t3"), process.getuid?.() === 0 ? 0o600 : 0o601);
+        yield* fs.chmod(path.join(plain, "t4"), process.getuid?.() === 0 ? 0o600 : 0o601);
         yield* fs.makeDirectory(shadow);
-        yield* fs.writeFileString(path.join(shadow, "t3"), "#!/bin/sh\n", { mode: 0o755 });
+        yield* fs.writeFileString(path.join(shadow, "t4"), "#!/bin/sh\n", { mode: 0o755 });
         process.env.PATH = [folder, plain, shadow, path.join(home, ".local", "bin")].join(":");
 
         const command = yield* commandIn({ home });
-        expect((yield* command.state).shadowedBy).toBe(path.join(shadow, "t3"));
+        expect((yield* command.state).shadowedBy).toBe(path.join(shadow, "t4"));
 
         const error = yield* Effect.flip(command.install);
-        expect(error.message).toContain(path.join(shadow, "t3"));
+        expect(error.message).toContain(path.join(shadow, "t4"));
 
         yield* fs.remove(shadow, { recursive: true });
         expect(yield* command.install).toMatchObject({
           onPath: true,
-          installedPath: path.join(home, ".local", "bin", "t3"),
+          installedPath: path.join(home, ".local", "bin", "t4"),
         });
       }).pipe(Effect.scoped),
   );
 
-  it.effect("does not treat its own launcher as another t3 when its folder is first on PATH", () =>
+  it.effect("does not treat its own launcher as another t4 when its folder is first on PATH", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const home = yield* fs.makeTempDirectoryScoped();
-      const launcher = path.join(home, ".t3", "bin", "t3");
+      const launcher = path.join(home, ".t3", "bin", "t4");
       process.env.PATH = [path.dirname(launcher), path.join(home, ".local", "bin")].join(":");
 
       const command = yield* commandIn({ home });
@@ -239,7 +239,7 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
       expect(yield* fs.exists(launcher)).toBe(true);
       expect(installed).toMatchObject({
         onPath: true,
-        installedPath: path.join(home, ".local", "bin", "t3"),
+        installedPath: path.join(home, ".local", "bin", "t4"),
       });
       expect(installed.shadowedBy).toBeUndefined();
       expect(yield* command.state).toEqual(installed);
@@ -269,7 +269,7 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
       registry.failReads = false;
       const launcherDir = DesktopCliShim.launcherPath(
         environmentFor(yield* Path.Path, { home, baseDir: `${home}/.t3`, platform: "win32" }),
-      ).replace(/[\\/]t3\.cmd$/, "");
+      ).replace(/[\\/]t4\.cmd$/, "");
       yield* command.install;
       expect(registry.path).toBe(`${userPath};${launcherDir}`);
       yield* command.uninstall;

@@ -1,19 +1,19 @@
 import {
   classifyMarkdownImageSource,
   markdownImageSourceFragment,
-} from "@t3tools/client-runtime/markdown-images";
+} from "@t4tools/client-runtime/markdown-images";
 import {
   audioMimeTypeFromExtension,
   mediaMimeTypeFromExtension,
-} from "@t3tools/shared/mediaPreview";
-import { splitFilePathPosition } from "@t3tools/shared/fileLinks";
-import { parseMarkdownFileLink } from "@t3tools/shared/markdownLinks";
+} from "@t4tools/shared/mediaPreview";
+import { splitFilePathPosition } from "@t4tools/shared/fileLinks";
+import { parseMarkdownFileLink } from "@t4tools/shared/markdownLinks";
 import {
   mediaFileReference,
   mediaUrlReference,
   mediaReferenceFileName,
-} from "@t3tools/client-runtime/media-reference";
-import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
+} from "@t4tools/client-runtime/media-reference";
+import type { EnvironmentId, ThreadId } from "@t4tools/contracts";
 import { normalizeNativeMarkdownUrl, resolveMarkdownLinkPresentation } from "./markdownLinks";
 import { resolveMobileMarkdownMediaSource } from "./markdownMediaSource";
 
