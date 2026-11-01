@@ -28,6 +28,11 @@ on:
         description: "Commit or tag to build for a manual stable release. Defaults to the latest published nightly."
         required: false
         type: string
+      use_connect:
+        description: "Include T4 Connect account and relay configuration in the build."
+        required: false
+        default: true
+        type: boolean
 
 # Serialize nightlies (scheduled and manual) so overlapping runs cannot build
 # the same commit twice or publish out of order. Stable tag releases get their
@@ -408,7 +413,8 @@ jobs:
     needs: [resolve_commit]
     if: |
       needs.resolve_commit.result == 'success' &&
-      (github.event_name != 'schedule' || needs.resolve_commit.outputs.has_changes == 'true')
+      (github.event_name != 'schedule' || needs.resolve_commit.outputs.has_changes == 'true') &&
+      (github.event_name != 'workflow_dispatch' || inputs.use_connect)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     environment:
@@ -516,7 +522,7 @@ jobs:
     # Same gating as relay_public_config: only the release commit is needed, so
     # this runs alongside preflight. See the condition comment there.
     needs: [preflight, relay_public_config]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -607,7 +613,7 @@ jobs:
   desktop_mac_arm64:
     name: Desktop macOS arm64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -618,6 +624,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: macOS arm64
       runner: macos-26
       platform: mac
@@ -631,7 +638,7 @@ jobs:
   desktop_mac_x64:
     name: Desktop macOS x64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -642,6 +649,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: macOS x64
       runner: macos-26-intel
       platform: mac
@@ -657,7 +665,7 @@ jobs:
   desktop_linux_x64:
     name: Desktop Linux x64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -668,6 +676,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: Linux x64
       runner: ubuntu-24.04
       platform: linux
@@ -683,7 +692,7 @@ jobs:
   desktop_linux_arm64:
     name: Desktop Linux arm64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -694,6 +703,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: Linux arm64
       runner: ubuntu-24.04-arm
       platform: linux
@@ -711,7 +721,7 @@ jobs:
   desktop_win_x64:
     name: Desktop Windows x64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -722,6 +732,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: Windows x64
       runner: ubuntu-24.04
       verify_runner: windows-2025
@@ -735,7 +746,7 @@ jobs:
   desktop_win_arm64:
     name: Desktop Windows arm64
     needs: [preflight, relay_public_config, build_bundle]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.build_bundle.result == 'success' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.build_bundle.result == 'success' }}
     uses: ./.github/workflows/release-desktop.yml
     secrets: inherit
     with:
@@ -746,6 +757,7 @@ jobs:
       clerk_jwt_template: ${{ needs.relay_public_config.outputs.clerk_jwt_template }}
       clerk_cli_oauth_client_id: ${{ needs.relay_public_config.outputs.clerk_cli_oauth_client_id }}
       relay_url: ${{ needs.relay_public_config.outputs.relay_url }}
+      relay_client_tracing: ${{ github.event_name != 'workflow_dispatch' || inputs.use_connect }}
       label: Windows arm64
       runner: ubuntu-24.04
       verify_runner: windows-11-arm
@@ -773,7 +785,7 @@ jobs:
         desktop_win_x64,
         desktop_win_arm64,
       ]
-    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.quality.result == 'success' && needs.test.result == 'success' && needs.test_web.result == 'success' && needs.test_server.result == 'success' && needs.desktop_mac_arm64.result == 'success' && needs.desktop_mac_x64.result == 'success' && needs.desktop_linux_x64.result == 'success' && needs.desktop_linux_arm64.result == 'success' && needs.desktop_win_x64.result == 'success' && needs.desktop_win_arm64.result == 'success' }}
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && (needs.relay_public_config.result == 'success' || (github.event_name == 'workflow_dispatch' && !inputs.use_connect)) && needs.quality.result == 'success' && needs.test.result == 'success' && needs.test_web.result == 'success' && needs.test_server.result == 'success' && needs.desktop_mac_arm64.result == 'success' && needs.desktop_mac_x64.result == 'success' && needs.desktop_linux_x64.result == 'success' && needs.desktop_linux_arm64.result == 'success' && needs.desktop_win_x64.result == 'success' && needs.desktop_win_arm64.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -1335,7 +1347,7 @@ jobs:
 
   finalize:
     name: Finalize release
-    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel == 'stable' }}
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel == 'stable' && !(github.event_name == 'workflow_dispatch' && inputs.source_ref != '') }}
     needs: [preflight, release]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
