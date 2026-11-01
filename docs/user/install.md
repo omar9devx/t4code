@@ -189,6 +189,11 @@ CLI's own update command when T4 Code cannot tell. Update a CLI installed with
 mise through mise. Cursor and Antigravity update with T4 Code. Homebrew installs
 compare against the version Homebrew offers, which can trail the npm release by
 a few hours.
+CLI's own update command when T4 Code cannot tell. Update a CLI installed with
+mise through mise. Cursor and Antigravity update with T4 Code. Homebrew and
+Chocolatey installs compare against the version their package manager offers,
+which can trail the npm release; update Claude installed with Chocolatey
+through Chocolatey.
 
 Add another provider instance for a separate account or configuration. Each
 instance can have its own environment variables, such as API keys or a custom
