@@ -70,7 +70,7 @@ export function deriveBlockedOnThreadWait(input: {
       continue;
     }
     if (item.type !== "dynamic_tool") return false;
-    const tool = resolveT4McpToolId(item.toolName);
+    const tool = resolveT4McpToolId(item.toolName)?.toLowerCase();
     if (
       tool !== "t4_thread_wait" &&
       !(

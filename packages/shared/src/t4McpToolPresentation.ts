@@ -86,7 +86,7 @@ function tool(
   return { displayName, labels, icon, summaryAction };
 }
 
-const T4_MCP_SERVER_ALIASES = new Set(["t4-code", "T4_code", "T4CODE"]);
+const T4_MCP_SERVER_ALIASES = new Set(["t4-code", "t4_code", "t4code"]);
 
 const T4_MCP_TOOLS: Readonly<Record<string, T4McpToolDefinition>> = {
   link_pull_request: tool(
@@ -376,6 +376,12 @@ function normalizeT4McpToolLabel(value: string): string {
   return value.replace(/\s+(?:complete|completed)\s*$/i, "").trim();
 }
 
+function canonicalT4McpToolName(value: string): string | null {
+  return (
+    Object.keys(T4_MCP_TOOLS).find((name) => name.toLowerCase() === value.toLowerCase()) ?? null
+  );
+}
+
 // ACP tool prefixes vary; match loosely but require a known display-name entry.
 function resolveT4McpToolName(value: string): string | null {
   const label = normalizeT4McpToolLabel(value);
@@ -385,7 +391,7 @@ function resolveT4McpToolName(value: string): string | null {
     return server !== undefined &&
       tool !== undefined &&
       T4_MCP_SERVER_ALIASES.has(server.toLowerCase())
-      ? tool
+      ? canonicalT4McpToolName(tool)
       : null;
   }
 
@@ -393,12 +399,13 @@ function resolveT4McpToolName(value: string): string | null {
     label,
   );
   if (namespaceMatch?.groups) {
-    return namespaceMatch.groups.tool ?? null;
+    return canonicalT4McpToolName(namespaceMatch.groups.tool ?? "");
   }
 
   const prefixed = /^(?:mcp[-_]{1,2})?t4[-_ ]?code(?:__|[-_.:/ ])(?<tool>.+)$/i.exec(label);
   const candidate = prefixed?.groups?.tool ?? label;
-  if (Object.hasOwn(T4_MCP_TOOLS, candidate)) return candidate;
+  const canonicalCandidate = canonicalT4McpToolName(candidate);
+  if (canonicalCandidate !== null) return canonicalCandidate;
   // OpenCode 2 thread prefixes can contain underscores; choose the longest known tool-name suffix.
   if (!/^t4-code-/i.test(label)) return null;
   let longest: string | null = null;

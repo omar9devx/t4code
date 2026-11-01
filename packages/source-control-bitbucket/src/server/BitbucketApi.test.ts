@@ -613,7 +613,7 @@ it.effect("creates pull requests using the official REST payload shape", () => {
       description: "PR body",
       source: {
         branch: { name: "feature/provider" },
-        repository: { full_name: "owner/T4CODE" },
+        repository: { full_name: "owner/t4code" },
       },
       destination: {
         branch: { name: "main" },
