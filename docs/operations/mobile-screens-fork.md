@@ -1,7 +1,7 @@
 # Building the mobile Screens dependency
 
 The mobile v5 stack uses a committed tarball from the
-[T4 Code Screens fork](https://github.com/pingdotgg/react-native-screens/tree/t4-v5.0.0-t4.45).
+[T4 Code Screens fork](https://github.com/omar9devx/react-native-screens/tree/t4-v5.0.0-t4.45).
 The fork owns the integration changes; the app does not patch this package.
 Each archive includes compiled JavaScript, declarations, native source and
 `t4-fork.json` recording its version, source commit and upstream base.

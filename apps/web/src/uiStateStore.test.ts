@@ -247,7 +247,7 @@ describe("uiStateStore persistence", () => {
   });
 
   it("restores the sidebar project scope across reloads", () => {
-    const keys = ["github.com/omar9devx/t4code", "github.com/pingdotgg/uploadthing"];
+    const keys = ["github.com/omar9devx/t4code", "github.com/omar9devx/uploadthing"];
     persistState(makeUiState({ sidebarProjectScopeKeys: keys }));
 
     const persisted = JSON.parse(

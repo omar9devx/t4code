@@ -16,7 +16,7 @@ describe("sourceControlClients.parseChangeRequestUrl", () => {
   it("reads a GitHub pull request, lower-casing the repository", () => {
     expect(parse("https://github.com/t4tools/T4CODE/pull/123")).toEqual({
       host: "github.com",
-      repository: "t4tools/T4CODE",
+      repository: "t4tools/t4code",
       number: 123,
     });
   });
@@ -64,7 +64,7 @@ describe("sourceControlClients.parseChangeRequestUrl", () => {
   it("reads a GitLab merge request on any host, nested groups and all", () => {
     expect(parse("https://gitlab.com/t4tools/platform/T4CODE/-/merge_requests/42")).toEqual({
       host: "gitlab.com",
-      repository: "t4tools/platform/T4CODE",
+      repository: "t4tools/platform/t4code",
       number: 42,
     });
     expect(parse("https://code.acme.test/team/project/-/merge_requests/9")).toEqual({
@@ -82,12 +82,12 @@ describe("sourceControlClients.parseChangeRequestUrl", () => {
     });
     expect(parse("https://dev.azure.com/acme/platform/_git/T4CODE/pullrequest/17")).toEqual({
       host: "dev.azure.com",
-      repository: "acme/platform/_git/T4CODE",
+      repository: "acme/platform/_git/t4code",
       number: 17,
     });
     expect(parse("https://acme.visualstudio.com/platform/_git/T4CODE/pullrequest/17")).toEqual({
       host: "acme.visualstudio.com",
-      repository: "platform/_git/T4CODE",
+      repository: "platform/_git/t4code",
       number: 17,
     });
   });
@@ -128,12 +128,12 @@ describe("sourceControlClients.parseChangeRequestUrl", () => {
   it("survives trailing segments, a trailing slash and a query string", () => {
     expect(parse("https://github.com/t4tools/T4CODE/pull/123/files?w=1")).toEqual({
       host: "github.com",
-      repository: "t4tools/T4CODE",
+      repository: "t4tools/t4code",
       number: 123,
     });
     expect(parse("https://github.com/t4tools/T4CODE/pull/123/")).toEqual({
       host: "github.com",
-      repository: "t4tools/T4CODE",
+      repository: "t4tools/t4code",
       number: 123,
     });
   });
@@ -273,19 +273,19 @@ describe("sourceControlClients.recognizeRemote", () => {
 describe("sourceControlClients repository keys", () => {
   // Persisted as `repositoryIdentity.canonicalKey` and in thread pull request keys.
   it.each([
-    ["git@github.com:t4tools/T4CODE.git", "github.com/t4tools/T4CODE"],
+    ["git@github.com:t4tools/T4CODE.git", "github.com/t4tools/t4code"],
     ["ssh://git@gitlab.company.com:2222/team/project.git", "gitlab.company.com/team/project"],
     [
       "git@ssh.dev.azure.com:v3/t4tools/Platform/T4CODE",
-      "dev.azure.com/t4tools/platform/_git/T4CODE",
+      "dev.azure.com/t4tools/platform/_git/t4code",
     ],
     [
       "t4tools@vs-ssh.visualstudio.com:v3/t4tools/Platform/T4CODE",
-      "t4tools.visualstudio.com/platform/_git/T4CODE",
+      "t4tools.visualstudio.com/platform/_git/t4code",
     ],
     [
       "https://t4tools.visualstudio.com/DefaultCollection/Platform/_git/T4CODE",
-      "t4tools.visualstudio.com/defaultcollection/platform/_git/T4CODE",
+      "t4tools.visualstudio.com/defaultcollection/platform/_git/t4code",
     ],
     ["git@ssh.dev.azure.com:v3/o/p", "ssh.dev.azure.com/v3/o/p"],
     ["ssh.dev.azure.com/v3/o/p/r", "ssh.dev.azure.com/v3/o/p/r"],

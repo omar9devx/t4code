@@ -33,7 +33,7 @@ describe(RULE, () => {
       // quarantine: #1234 flakes on Windows until the pty fix lands
       it.skip("pending", () => {});
 
-      // https://github.com/pingdotgg/t3code/issues/42
+      // https://github.com/omar9devx/t4code/issues/42
       describe.only("focused", () => {});
     `,
   );

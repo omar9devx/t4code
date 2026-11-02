@@ -55,7 +55,18 @@ test("validates the fixed artifact schema", () => {
 test("resolves a fallback PR with a redacted head repo and exact main baseline", async () => {
   const outputs = {};
   const listWorkflowRunArtifacts = () => {};
-  const listWorkflowRuns = () => {};
+  // The exact base run sits far past the newest page of main CI runs.
+  const mainRuns = Array.from({ length: 1_000 }, (_, index) => ({
+    id: 1_000 - index,
+    head_sha: index === 900 ? "base-sha" : `main-sha-${index}`,
+  }));
+  const listWorkflowRuns = async ({ head_sha, per_page }) => ({
+    data: {
+      workflow_runs: mainRuns
+        .filter((run) => head_sha === undefined || run.head_sha === head_sha)
+        .slice(0, per_page),
+    },
+  });
   const listPullRequestsAssociatedWithCommit = () => {};
   const github = {
     paginate: async (method, input) => {
@@ -77,9 +88,6 @@ test("resolves a fallback PR with a redacted head repo and exact main baseline",
           },
         ];
       }
-      if (method === listWorkflowRuns) {
-        return [{ id: 1, head_sha: "base-sha" }];
-      }
       throw new Error("unexpected pagination call");
     },
     rest: {
@@ -98,7 +106,7 @@ test("resolves a fallback PR with a redacted head repo and exact main baseline",
   await resolve({
     github,
     context: {
-      repo: { owner: "pingdotgg", repo: "T4CODE" },
+      repo: { owner: "omar9devx", repo: "T4CODE" },
       payload: {
         workflow_run: {
           id: 2,
@@ -123,7 +131,7 @@ test("resolves a fallback PR with a redacted head repo and exact main baseline",
   assert.equal(outputs.publish, "true");
   assert.equal(outputs.pull_number, "5350");
   assert.equal(outputs.pr_artifact, "true");
-  assert.equal(outputs.baseline_run_id, "1");
+  assert.equal(outputs.baseline_run_id, "100");
   assert.equal(outputs.baseline_matches_base, "true");
 });
 
@@ -156,7 +164,7 @@ test("does not guess when a fallback commit belongs to multiple PRs", async () =
       },
     },
     context: {
-      repo: { owner: "pingdotgg", repo: "T4CODE" },
+      repo: { owner: "omar9devx", repo: "T4CODE" },
       payload: {
         workflow_run: {
           id: 2,
@@ -201,7 +209,7 @@ test("skips a missing PR commit but preserves other lookup failures", async () =
         rest: { repos: { listPullRequestsAssociatedWithCommit: () => {} } },
       },
       context: {
-        repo: { owner: "pingdotgg", repo: "T4CODE" },
+        repo: { owner: "omar9devx", repo: "T4CODE" },
         payload: {
           workflow_run: { event: "pull_request", head_sha: "old-head", pull_requests: [] },
         },
@@ -242,7 +250,7 @@ test("does not report a passing run that skipped the server tests", async () => 
       },
     },
     context: {
-      repo: { owner: "pingdotgg", repo: "T4CODE" },
+      repo: { owner: "omar9devx", repo: "T4CODE" },
       payload: {
         workflow_run: {
           id: 2,
@@ -289,7 +297,7 @@ test("does not publish a stale result after the PR head advances", async () => {
         },
       },
     },
-    { repo: { owner: "pingdotgg", repo: "T4CODE" } },
+    { repo: { owner: "omar9devx", repo: "T4CODE" } },
     { info: (message) => info.push(message) },
     5350,
     "old-head-sha",
@@ -328,7 +336,7 @@ test("preserves a successful result when a same-SHA rerun has no artifact", asyn
         },
       },
     },
-    { repo: { owner: "pingdotgg", repo: "T4CODE" } },
+    { repo: { owner: "omar9devx", repo: "T4CODE" } },
     { info: () => {} },
     5350,
     sha,

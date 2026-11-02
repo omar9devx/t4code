@@ -42,7 +42,7 @@ describe("findProjectForChangeRequest", () => {
       project({
         canonicalKey: "github.com/omar9devx/t4code",
         provider: SourceControlProviderKind.make("github"),
-        owner: "pingdotgg",
+        owner: "omar9devx",
         name: "T4CODE",
       }),
     ];

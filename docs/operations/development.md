@@ -17,7 +17,7 @@ Prefer a container? See [Dev container](../internals/devcontainer.md) for VS Cod
 
 ## Git remotes and branches
 
-`origin` is the public T4 repository (`omar9devx/t4code`). `upstream` is the original T3 Code
+`origin` is the public T4 repository (`omar9devx/t4code`). `upstream` is the original T4 Code
 repository used only to fetch tagged releases for manual review and porting. Keep those roles
 separate: do not push T4 changes to `upstream` or merge an upstream release without reviewing it.
 

@@ -6,7 +6,7 @@ Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCod
 
 ## Vorynixal versioning
 
-Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is based on [T3 Code Nightly 0.1.7-nightly.20261101.4035](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261101.4035) (source commit `80120b1aa34a`). T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
+Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is based on [T3 Code Nightly 0.1.7-nightly.20261102.4066](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261102.4066) (source commit `30654b3e91a5`). T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
 
 ## "Wait, what are you selling me?"
 

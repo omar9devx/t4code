@@ -749,7 +749,7 @@ describe("review thread decoding", () => {
         reviewJson({
           requested: [
             {
-              combinedSlug: "pingdotgg/ping-devs",
+              combinedSlug: "omar9devx/ping-devs",
               teamName: "Ping Devs",
               teamAvatarUrl: "https://avatars.githubusercontent.com/t/6692390?s=400&v=4",
             },
@@ -763,7 +763,7 @@ describe("review thread decoding", () => {
 
     expect(result.reviewers).toEqual([
       {
-        login: "pingdotgg/ping-devs",
+        login: "omar9devx/ping-devs",
         name: "Ping Devs",
         avatarUrl: "https://avatars.githubusercontent.com/t/6692390?s=400&v=4",
       },

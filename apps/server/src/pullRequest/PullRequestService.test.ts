@@ -876,12 +876,12 @@ it.effect("keeps healthy repositories when one of them cannot be read", () =>
     const service = yield* makeService({
       projects: [
         project({ id: "p1", title: "T4CODE", workspaceRoot: "/a", repository: "omar9devx/t4code" }),
-        project({ id: "p2", title: "broken", workspaceRoot: "/b", repository: "pingdotgg/broken" }),
+        project({ id: "p2", title: "broken", workspaceRoot: "/b", repository: "omar9devx/broken" }),
       ],
       providers: [
         fakePullRequestProvider(SourceControlProviderKind.make("github"), {
           listChangeRequests: (input) =>
-            input.repository === "pingdotgg/broken"
+            input.repository === "omar9devx/broken"
               ? Effect.fail(requestFailed)
               : Effect.succeed({
                   items: [changeRequest(1, "2026-07-02T00:00:00Z")],
@@ -918,9 +918,9 @@ it.effect("offers each label once across repositories, despite one that cannot b
           id: "p2",
           title: "uploadthing",
           workspaceRoot: "/b",
-          repository: "pingdotgg/ut",
+          repository: "omar9devx/ut",
         }),
-        project({ id: "p3", title: "broken", workspaceRoot: "/c", repository: "pingdotgg/broken" }),
+        project({ id: "p3", title: "broken", workspaceRoot: "/c", repository: "omar9devx/broken" }),
         project({
           id: "p4",
           title: "elsewhere",
@@ -933,7 +933,7 @@ it.effect("offers each label once across repositories, despite one that cannot b
         fakePullRequestProvider(SourceControlProviderKind.make("github"), {
           listRepositoryLabels: (input) => {
             reads.push(input.repository);
-            return input.repository === "pingdotgg/broken"
+            return input.repository === "omar9devx/broken"
               ? Effect.fail(requestFailed)
               : Effect.succeed({
                   items:

@@ -86,7 +86,14 @@ function tool(
   return { displayName, labels, icon, summaryAction };
 }
 
-const T4_MCP_SERVER_ALIASES = new Set(["t4-code", "t4_code", "t4code"]);
+// Codex registers "t4-code-direct" for T3 tools kept out of Code Mode.
+const T4_MCP_SERVER_ALIASES = new Set([
+  "t4-code",
+  "t4_code",
+  "t4code",
+  "t4-code-direct",
+  "t4_code_direct",
+]);
 
 const T4_MCP_TOOLS: Readonly<Record<string, T4McpToolDefinition>> = {
   link_pull_request: tool(
@@ -395,9 +402,10 @@ function resolveT4McpToolName(value: string): string | null {
       : null;
   }
 
-  const namespaceMatch = /^(?<server>t4-code|T4_code|T4CODE)(?:[.:/]|\s*·\s*)(?<tool>.+)$/i.exec(
-    label,
-  );
+  const namespaceMatch =
+    /^(?<server>t3[-_]code[-_]direct|t4[-_]code[-_]direct|t4-code|t4_code|t4code|T4 Code-code)(?:[.:/]|\s*·\s*)(?<tool>.+)$/i.exec(
+      label,
+    );
   if (namespaceMatch?.groups) {
     return canonicalT4McpToolName(namespaceMatch.groups.tool ?? "");
   }

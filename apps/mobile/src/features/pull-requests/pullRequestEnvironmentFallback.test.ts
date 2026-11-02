@@ -13,7 +13,7 @@ const project = (environmentId: string, id: string, canonicalKey: string) =>
 
 const projects = [
   project("laptop", "t4", "github.com/omar9devx/t4code"),
-  project("desktop", "other", "github.com/pingdotgg/other"),
+  project("desktop", "other", "github.com/omar9devx/other"),
   project("server", "t4-copy", "github.com/omar9devx/t4code"),
 ];
 const target = {

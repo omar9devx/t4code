@@ -32,11 +32,11 @@ describe("makeIsRepositoryStarred", () => {
     return Effect.gen(function* () {
       const isStarred = yield* makeIsRepositoryStarred;
       assert.isTrue(yield* isStarred("github.com", "omar9devx/t4code"));
-      assert.isFalse(yield* isStarred("github.com", "pingdotgg/uploadthing"));
+      assert.isFalse(yield* isStarred("github.com", "omar9devx/uploadthing"));
       assert.isFalse(yield* isStarred("github.com", "omar9devx/t4code/../../user"));
       assert.deepStrictEqual(paths, [
         "user/starred/omar9devx/t4code",
-        "user/starred/pingdotgg/uploadthing",
+        "user/starred/omar9devx/uploadthing",
       ]);
     }).pipe(Effect.provide(api));
   });

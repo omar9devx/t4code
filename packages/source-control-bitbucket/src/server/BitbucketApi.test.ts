@@ -46,7 +46,7 @@ const bitbucketPullRequest = {
     branch: { name: "main" },
     repository: {
       full_name: "omar9devx/t4code",
-      workspace: { slug: "pingdotgg" },
+      workspace: { slug: "omar9devx" },
     },
   },
 };

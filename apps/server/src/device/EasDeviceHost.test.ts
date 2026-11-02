@@ -152,7 +152,7 @@ const fakeExpo = (
               app: {
                 byId: {
                   ownerAccount: {
-                    name: "pingdotgg",
+                    name: "omar9devx",
                     accountFeatureGates: { "device-run-sessions": true },
                   },
                 },

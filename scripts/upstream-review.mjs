@@ -11,7 +11,7 @@ function git(args, { binary = false } = {}) {
   const result = NodeChildProcess.spawnSync("git", args, {
     cwd: repoRoot,
     encoding: binary ? "buffer" : "utf8",
-    maxBuffer: 64 * 1024 * 1024,
+    maxBuffer: 256 * 1024 * 1024,
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
@@ -57,7 +57,7 @@ function run() {
   }
   if (args.length !== 2 || args.some((tag) => !tagPattern.test(tag))) {
     throw new Error(
-      "Pass two exact tags, for example: vp run upstream:review -- v0.1.7-nightly.20261101.4016 v0.1.7-nightly.NEXT",
+      "Pass two exact tags, for example: vp run upstream:review -- v0.1.7-nightly.20261102.4066 v0.1.7-nightly.NEXT",
     );
   }
   const [oldTag, newTag] = args;

@@ -114,9 +114,9 @@ describe("T4 Code tool instructions", () => {
     });
 
     assert.include(acp, "<t4_code_instructions>");
-    assert.notInclude(acp, "<t3_code_instructions>");
+    assert.notInclude(acp, "<t4_code_instructions>");
     assert.include(cursor, "<t4_code_orchestration_instructions>");
-    assert.notInclude(cursor, "<t3_code_orchestration_instructions>");
+    assert.notInclude(cursor, "<t4_code_orchestration_instructions>");
     assert.include(T4_CODE_DEVICE_TOOL_INSTRUCTIONS_WITH_TOOL_SEARCH, "mcp__t4-code__");
   });
 
