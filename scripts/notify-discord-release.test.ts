@@ -445,7 +445,7 @@ it.layer(NodeServices.layer)("Discord release CLI and workflow", (it) => {
       assert.ok(
         workflow
           .slice(workflow.indexOf("  announce_discord:"))
-          .includes("needs.preflight.outputs.release_channel != 'preview'"),
+          .includes("needs.preflight.outputs.release_channel == 'stable'"),
       );
     }),
   );
