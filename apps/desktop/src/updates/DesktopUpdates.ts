@@ -72,6 +72,7 @@ const UpdateInfo = Schema.Struct({
   // Malformed notes must not block update-state decoding; normalizeDesktopUpdateReleaseNotes validates separately.
   releaseNotes: Schema.optional(Schema.Unknown),
   releaseDate: Schema.optional(Schema.String),
+  t4Downloadable: Schema.optional(Schema.Boolean),
 });
 
 const DownloadProgressInfo = Schema.Struct({
@@ -592,6 +593,13 @@ export const make = Effect.gen(function* () {
     if (!(yield* Ref.get(updaterConfiguredRef)) || state.status !== "available") {
       return { accepted: false, completed: false };
     }
+    if (state.downloadUnavailable === true) {
+      yield* logUpdaterInfo("update is available but has no published installer", {
+        version: state.availableVersion,
+        channel: state.channel,
+      });
+      return { accepted: false, completed: false };
+    }
 
     if (!(yield* tryStartUpdateAction("download"))) {
       return { accepted: false, completed: false };
@@ -949,6 +957,7 @@ export const make = Effect.gen(function* () {
               checkedAt,
               releaseNotes,
               omittedReleaseCount,
+              info.t4Downloadable !== false,
             ),
           );
           yield* Ref.set(lastLoggedDownloadMilestoneRef, -1);

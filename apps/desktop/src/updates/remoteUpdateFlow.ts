@@ -52,6 +52,13 @@ export function nextRemoteDesktopUpdateStep(
       reason: `Update ${state.notAppliedVersion} did not apply on this machine. Retry it from the desktop app there.`,
     };
   }
+  if (state.downloadUnavailable === true && state.downloadedVersion === null) {
+    return {
+      action: "done",
+      outcome: "failed",
+      reason: state.message ?? "The update exists, but its installer is not available to download.",
+    };
+  }
   // Match install admission, including retained downloads after unrelated background or earlier install errors.
   if (isInstallableDesktopUpdateState(state)) {
     return { action: "install" };

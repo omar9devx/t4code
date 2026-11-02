@@ -34,6 +34,7 @@ export async function prepareLocalTrackSwitch(
   if (!input.reinstall) return { ok: true, local: null };
   const found = local.downloadedVersion ?? local.availableVersion;
   if (
+    (local.downloadUnavailable !== true || local.downloadedVersion !== null) &&
     (local.status === "available" || local.status === "downloaded") &&
     found !== null &&
     acceptsTrackSwitchRelease(found, input.channel, input.version)

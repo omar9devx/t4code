@@ -6,7 +6,7 @@ Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCod
 
 ## Vorynixal versioning
 
-Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.0.0 Stable** is based on [T3 Code Nightly 0.1.7-nightly.20261102.4066](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261102.4066) (source commit `30654b3e91a5`). The **1.1.0 Nightly** build follows T3's `nightly.YYYYMMDD.RUN` prerelease format as `1.1.0-nightly.20261102.4080`, based on [T3 Code Nightly 0.1.7-nightly.20261102.4080](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261102.4080) (source commit `47f2c8d29e98`). T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
+Vorynixal uses its own release versions, independent of T3 Code's version numbers. Version **1.1.0 Stable** is based on [T3 Code Nightly 0.1.7-nightly.20261102.4080](https://github.com/pingdotgg/t3code/releases/tag/v0.1.7-nightly.20261102.4080) (source commit `47f2c8d29e98`). Desktop builds check for updates through the T4 Code GitHub Releases repository. Stable releases include installers; new nightly releases publish update metadata and SHA256 checksums only, so clients can detect the new version but cannot download it. Nightly source is retained on the `nightly` branch. T3's version is source provenance only; future T3 updates do not change Vorynixal's version unless we publish a Vorynixal release.
 
 ## "Wait, what are you selling me?"
 
@@ -75,19 +75,12 @@ sudo apt install ./T4 Code-Code-*.deb
 
 #### Arch Linux (AUR)
 
-Stable:
-
 ```bash
 yay -S T4CODE-bin
 ```
 
-Nightly:
-
-```bash
-yay -S T4CODE-nightly-bin
-```
-
-The AUR packaging is maintained in this repository under [`packaging/aur`](./packaging/aur).
+Stable AUR packaging is maintained in this repository under [`packaging/aur`](./packaging/aur).
+Nightly source stays on the `nightly` branch; nightly installers are not publicly distributed.
 
 #### Nix (nixpkgs)
 

@@ -84,14 +84,17 @@ function resolveSidebarUpdatePresentation({
   run,
   isDownloading,
   showCheckIcon,
+  hasUnavailableUpdate,
 }: {
   readonly action: ReturnType<typeof resolveDesktopUpdateButtonAction>;
   readonly showsEverything: boolean;
   readonly run: UpdateEverythingRun | null;
   readonly isDownloading: boolean;
   readonly showCheckIcon: boolean;
+  readonly hasUnavailableUpdate: boolean;
 }) {
-  const showUpdateDetails = action !== "none" || showsEverything || run !== null || isDownloading;
+  const showUpdateDetails =
+    action !== "none" || showsEverything || run !== null || isDownloading || hasUnavailableUpdate;
   const iconStatus: DesktopUpdateStatusIconState = showCheckIcon
     ? "checking"
     : isDownloading
@@ -102,11 +105,13 @@ function resolveSidebarUpdatePresentation({
           : "everything"
         : showsEverything
           ? "everything"
-          : action === "install"
-            ? "downloaded"
-            : action === "download"
-              ? "available"
-              : "idle";
+          : hasUnavailableUpdate
+            ? "unavailable"
+            : action === "install"
+              ? "downloaded"
+              : action === "download"
+                ? "available"
+                : "idle";
 
   return {
     iconStatus,
@@ -244,6 +249,7 @@ function SidebarUpdateControl() {
     run,
     isDownloading,
     showCheckIcon,
+    hasUnavailableUpdate: state?.downloadUnavailable === true && state.downloadedVersion === null,
   });
   const idleTooltip =
     !showUpdateDetails && !showCheckIcon ? getDesktopUpdateIdleTooltip(state, updatesDenial) : null;

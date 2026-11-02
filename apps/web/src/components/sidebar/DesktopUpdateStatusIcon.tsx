@@ -1,5 +1,5 @@
 import { RefreshIcon } from "~/components/ui/refresh-icon";
-import { CheckIcon, CircleArrowUpIcon, DownloadIcon, RotateCwIcon } from "lucide-react";
+import { BanIcon, CheckIcon, CircleArrowUpIcon, DownloadIcon, RotateCwIcon } from "lucide-react";
 import type { AnimationEventHandler } from "react";
 
 const DOWNLOAD_PROGRESS_RADIUS = 14;
@@ -9,6 +9,7 @@ export type DesktopUpdateStatusIconState =
   | "idle"
   | "checking"
   | "available"
+  | "unavailable"
   | "downloading"
   | "downloaded"
   | "everything";
@@ -112,6 +113,7 @@ export function DesktopUpdateStatusIcon({
   readonly status: DesktopUpdateStatusIconState;
 }) {
   if (status === "available") return <DesktopUpdateAvailableIcon />;
+  if (status === "unavailable") return <BanIcon className="size-4" />;
   if (status === "downloading") {
     return <DesktopUpdateDownloadingIcon percent={downloadPercent ?? null} />;
   }

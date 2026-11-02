@@ -66,14 +66,13 @@ update it with `git pull` and a rebuild.
 Download a release from [GitHub Releases](https://github.com/omar9devx/t4code/releases),
 or use a package manager:
 
-| Platform           | Install                                                      |
-| ------------------ | ------------------------------------------------------------ |
-| Windows            | `winget install t4tools.T4CODE`                              |
-| macOS              | `brew install --cask t4-code`                                |
-| Debian, Ubuntu     | `sudo apt install ./T4 Code-Code-*.deb`                      |
-| Arch Linux         | `yay -S T4CODE-bin`                                          |
-| Arch Linux nightly | `yay -S T4CODE-nightly-bin`                                  |
-| Nix                | `nix profile add github:NixOS/nixpkgs/nixos-unstable#T4CODE` |
+| Platform       | Install                                                      |
+| -------------- | ------------------------------------------------------------ |
+| Windows        | `winget install t4tools.T4CODE`                              |
+| macOS          | `brew install --cask t4-code`                                |
+| Debian, Ubuntu | `sudo apt install ./T4 Code-Code-*.deb`                      |
+| Arch Linux     | `yay -S T4CODE-bin`                                          |
+| Nix            | `nix profile add github:NixOS/nixpkgs/nixos-unstable#T4CODE` |
 
 The `.deb` updates itself like the other desktop builds. It asks for your
 password to install each update. If your desktop has no password prompt, the

@@ -277,11 +277,17 @@ function AboutVersionSection() {
   const action = updateState ? resolveDesktopUpdateButtonAction(updateState) : "none";
   const buttonTooltip = updateState ? getDesktopUpdateButtonTooltip(updateState) : null;
   const buttonDisabled =
-    action === "none"
-      ? !canCheckForUpdate(updateState)
-      : isDesktopUpdateButtonDisabled(updateState);
+    updateState?.downloadUnavailable === true && updateState.downloadedVersion === null
+      ? true
+      : action === "none"
+        ? !canCheckForUpdate(updateState)
+        : isDesktopUpdateButtonDisabled(updateState);
 
-  const actionLabel: Record<string, string> = { download: "Download", install: "Install" };
+  const actionLabel: Record<string, string> = {
+    download: "Download",
+    install: "Install",
+    none: updateState?.downloadUnavailable === true ? "Unavailable" : "Check for Updates",
+  };
   const statusLabel: Record<string, string> = {
     checking: "Checking…",
     downloading: "Downloading…",
@@ -291,10 +297,12 @@ function AboutVersionSection() {
   const buttonLabel =
     actionLabel[action] ?? statusLabel[updateState?.status ?? ""] ?? "Check for Updates";
   const description =
-    action === "download" || action === "install"
-      ? "Update available."
-      : (getDesktopUpdateDisabledReason(updateState, updatesDenial) ??
-        "Current version of the application.");
+    updateState?.downloadUnavailable === true && updateState.downloadedVersion === null
+      ? `Update ${updateState.availableVersion ?? "available"} exists, but its installer is not available to download.`
+      : action === "download" || action === "install"
+        ? "Update available."
+        : (getDesktopUpdateDisabledReason(updateState, updatesDenial) ??
+          "Current version of the application.");
 
   return (
     <>

@@ -37,26 +37,28 @@ the version.
   - Linux `x64` and `arm64` AppImage and `.deb`, from one electron-builder run. The `.deb` updates in the app through electron-updater, which installs it with `dpkg`.
   - Windows `x64` and `arm64` NSIS installer
 - Opens the packaged Linux x64 AppImage (under Xvfb) and macOS arm64 DMG against a seeded database and opens a thread (`scripts/smoke-desktop-app.ts`). A build whose backend or bundle cannot start fails here, so nothing is published. The database in `scripts/fixtures/desktop-launch` is an old snapshot on purpose: the packaged server must migrate it forward, as it does for upgrading users. Do not regenerate it on schema changes.
-- Publishes one GitHub Release with all produced files.
+- Publishes stable GitHub Releases with all installers and CLI archives. Nightly GitHub releases
+  carry updater manifests and `SHA256SUMS` only; installer files are used to generate the
+  checksums, then workflow artifacts are deleted. Nightly source is advanced on the `nightly` branch.
   - Stable tags with a suffix after `X.Y.Z` (for example `1.2.3-alpha.1`) are published as GitHub prereleases.
   - Only plain stable `X.Y.Z` releases are marked as the repository's latest release.
   - Nightly runs are always GitHub prereleases and never marked latest.
   - Automatically generated release notes are pinned to the previous tag in the same channel, so stable compares to the previous stable tag and nightly compares to the previous nightly tag.
-  - The release job's **Write release notes** step (`scripts/generate-release-notes.ts`) builds the body: a computed header line, a short summary from `gpt-6.1-terra`, and GitHub's generated list folded under `<details>`. It needs the `OPENAI_API_KEY` secret. The desktop update popover shows up to seven highlights and the number of other fixes and performance improvements. Mobile-only commits count toward release totals but cannot be highlights. The offered release's age comes from the update feed's `releaseDate`. The nightly Discord post shows the part above `<details>`. If summary generation fails, the release uses GitHub's generated notes.
-- Includes Electron auto-update metadata (for example `latest*.yml`, `nightly*.yml`, and `*.blockmap`) in release assets.
-- Builds a self-contained CLI archive per platform (`t4-<version>-<platform>-<arch>.tar.gz`, `.zip` on Windows) in the same job as that target's desktop artifact and attaches them to the GitHub Release with a `SHA256SUMS` file, on every channel, for five targets: macOS arm64, Linux x64 and arm64, Windows x64 and arm64. Every archive is smoke-tested on hardware of its own architecture, and every one but the Windows archives is also built and signed there. There is no macOS x64 archive: Node single-executables are unsupported on x64 macOS (the SEA docs list macOS as arm64 only) and the binary segfaults on start; the x64 desktop app is Electron and unaffected.
+  - The release job's **Write release notes** step (`scripts/generate-release-notes.ts`) builds the body: a computed header line, a short summary from `gpt-6.1-terra`, and GitHub's generated list folded under `<details>`. It needs the `OPENAI_API_KEY` secret. The desktop update popover shows up to seven highlights and the number of other fixes and performance improvements. Mobile-only commits count toward release totals but cannot be highlights. The offered release's age comes from the update feed's `releaseDate`. If summary generation fails, the release uses GitHub's generated notes.
+- Includes Electron auto-update metadata (for example `latest*.yml`, `nightly*.yml`, and `*.blockmap`)
+  on stable releases. Nightly manifests remain public so clients detect the version, and mark
+  `t4Downloadable: false` so desktop clients report that the installer is unavailable without trying to fetch it.
+- Builds a self-contained CLI archive per platform (`t4-<version>-<platform>-<arch>.tar.gz`, `.zip` on Windows) in the same job as that target's desktop artifact for five targets: macOS arm64, Linux x64 and arm64, Windows x64 and arm64. Stable releases attach the archives; nightly releases keep them in workflow artifacts and publish checksums only. Every archive is smoke-tested on hardware of its own architecture, and every one but the Windows archives is also built and signed there. There is no macOS x64 archive: Node single-executables are unsupported on x64 macOS (the SEA docs list macOS as arm64 only) and the binary segfaults on start; the x64 desktop app is Electron and unaffected.
   - The archive holds the server as a Node single-executable (`scripts/build-cli-archive.ts`), so unpacking it needs neither Node, npm, nor a compiler. It is the only form in which T4 Code manages a runtime: the desktop's SSH environments, the boot service, `t4 update`, and the install scripts all download and verify this archive against `SHA256SUMS`. The `t4` npm package exists for people who run `npx t4` or `npm install -g t4` themselves, and it downloads this same archive too; nothing in the product installs from npm. The `curl | sh` installers are `scripts/install.sh` and `scripts/install.ps1`; the marketing site copies them into its `public/` at build time (`apps/marketing/scripts/stage-install-scripts.mjs`) and serves them at `t3.codes/install.sh` and `/install.ps1`.
   - The root `package.json` pins `engines.node` to the exact Node version used by development, CI and standalone executables. Keep it exact: cross-target builds download that version, and native executable builds reject a different host Node version. TEMPORARY: Linux arm64 executables build only on a Linux arm64 host and are injected with postject, because Node's `--build-sea` output cannot load on 16 or 64 KiB page kernels. Revert when [nodejs/node#67048](https://github.com/nodejs/node/issues/67048) is fixed. Runtime changes need a new T4 Code release version because installed runtimes are cached by that version.
   - macOS archives are signed with the Developer ID certificate and notarized when the Apple secrets are present (ad hoc otherwise, which still runs from `curl`/`tar` installs). Windows executables use the same Azure Trusted Signing setup as the installer. Every native addon in the macOS archive is signed too, since the hardened runtime refuses unsigned libraries.
   - Each archive is extracted and executed (`scripts/smoke-cli-archive.ts`) on its build runner, or on the `verify_runner` for Windows.
 - After the GitHub Release is published, publishes the `t4` npm package with OIDC trusted publishing from the same workflow file. It is only a launcher (`scripts/npm-launcher/t4.mjs`): on first run it downloads its exact version's CLI archive from the GitHub Release, verifies it against `SHA256SUMS`, and unpacks it into `<T4 home>/runtime/versions/<version>`, the layout the install scripts and `t4 update` share. The executables are not on npm. They used to be, as `@T4CODE/t4-<platform>-<arch>` optional dependencies, but npm's publish-time scanning held those 80-250 MB packages back for up to an hour after the launcher was live, and every install in that window got a launcher with no executable. Those packages stay on npm at their old versions and get no new ones. Because the launcher reads from the release, `publish_cli` runs after `release`, never before.
   - stable releases publish npm dist-tag `latest`
-  - nightly releases publish npm dist-tag `nightly`
+  - nightly releases do not publish to npm
   - preview releases publish npm dist-tag `preview`, which nothing resolves unless asked for by name
   - one-time setup: package `t4` needs a trusted publisher registered for this workflow file (see below).
-- Builds the hosted web app on Vercel while the desktop jobs run, and makes it live only after a release is published:
-  - stable releases are aliased to the `latest` hosted app channel
-  - nightly releases are aliased to the `nightly` hosted app channel
+- Builds and deploys the hosted web app on Vercel for stable releases only.
 - Signing is optional and auto-detected per platform from secrets.
 
 ## Pull request macOS previews
@@ -340,11 +342,8 @@ track hourly. Each new beta gets one `android-beta-<build-number>` prerelease
 containing its APK. Unchanged checks publish nothing, and interrupted draft
 uploads resume on the next check.
 
-Normal Nightly releases include the newest processed internal-testing APK available
-when the release publishes. Internal builds do not create separate Android releases.
-If Play credentials or a processed APK are unavailable, the Nightly can still publish
-without an APK. Android submissions continue to go to internal testing; promote a
-build to Alpha to publish it as a beta.
+Nightly releases do not mirror an APK to GitHub. Android submissions continue to go
+to internal testing; promote a build to Alpha to publish it as a beta.
 
 The APK is the universal APK Play generates and signs from the
 uploaded bundle, so no signing key lives in GitHub. The job skips itself until
@@ -357,10 +356,10 @@ account EAS Submit uses.
 
 The hosted app is intentionally not deployed by Vercel's Git integration. The
 web project disables automatic Git deployments in `apps/web/vercel.ts` via
-`git.deploymentEnabled: false`. `.github/workflows/release.yml` builds the web
-app with Vercel CLI as a staged production deployment (`--skip-domain`) while
-the desktop jobs run, and aliases the channel domains to it after the GitHub
-Release succeeds.
+`git.deploymentEnabled: false`. `.github/workflows/release.yml` builds the stable
+web app with Vercel CLI as a staged production deployment (`--skip-domain`) and
+aliases the stable domain after the GitHub Release succeeds. Nightly web builds
+are not deployed.
 
 Required GitHub Actions secrets:
 
@@ -373,13 +372,11 @@ Optional GitHub Actions variables:
 - `VERCEL_TEAM_SLUG`: overrides the Vercel CLI scope when the team slug is preferred over the `VERCEL_ORG_ID` secret.
 - `T4CODE_WEB_ROUTER_URL`: defaults to `https://app.t4.codes`.
 - `T4CODE_WEB_LATEST_DOMAIN`: defaults to `latest.app.t4.codes`.
-- `T4CODE_WEB_NIGHTLY_DOMAIN`: defaults to `nightly.app.t4.codes`.
 
 Required Vercel domains:
 
 - `app.t4.codes`: the router domain users open, updated by stable releases.
 - `latest.app.t4.codes`: channel alias updated by stable releases.
-- `nightly.app.t4.codes`: channel alias updated by nightly releases.
 
 The router domain uses `apps/web/vercel.ts` routes. Users opt into a channel by
 visiting `/__T4CODE/channel?channel=latest` or
@@ -387,11 +384,10 @@ visiting `/__T4CODE/channel?channel=latest` or
 `T4CODE_web_channel` cookie and rewrites future requests on `app.t4.codes` to
 the matching channel alias.
 
-The release deploy job rewrites release package versions before upload so the
+The stable release deploy job rewrites release package versions before upload so the
 hosted app's About panel renders the release version. Stable deploys alias the
 same deployment to both the `latest` channel and the router domain so the router
-rules stay current. Nightly deploys only alias the `nightly` channel. The job
-also passes `VITE_HOSTED_APP_CHANNEL=latest|nightly`, which renders the hosted
+rules stay current. The job also passes `VITE_HOSTED_APP_CHANNEL=latest`, which renders the hosted
 update track selector in the About panel. Changing the selector navigates
 through `/__T4CODE/channel` on the router domain so the user's channel cookie is
 updated before redirecting to the hosted app root.
@@ -422,35 +418,33 @@ One-time Vercel dashboard setup:
   - release name includes the short commit SHA
   - `make_latest` is always `false`
 - Uses the next stable patch version as the nightly base. For example, `0.0.17` produces nightlies on `0.0.18-nightly.*`.
-- Publishes Electron auto-update metadata to the dedicated `nightly` updater channel, so desktop users can opt into that track independently from stable.
-- Publishes the `t4` npm launcher to the `nightly` npm dist-tag using the same nightly version.
+- Publishes Electron auto-update metadata and `SHA256SUMS`, but no installer or CLI archives. The manifest lets desktop clients report the new version as unavailable to download.
+- Does not publish nightly builds to npm, AUR, hosted web, marketing, or Discord. Build artifacts are deleted from the workflow run after checksums are published.
+- Advances the `nightly` branch to the built source commit without rewriting branch-only history.
 - Does not commit version bumps back to `main`.
 
 ## Server self-update release invariant
 
-Connected servers update to the client's exact version, not to an npm dist-tag. Servers that update
-themselves download that version's CLI archive from the GitHub Release; servers run through npm are
-handed a `t4@<version>` command to run. Every released client version must therefore have its
-release archives, and then its npm launcher, available before users can receive that client.
+Connected servers update to the client's exact version, not to an npm dist-tag. Stable versions
+include their CLI archives; nightly versions have no public server archive and are not offered as
+automatic desktop or CLI downloads.
 
 The workflow enforces this ordering:
 
-1. `release` publishes the GitHub Release with the CLI archives and `SHA256SUMS`. Every channel
+1. Stable `release` publishes the GitHub Release with the CLI archives and `SHA256SUMS`. Every stable channel
    uploads to a draft and publishes only after all assets are attached, so a new version in the
    desktop update feed already has its archives. **Update everything** relies on this to update
    background-service hosts before npm has the version. Rerunning `release` after publication
    replaces assets in a public release, so service updates can fail until the upload finishes.
-2. `publish_cli` publishes the `t4@<version>` launcher, which downloads from that release, on every
-   channel.
-3. `deploy_web` depends on both before moving the hosted channel to the new client.
+2. `publish_cli` publishes the stable `t4@<version>` launcher, which downloads from that release.
+3. Stable `deploy_web` depends on both before moving the hosted channel to the new client.
    `build_web` builds that client earlier with `vercel deploy --prod --skip-domain`, which
    leaves the custom domains alone but moves the project's own `*.vercel.app` production
    hostname. That hostname is behind Vercel SSO, so users only get the client through the
    custom domains.
 
-Desktop auto-update reads the GitHub Release directly, so a desktop client can see the new version
-a few minutes before `t4@<version>` is on npm. Only the copied manual command for npm-run servers
-depends on npm, and it works once `publish_cli` finishes.
+Desktop auto-update reads the GitHub Release directly. Nightly builds see metadata for the next
+version but do not try to download it unless a platform installer is attached.
 
 Preserve these dependencies when changing the release graph. Publishing a client first would leave
 the **Update server** action targeting a package version that does not exist yet.
@@ -472,15 +466,17 @@ available.
 - Update UX:
   - Background checks run on startup delay + interval.
   - No automatic download or install.
-  - The desktop UI shows a rocket update button when an update is available; click once to download, click again after download to restart/install.
+  - Stable installers can be downloaded from the update button. A nightly manifest with no installer shows the version as unavailable and disables downloading.
 - Provider: GitHub Releases (`provider: github`) configured at build time.
 - Repository slug source:
   - `T4CODE_DESKTOP_UPDATE_REPOSITORY` (format `owner/repo`), if set.
   - otherwise `GITHUB_REPOSITORY` from GitHub Actions.
-- Required release assets for updater:
+- Required stable release assets for updater:
   - platform installers (`.exe`, `.dmg`, `.AppImage`, `.deb`, plus macOS `.zip` for Squirrel.Mac update payloads)
   - channel metadata: `latest*.yml` for stable releases, `nightly*.yml` for nightly releases
   - `*.blockmap` files (used for differential downloads)
+- Nightly releases publish their `nightly*.yml` manifests and `SHA256SUMS`, without installer assets.
+  The manifest's `t4Downloadable: false` field prevents clients from attempting a missing download.
 - macOS metadata note:
   - `electron-updater` reads `latest-mac.yml` on stable and `nightly-mac.yml` on nightly, for both Intel and Apple Silicon.
   - The workflow merges the per-arch mac manifests into one channel-specific mac manifest before publishing the GitHub Release.
@@ -548,7 +544,7 @@ Checklist:
 3. Ensure npm account and org policies allow trusted publishing for the package.
 4. Create release tag `vX.Y.Z` and push; the workflow publishes the GitHub Release and then the
    launcher with npm dist-tag `latest`.
-5. Nightly runs publish with npm dist-tag `nightly`; preview runs with `preview`.
+5. Nightly runs do not publish to npm; preview runs publish with `preview`.
 
 ## 1) Release validation and unsigned builds
 
@@ -559,10 +555,10 @@ There is no dry-run tag path. Pushing any accepted non-nightly tag, including
 to validate the workflow.
 
 The workflow has no non-publishing `workflow_dispatch` mode. Use normal CI or local quality gates to
-validate checks and builds without shipping. To exercise the complete release graph at lower stable
-risk, manually dispatch `channel=nightly`; this still publishes a real nightly npm package, GitHub
-prerelease, desktop updater release, hosted nightly alias, and marketing site, but it does not update stable app aliases or
-commit a version bump to `main`. Only run it when a real nightly release is acceptable.
+validate checks and builds without shipping. To exercise release packaging, manually dispatch
+`channel=nightly`; it creates a metadata-only GitHub prerelease and updates the `nightly` source
+branch, but publishes no installers, CLI package, AUR package, hosted app, marketing site, APK, or
+Discord announcement.
 
 Manual `channel=stable` is also a real stable-channel release. Omitting signing secrets only makes
 platform artifacts unsigned; it does not prevent publication.

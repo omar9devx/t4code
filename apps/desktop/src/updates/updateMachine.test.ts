@@ -8,6 +8,7 @@ import {
   reduceDesktopUpdateStateOnDownloadFailure,
   reduceDesktopUpdateStateOnInstallFailure,
   reduceDesktopUpdateStateOnNoUpdate,
+  reduceDesktopUpdateStateOnUpdateAvailable,
 } from "./updateMachine.ts";
 
 const runtimeInfo = {
@@ -112,5 +113,24 @@ describe("updateMachine", () => {
     expect(state.omittedReleaseCount).toBe(0);
     expect(state.message).toBeNull();
     expect(state.errorContext).toBeNull();
+  });
+
+  it("keeps metadata-only updates visible without making them installable", () => {
+    const unavailable = reduceDesktopUpdateStateOnUpdateAvailable(
+      createInitialDesktopUpdateState("1.0.0", runtimeInfo, "nightly"),
+      "1.1.0-nightly.20261102.4080",
+      "2026-11-02T00:00:00.000Z",
+      [],
+      0,
+      false,
+    );
+
+    expect(unavailable.status).toBe("available");
+    expect(unavailable.downloadUnavailable).toBe(true);
+    expect(unavailable.message).toContain("installer files were not published");
+    expect(
+      reduceDesktopUpdateStateOnNoUpdate(unavailable, "2026-11-02T00:00:01.000Z")
+        .downloadUnavailable,
+    ).toBeUndefined();
   });
 });

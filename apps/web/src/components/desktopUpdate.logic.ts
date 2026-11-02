@@ -52,6 +52,7 @@ export function resolveDesktopUpdateButtonAction(
   ) {
     return "install";
   }
+  if (state.downloadUnavailable === true) return "none";
   if (state.status === "available") {
     return "download";
   }
@@ -68,7 +69,10 @@ export function shouldShowArm64IntelBuildWarning(state: DesktopUpdateState | nul
 }
 
 export function isDesktopUpdateButtonDisabled(state: DesktopUpdateState | null): boolean {
-  return state?.status === "downloading";
+  return (
+    state?.status === "downloading" ||
+    (state?.downloadUnavailable === true && state.downloadedVersion === null)
+  );
 }
 
 export function getArm64IntelBuildWarningDescription(state: DesktopUpdateState): string {
@@ -95,6 +99,9 @@ export function getDesktopUpdateButtonTooltip(state: DesktopUpdateState): string
     return `Update ${state.notAppliedVersion} did not apply. Click to retry.`;
   }
   if (state.status === "available") {
+    if (state.downloadUnavailable === true) {
+      return `Update ${state.availableVersion ?? "available"} exists, but its installer is not available to download.`;
+    }
     return `Update ${state.availableVersion ?? "available"} ready to download`;
   }
   if (state.status === "downloading") {

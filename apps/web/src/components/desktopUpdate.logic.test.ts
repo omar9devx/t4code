@@ -62,6 +62,17 @@ describe("desktop update button state", () => {
     };
     expect(resolveDesktopUpdateButtonAction(state)).toBe("none");
   });
+
+  it("does not offer downloads when release metadata has no installer", () => {
+    const state: DesktopUpdateState = {
+      ...baseState,
+      status: "available",
+      availableVersion: "1.1.0-nightly.20261102.4080",
+      downloadUnavailable: true,
+    };
+    expect(resolveDesktopUpdateButtonAction(state)).toBe("none");
+    expect(getDesktopUpdateButtonTooltip(state)).toContain("installer is not available");
+  });
 });
 
 describe("desktop update UI helpers", () => {

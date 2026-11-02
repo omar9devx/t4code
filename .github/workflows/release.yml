@@ -852,17 +852,17 @@ jobs:
             node .github/scripts/mirror-play-apk.cjs
           fi
 
-      # Installers verify archives against this file, so it is written from the
-      # signed bytes that get uploaded, never from an earlier stage.
-      - name: Write CLI archive checksums
+      # Keep a digest for every build output. Nightly releases publish this
+      # checksum file but do not attach the installer assets.
+      - name: Write release checksums
         shell: bash
         run: |
           set -euo pipefail
           cd release-assets
           shopt -s nullglob
-          archives=(t4-*.tar.gz t4-*.zip)
+          archives=( *.dmg *.zip *.AppImage *.deb *.exe *.apk *.tar.gz )
           if [[ ${#archives[@]} -eq 0 ]]; then
-            echo "No CLI archives were produced." >&2
+            echo "No release artifacts were produced." >&2
             exit 1
           fi
           sha256sum "${archives[@]}" > SHA256SUMS
@@ -915,6 +915,23 @@ jobs:
             fi
           done
 
+      # Keep update discovery working for developer nightlies while clearly
+      # marking that their installer assets are intentionally not published.
+      - name: Mark nightly updates as not downloadable
+        if: needs.preflight.outputs.release_channel == 'nightly'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob extglob
+          manifests=(release-assets/!(builder-debug).yml)
+          if [[ ${#manifests[@]} -eq 0 ]]; then
+            echo "Nightly release is missing updater manifests." >&2
+            exit 1
+          fi
+          for manifest in "${manifests[@]}"; do
+            printf '\nt4Downloadable: false\n' >> "$manifest"
+          done
+
       # Updater manifests and blockmaps are what electron-updater consumes.
       # They are only listed for channels an updater is meant to follow.
       - id: release_files
@@ -923,21 +940,26 @@ jobs:
         run: |
           {
             echo 'files<<EOF'
-            echo 'release-assets/*.dmg'
-            echo 'release-assets/*.zip'
-            echo 'release-assets/*.AppImage'
-            echo 'release-assets/*.deb'
-            echo 'release-assets/*.exe'
-            if [[ "${{ needs.preflight.outputs.release_channel }}" != "preview" ]]; then
-              echo 'release-assets/*.blockmap'
+            if [[ "${{ needs.preflight.outputs.release_channel }}" == "nightly" ]]; then
               echo 'release-assets/*.yml'
+              echo 'release-assets/SHA256SUMS'
+            else
+              echo 'release-assets/*.dmg'
+              echo 'release-assets/*.zip'
+              echo 'release-assets/*.AppImage'
+              echo 'release-assets/*.deb'
+              echo 'release-assets/*.exe'
+              if [[ "${{ needs.preflight.outputs.release_channel }}" != "preview" ]]; then
+                echo 'release-assets/*.blockmap'
+                echo 'release-assets/*.yml'
+              fi
+              echo 'release-assets/*.tar.gz'
+              # Only list APKs when Play has a processed internal build available.
+              for apk in release-assets/*.apk; do
+                [[ -f "$apk" ]] && echo "$apk"
+              done
+              echo 'release-assets/SHA256SUMS'
             fi
-            echo 'release-assets/*.tar.gz'
-            # Only list APKs when Play has a processed internal build available.
-            for apk in release-assets/*.apk; do
-              [[ -f "$apk" ]] && echo "$apk"
-            done
-            echo 'release-assets/SHA256SUMS'
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
@@ -1013,9 +1035,8 @@ jobs:
           fail_on_unmatched_files: true
           token: ${{ github.token }}
 
-      # The action keeps a stable release a draft until its assets finish uploading, but publishes a
-      # prerelease first. Desktop clients update connected servers from the CLI archives as soon as
-      # they see the release, so a prerelease also goes public only once every asset is attached.
+      # Keep prereleases in draft until their metadata and checksums finish uploading. Stable
+      # releases remain drafts until all installable assets are attached.
       - name: Publish prerelease
         if: needs.preflight.outputs.is_prerelease == 'true'
         env:
@@ -1024,6 +1045,59 @@ jobs:
           RELEASE_TAG: ${{ needs.preflight.outputs.tag }}
         run: gh release edit "$RELEASE_TAG" --draft=false
 
+  update_nightly_branch:
+    name: Update nightly source branch
+    needs: [preflight]
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.preflight.outputs.release_channel == 'nightly' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout nightly source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.preflight.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Advance nightly source branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin nightly >/dev/null 2>&1; then
+            git fetch origin refs/heads/nightly:refs/remotes/origin/nightly
+            if ! git merge-base --is-ancestor origin/nightly HEAD; then
+              echo "Refusing to move nightly backwards or discard branch-only commits." >&2
+              exit 1
+            fi
+          fi
+          git push origin HEAD:refs/heads/nightly
+
+  cleanup_nightly_artifacts:
+    name: Remove nightly build artifacts
+    needs: [preflight, release]
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel == 'nightly' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Delete workflow artifacts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              ...context.repo,
+              run_id: context.runId,
+              per_page: 100,
+            });
+            for (const artifact of artifacts) {
+              await github.rest.actions.deleteArtifact({
+                ...context.repo,
+                artifact_id: artifact.id,
+              });
+            }
+
   # The `t4` npm package is a launcher that downloads this version's CLI
   # archive from the GitHub Release, so it publishes only once that release
   # exists. Preview publishes too, under the `preview` dist-tag, which
@@ -1031,7 +1105,7 @@ jobs:
   publish_cli:
     name: Publish CLI to npm
     needs: [preflight, release]
-    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' }}
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel != 'nightly' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -1065,7 +1139,7 @@ jobs:
   publish_aur:
     name: Publish AUR package
     needs: [preflight, release]
-    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel != 'preview' }}
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.release.result == 'success' && needs.preflight.outputs.release_channel == 'stable' }}
     uses: ./.github/workflows/publish-aur.yml
     with:
       release_tag: ${{ needs.preflight.outputs.tag }}
@@ -1081,7 +1155,7 @@ jobs:
   build_web:
     name: Build hosted web app
     needs: [preflight, relay_public_config]
-    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.preflight.outputs.release_channel != 'preview' }}
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.relay_public_config.result == 'success' && needs.preflight.outputs.release_channel == 'stable' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -1182,7 +1256,7 @@ jobs:
   deploy_web:
     name: Deploy hosted web app
     needs: [preflight, build_web, release, publish_cli]
-    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.build_web.result == 'success' && needs.release.result == 'success' && needs.publish_cli.result == 'success' && needs.preflight.outputs.release_channel != 'preview' }}
+    if: ${{ !failure() && !cancelled() && needs.preflight.result == 'success' && needs.build_web.result == 'success' && needs.release.result == 'success' && needs.publish_cli.result == 'success' && needs.preflight.outputs.release_channel == 'stable' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
@@ -1440,7 +1514,7 @@ jobs:
     if: |
       always() && !cancelled() &&
       needs.preflight.result == 'success' &&
-      needs.preflight.outputs.release_channel != 'preview' &&
+      needs.preflight.outputs.release_channel == 'stable' &&
       needs.relay_public_config.result == 'success' &&
       needs.release.result == 'success' &&
       needs.deploy_web.result == 'success' &&

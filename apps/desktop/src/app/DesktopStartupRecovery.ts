@@ -50,7 +50,10 @@ export function resolveStartupRecoveryOffer(
     };
   }
   const updateVersion =
-    update.downloadedVersion ?? (update.status === "available" ? update.availableVersion : null);
+    update.downloadedVersion ??
+    (update.status === "available" && update.downloadUnavailable !== true
+      ? update.availableVersion
+      : null);
   // A version that already failed to apply here would loop through install and relaunch.
   if (updateVersion !== null && updateVersion !== update.notAppliedVersion) {
     return { _tag: "Update", version: updateVersion };

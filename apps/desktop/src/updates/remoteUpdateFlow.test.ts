@@ -181,4 +181,23 @@ describe("nextRemoteDesktopUpdateStep", () => {
       reason: "The desktop app update failed.",
     });
   });
+
+  it("stops when an available release has no published installer", () => {
+    const step = nextRemoteDesktopUpdateStep(
+      makeState({
+        status: "available",
+        availableVersion: "1.1.0-nightly.20261102.4080",
+        downloadUnavailable: true,
+        message: "Installer files were not published.",
+      }),
+      NO_ATTEMPTS,
+      null,
+    );
+
+    assert.deepEqual(step, {
+      action: "done",
+      outcome: "failed",
+      reason: "Installer files were not published.",
+    });
+  });
 });

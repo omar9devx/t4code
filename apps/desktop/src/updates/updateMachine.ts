@@ -15,6 +15,11 @@ function getCanRetryAfterDownloadFailure(currentState: DesktopUpdateState): bool
   return currentState.availableVersion !== null;
 }
 
+function withoutDownloadUnavailable(state: DesktopUpdateState) {
+  const { downloadUnavailable: _downloadUnavailable, ...rest } = state;
+  return rest;
+}
+
 export function createInitialDesktopUpdateState(
   currentVersion: string,
   runtimeInfo: DesktopRuntimeInfo,
@@ -65,7 +70,7 @@ export function reduceDesktopUpdateStateOnCheckFailure(
 ): DesktopUpdateState {
   if (state.downloadedVersion !== null) {
     return {
-      ...state,
+      ...withoutDownloadUnavailable(state),
       status: "downloaded",
       message: null,
       checkedAt,
@@ -76,7 +81,7 @@ export function reduceDesktopUpdateStateOnCheckFailure(
   }
 
   return {
-    ...state,
+    ...withoutDownloadUnavailable(state),
     status: "error",
     message,
     checkedAt,
@@ -92,11 +97,12 @@ export function reduceDesktopUpdateStateOnUpdateAvailable(
   checkedAt: string,
   releaseNotes: ReadonlyArray<DesktopUpdateReleaseNote> = [],
   omittedReleaseCount = 0,
+  downloadable = true,
 ): DesktopUpdateState {
   const isDownloadedVersion = state.downloadedVersion === version;
   const preserveReleaseNotes = isDownloadedVersion && releaseNotes.length === 0;
   return {
-    ...state,
+    ...withoutDownloadUnavailable(state),
     status: isDownloadedVersion ? "downloaded" : "available",
     availableVersion: version,
     downloadedVersion: isDownloadedVersion ? version : null,
@@ -104,9 +110,12 @@ export function reduceDesktopUpdateStateOnUpdateAvailable(
     omittedReleaseCount: preserveReleaseNotes ? state.omittedReleaseCount : omittedReleaseCount,
     downloadPercent: isDownloadedVersion ? 100 : null,
     checkedAt,
-    message: null,
+    message: downloadable
+      ? null
+      : "This update is available, but its installer files were not published.",
     errorContext: null,
     canRetry: isDownloadedVersion,
+    ...(downloadable ? {} : { downloadUnavailable: true as const }),
   };
 }
 
@@ -116,7 +125,7 @@ export function reduceDesktopUpdateStateOnNoUpdate(
 ): DesktopUpdateState {
   if (state.downloadedVersion !== null) {
     return {
-      ...state,
+      ...withoutDownloadUnavailable(state),
       status: "downloaded",
       availableVersion: state.downloadedVersion,
       downloadPercent: 100,
@@ -128,7 +137,7 @@ export function reduceDesktopUpdateStateOnNoUpdate(
   }
 
   return {
-    ...state,
+    ...withoutDownloadUnavailable(state),
     status: "up-to-date",
     availableVersion: null,
     downloadedVersion: null,
@@ -146,7 +155,7 @@ export function reduceDesktopUpdateStateOnDownloadStart(
   state: DesktopUpdateState,
 ): DesktopUpdateState {
   return {
-    ...state,
+    ...withoutDownloadUnavailable(state),
     status: "downloading",
     downloadPercent: 0,
     message: null,

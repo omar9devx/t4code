@@ -49,14 +49,42 @@ it.effect("authenticates each release page until the requested channel is found"
       const page = url.searchParams.get("page") ?? "";
       pages.push(page);
       const tag_name = page === "1" ? "v1.2.4-preview.20260101.1" : "v1.2.3";
-      return Effect.succeed(HttpClientResponse.fromWeb(request, Response.json([{ tag_name }])));
+      const assets = page === "1" ? [] : [{ name: "t4-1.2.3-linux-x64.tar.gz" }];
+      return Effect.succeed(
+        HttpClientResponse.fromWeb(request, Response.json([{ tag_name, assets }])),
+      );
     });
-    const version = yield* resolveNewestVersion("stable").pipe(
+    const version = yield* resolveNewestVersion("stable", "linux", "x64").pipe(
       Effect.provideService(HostProcess.Environment, { GH_TOKEN: "gh-token" }),
       Effect.provideService(HttpClient.HttpClient, httpClient),
     );
     assert.equal(version, "1.2.3");
     assert.deepStrictEqual(pages, ["1", "2"]);
+  }),
+);
+
+it.effect("does not offer a CLI release without the current platform archive", () =>
+  Effect.gen(function* () {
+    const httpClient = HttpClient.make((request) =>
+      Effect.succeed(
+        HttpClientResponse.fromWeb(
+          request,
+          Response.json([
+            { tag_name: "v1.2.3", assets: [{ name: "t4-1.2.3-darwin-arm64.tar.gz" }] },
+          ]),
+        ),
+      ),
+    );
+    const error = yield* resolveNewestVersion("stable", "linux", "x64").pipe(
+      Effect.flip,
+      Effect.provideService(HostProcess.Environment, {}),
+      Effect.provideService(HttpClient.HttpClient, httpClient),
+    );
+
+    assert.equal(
+      error.message,
+      "T4 update 1.2.3 exists, but its installer is not available to download for linux-x64.",
+    );
   }),
 );
 

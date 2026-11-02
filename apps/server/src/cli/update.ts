@@ -4,6 +4,8 @@ import {
   CLI_RELEASE_CHANNELS,
   cliReleaseIndexPageUrl,
   cliReleaseChannelOf,
+  cliArchivePlatformKey,
+  cliArchiveFileName,
   newestCliReleaseVersion,
   type CliReleaseChannel,
 } from "@t4tools/shared/cliRelease";
@@ -52,6 +54,7 @@ const ReleaseIndex = Schema.Array(
   Schema.Struct({
     tag_name: Schema.String,
     draft: Schema.optional(Schema.Boolean),
+    assets: Schema.optional(Schema.Array(Schema.Struct({ name: Schema.String }))),
   }),
 );
 const decodeReleaseIndex = Schema.decodeUnknownEffect(Schema.fromJsonString(ReleaseIndex));
@@ -61,6 +64,9 @@ const RELEASE_INDEX_MAX_PAGES = 10;
 
 export const resolveNewestVersion = Effect.fn("cli.update.resolve_newest")(function* (
   channel: CliReleaseChannel,
+  platform: NodeJS.Platform,
+  arch: string,
+  requestedVersion?: string,
 ) {
   const httpClient = yield* HttpClient.HttpClient;
   const environment = yield* HostProcess.Environment;
@@ -87,8 +93,26 @@ export const resolveNewestVersion = Effect.fn("cli.update.resolve_newest")(funct
         () => new CliUpdateError({ reason: "The t4 release index had an unexpected shape." }),
       ),
     );
-    const version = newestCliReleaseVersion(releases, channel);
-    if (version !== undefined) return version;
+    const version = requestedVersion ?? newestCliReleaseVersion(releases, channel);
+    if (version !== undefined) {
+      const release = releases.find((candidate) => candidate.tag_name === `v${version}`);
+      if (!release && requestedVersion !== undefined) {
+        if (releases.length === 0) break;
+        continue;
+      }
+      const platformKey = cliArchivePlatformKey(platform, arch);
+      const archiveName =
+        platformKey === undefined ? undefined : cliArchiveFileName(version, platformKey);
+      if (
+        archiveName === undefined ||
+        !release?.assets?.some((asset) => asset.name === archiveName)
+      ) {
+        return yield* new CliUpdateError({
+          reason: `T4 update ${version} exists, but its installer is not available to download for ${platform}-${arch}.`,
+        });
+      }
+      return version;
+    }
     if (releases.length === 0) break;
   }
   return yield* new CliUpdateError({ reason: `No published ${channel} release was found.` });
@@ -337,10 +361,11 @@ export const runUpdate = Effect.fn("cli.update.run")(function* (input: {
   }
   const progress = createUpdateProgress();
   progress.status("Checking for updates...");
-  const targetVersion = yield* (
-    input.requestedVersion === undefined
-      ? resolveNewestVersion(channel)
-      : Effect.succeed(input.requestedVersion)
+  const targetVersion = yield* resolveNewestVersion(
+    channel,
+    platform,
+    arch,
+    input.requestedVersion,
   ).pipe(Effect.ensuring(Effect.sync(progress.finish)));
   const targetChannel = cliReleaseChannelOf(targetVersion);
 
