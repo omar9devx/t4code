@@ -659,7 +659,7 @@ describe("orchestrator MCP toolkit", () => {
             messageReads.filter((query) => !query.includes("$.notification.source.kind")),
           ).toHaveLength(1);
           const parentlessRead = yield* invoke(
-            "t3_thread_read",
+            "t4_thread_read",
             {
               threadId: delegated.childThreadId,
               limit: 100,
