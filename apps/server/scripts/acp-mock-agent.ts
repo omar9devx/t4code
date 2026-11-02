@@ -84,7 +84,7 @@ let currentModeId = antigravityProfile
   : copilotModesProfile
     ? copilotModeId("agent")
     : "ask";
-let currentModelId = antigravityProfile ? "gemini-test-low" : "default";
+let currentModelId = antigravityProfile ? "gemini-3.8-flash" : "default";
 let parameterizedModelPicker = false;
 let currentReasoning = "medium";
 let currentContext = "272k";
@@ -327,8 +327,7 @@ function availableModels(): ReadonlyArray<{
 }
 
 const antigravityModels = [
-  { modelId: "gemini-test-low", name: "Gemini Test Low" },
-  { modelId: "gemini-test-high", name: "Gemini Test High" },
+  { modelId: "gemini-3.8-flash", name: "Gemini 3.8 Flash" },
 ] satisfies ReadonlyArray<AcpCompat.ModelInfo>;
 
 const availableModes: ReadonlyArray<AcpCompat.SessionMode> = antigravityProfile
@@ -512,7 +511,7 @@ const program = Effect.gen(function* () {
       parameterizedModelPicker = request.capabilities?._meta?.parameterizedModelPicker === true;
       return {
         protocolVersion: 2,
-        info: { name: "t3-acp-mock-agent", version: process.env.T3_ACP_AGENT_VERSION ?? "0.0.0" },
+        info: { name: "t4-acp-mock-agent", version: process.env.T4_ACP_AGENT_VERSION ?? "0.0.0" },
         ...(omitInitializeModelState ? {} : { _meta: { modelState: modelState() } }),
         capabilities: {
           session: {

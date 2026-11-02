@@ -250,7 +250,7 @@ export class ServerSettingsService extends Context.Service<
     /** Subscribe before reading a snapshot to retain changes before lazy stream startup. */
     readonly subscribeChanges: Effect.Effect<Stream.Stream<ServerSettings>, never, Scope.Scope>;
   }
->()("t3/serverSettings/ServerSettingsService") {
+>()("t4/serverSettings/ServerSettingsService") {
   static readonly layerTest = (
     overrides: DeepPartial<ServerSettings> = {},
     managedPolicy?: ManagedPolicySummary,
@@ -518,6 +518,8 @@ const ATOMIC_SETTINGS_KEYS: ReadonlySet<string> = new Set([
   "textGenerationModelSelection",
   "fallbackModelSelection",
   "pullRequestMergeMethod",
+  "computerUsePermissions",
+  "computerUseApprovalMode",
   // Empty by default, these hold one whole value, which a managed policy can default.
   ...Object.entries(DEFAULT_SERVER_SETTINGS).flatMap(([key, value]) =>
     value === null ? [key] : [],

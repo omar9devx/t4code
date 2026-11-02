@@ -74,7 +74,7 @@
     },
     {
       "driver": "antigravity",
-      "t4CodeRange": ">=0.0.42",
+      "T4CODERange": ">=0.0.42",
       "recommendedRange": "=1.4.5 || =1.4.1",
       "ranges": [
         { "range": "=1.4.5", "status": "supported" },

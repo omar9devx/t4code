@@ -173,7 +173,7 @@ describe("AntigravityAdapterV2 compaction", () => {
       const session = yield* adapter.openSession({
         threadId: ThreadId.make("thread-antigravity-compaction"),
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-compaction"),
-        modelSelection: { instanceId, model: "gemini-test-low" },
+        modelSelection: { instanceId, model: "gemini-3.8-flash" },
         runtimePolicy: ProviderAdapter.ProviderAdapterV2RuntimePolicy.make({
           runtimeMode: "full-access",
           interactionMode: "default",
@@ -224,7 +224,7 @@ describe("AntigravityAdapterV2 session open", () => {
         .openSession({
           threadId,
           providerSessionId: ProviderSessionId.make("provider-session-antigravity-sign-in"),
-          modelSelection: { instanceId, model: "gemini-test-low" },
+          modelSelection: { instanceId, model: "gemini-3.8-flash" },
           runtimePolicy: ProviderAdapter.ProviderAdapterV2RuntimePolicy.make({
             runtimeMode: "full-access",
             interactionMode: "default",
@@ -308,7 +308,7 @@ describe("AntigravityAdapterV2 client file system", () => {
         interactionMode: "default",
         cwd: workspace,
       });
-      const modelSelection = { instanceId, model: "gemini-test-low" } as const;
+      const modelSelection = { instanceId, model: "gemini-3.8-flash" } as const;
       const session = yield* adapter.openSession({
         threadId,
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-containment"),
@@ -468,7 +468,7 @@ describe("AntigravityAdapterV2 workspace changes", () => {
           cwd,
         });
       const threadId = ThreadId.make("thread-antigravity-workspace-change");
-      const modelSelection = { instanceId, model: "gemini-test-low" } as const;
+      const modelSelection = { instanceId, model: "gemini-3.8-flash" } as const;
       const session = yield* adapter.openSession({
         threadId,
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-workspace-change"),
@@ -713,7 +713,7 @@ describe("AntigravityAdapterV2 html_render pages", () => {
         interactionMode: "default",
         cwd: process.cwd(),
       });
-      const modelSelection = { instanceId, model: "gemini-test-low" } as const;
+      const modelSelection = { instanceId, model: "gemini-3.8-flash" } as const;
       const session = yield* adapter.openSession({
         threadId,
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-html-render"),
@@ -958,7 +958,7 @@ describe("AntigravityAdapterV2 subagent reads", () => {
         interactionMode: "default",
         cwd: workspace,
       });
-      const modelSelection = { instanceId, model: "gemini-test-low" } as const;
+      const modelSelection = { instanceId, model: "gemini-3.8-flash" } as const;
       const session = yield* adapter.openSession({
         threadId,
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-subagent-reads"),
@@ -1073,7 +1073,7 @@ describe("AntigravityAdapterV2 runtime mode ceiling", () => {
               command: process.execPath,
               args: [mockAgentPath],
               cwd: input.cwd,
-              env: { T3_ACP_ANTIGRAVITY: "1" },
+              env: { T4_ACP_ANTIGRAVITY: "1" },
             },
           }).pipe(
             Effect.provideService(Crypto.Crypto, crypto),
@@ -1095,7 +1095,7 @@ describe("AntigravityAdapterV2 runtime mode ceiling", () => {
         providerSessionId: ProviderSessionId.make("provider-session-antigravity-ceiling"),
         modelSelection: {
           instanceId,
-          model: "gemini-test-low",
+          model: "gemini-3.8-flash",
           options: [{ id: "_t3/session-mode", value: pickedMode }],
         },
         runtimePolicy: ProviderAdapter.ProviderAdapterV2RuntimePolicy.make({
@@ -1146,10 +1146,10 @@ describe("AntigravityAdapterV2 session system prompt", () => {
                 args: [mockAgentPath],
                 cwd: input.cwd,
                 env: {
-                  T3_ACP_ANTIGRAVITY: "1",
-                  T3_ACP_AGENT_VERSION: agentVersion,
-                  T3_ACP_REQUEST_LOG_PATH: requestLog,
-                  T3_ACP_HANG_PROMPT_FOREVER: "1",
+                  T4_ACP_ANTIGRAVITY: "1",
+                  T4_ACP_AGENT_VERSION: agentVersion,
+                  T4_ACP_REQUEST_LOG_PATH: requestLog,
+                  T4_ACP_HANG_PROMPT_FOREVER: "1",
                 },
               },
             }).pipe(
@@ -1173,7 +1173,7 @@ describe("AntigravityAdapterV2 session system prompt", () => {
           cwd: workspace,
         });
         const threadId = ThreadId.make("thread-antigravity-system-prompt");
-        const modelSelection = { instanceId, model: "gemini-test-low" } as const;
+        const modelSelection = { instanceId, model: "gemini-3.8-flash" } as const;
         const session = yield* adapter.openSession({
           threadId,
           providerSessionId: ProviderSessionId.make("provider-session-antigravity-system-prompt"),
@@ -1237,7 +1237,7 @@ describe("AntigravityAdapterV2 session system prompt", () => {
           .find((request) => request.method === "session/new");
         const append = JSON.stringify(sessionNew?.params?._meta ?? null);
         // Identity stays per turn either way.
-        assert.include(sent, "through the Antigravity harness, as gemini-test-low");
+        assert.include(sent, "through the Antigravity harness, as gemini-3.8-flash");
         if (agentVersion === "1.4.5") {
           assert.include(append, "pull_request_linking");
           assert.notInclude(sent, "<pull_request_linking>");
