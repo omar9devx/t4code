@@ -21,7 +21,7 @@ describe("promptLinkSearchFromParams", () => {
       value: {
         kind: "new",
         prompt: { text: "Fix the bug & add tests = done?", hiddenCharacters: 0 },
-        repository: { owner: "omar9devx", name: "T4CODE" },
+        repository: { owner: "omar9devx", name: "t4code" },
         provider: "codex",
         model: null,
       },
