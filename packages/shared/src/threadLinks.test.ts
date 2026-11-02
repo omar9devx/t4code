@@ -154,7 +154,7 @@ describe("thread links", () => {
         return match;
       });
     });
-    expect(threadLinkRefs("<t3-thread://v2/local/t1> [a](t3-thread://v2/there/t2)", local)).toEqual(
+    expect(threadLinkRefs("<t4-thread://v2/local/t1> [a](t4-thread://v2/there/t2)", local)).toEqual(
       [ref("local", "t1"), ref("there", "t2")],
     );
   });

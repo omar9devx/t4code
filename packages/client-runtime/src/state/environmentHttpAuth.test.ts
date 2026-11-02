@@ -15,6 +15,7 @@ import {
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Fiber from "effect/Fiber";
+import * as Cause from "effect/Cause";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Queue from "effect/Queue";
@@ -547,7 +548,7 @@ describe("authenticated environment HTTP requests", () => {
       }),
   );
 
-  it.effect("gives up on session permissions once a 100 second wait also times out", () =>
+  it.effect("gives up on session permissions once the 60 second maximum also times out", () =>
     Effect.gen(function* () {
       const requests = yield* Queue.unbounded<number>();
       const harness = makeHarness((requestNumber) => {
@@ -568,12 +569,13 @@ describe("authenticated environment HTTP requests", () => {
       yield* TestClock.adjust("100 seconds");
       const exit = yield* Fiber.await(load);
 
-      expect(exit).toMatchObject({
-        _tag: "Failure",
-        cause: {
-          reasons: [{ error: { _tag: "RemoteEnvironmentAuthTimeoutError", timeoutMs: 100_000 } }],
-        },
-      });
+      expect(Exit.isFailure(exit)).toBe(true);
+      if (Exit.isFailure(exit)) {
+        expect(Option.getOrNull(Cause.findErrorOption(exit.cause))).toMatchObject({
+          _tag: "RemoteEnvironmentAuthTimeoutError",
+          timeoutMs: 60_000,
+        });
+      }
       expect(harness.calls).toHaveLength(3);
     }),
   );

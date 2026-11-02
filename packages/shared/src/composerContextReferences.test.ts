@@ -223,7 +223,7 @@ describe("provider projection", () => {
 
   it("emits no terminal lines when the captured range is inverted", () => {
     const projected = projectComposerContextForProvider({
-      text: "[log](t3-context://v1/terminal/ctx_t)",
+      text: "[log](t4-context://v1/terminal/ctx_t)",
       records: [{ ...terminal, lineStart: 10, lineEnd: 5, text: "a\nb\nc\nd\ne\nf" }],
     });
     expect(projected).toContain('<context kind="terminal" id="ctx_t">');
