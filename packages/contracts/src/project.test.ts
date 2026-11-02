@@ -147,11 +147,11 @@ const decodeProjectShell = Schema.decodeUnknownEffect(OrchestrationProjectShell)
 
 effectIt.effect("reads monograms stored in the pre-v2 fallback shape", () =>
   Effect.gen(function* () {
-    const monogram = { kind: "monogram", text: "T4 Code", color: "violet" } as const;
+    const monogram = { kind: "monogram", text: "T4", color: "violet" } as const;
     const fallback = { kind: "lucide", name: "folder-code", color: "violet" } as const;
     for (const legacy of [
-      { ...fallback, monogramText: "T4 Code" },
-      { ...fallback, monogram: "T4 Code" },
+      { ...fallback, monogramText: "T4" },
+      { ...fallback, monogram: "T4" },
     ]) {
       assert.deepEqual(yield* decodeStoredIcon(legacy), monogram);
       assert.deepEqual(yield* decodeReceivedIcon(legacy), monogram);
